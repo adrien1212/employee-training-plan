@@ -3,7 +3,6 @@ import {
   Box, Button, FormControl, FormLabel,
   Input, Select, Heading, VStack, useToast, Container
 } from '@chakra-ui/react';
-import axios from 'axios';
 import api from '../service/api';
 
 interface Department {

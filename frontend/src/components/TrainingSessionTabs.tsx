@@ -3,7 +3,6 @@ import {
     Table, Thead, Tr, Th, Td, Tbody, Text, Spinner, Heading
   } from '@chakra-ui/react';
   import { useEffect, useState } from 'react';
-  import axios from 'axios';
 import api from '../service/api';
   
   interface Props {

@@ -1,9 +1,9 @@
 // src/pages/DepartmentDetail.tsx
 
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Box, Heading, Text, Spinner, VStack, Container, useToast, Divider, List, ListItem, Badge, Button
+  Box, Heading, Text, Spinner, VStack, Container, useToast, Divider, List, ListItem, Button
 } from '@chakra-ui/react';
 import api from '../service/api';
 
@@ -32,7 +32,6 @@ interface Training {
 // --- DepartmentDetail Component ---
 const DepartmentDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
 

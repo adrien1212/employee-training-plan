@@ -72,6 +72,9 @@ const TrainingDetail = () => {
   const [startDate, setStartDate] = useState<string>(format(new Date(), 'yyyy-01-01'));
   const [endDate, setEndDate] = useState<string>(format(new Date(), 'yyyy-12-31'));
 
+  // to remove or use
+  uploading
+
   const fetchTraining = useCallback(async () => {
     if (!id) return;
     try {
@@ -250,7 +253,7 @@ const TrainingDetail = () => {
 
         <Box w="100%" mt={4}>
           <Heading size="md" mb={2}>Training Histogram</Heading>
-          <Bar data={getEnrollmentChartData()} options={{ responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Employee Training by Month' } } }} />
+          <Bar data={getEnrollmentChartData()!} options={{ responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Employee Training by Month' } } }} />
         </Box>
 
         <Button

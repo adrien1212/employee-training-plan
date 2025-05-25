@@ -4,7 +4,7 @@ import App from './App.tsx'
 import { ChakraProvider } from '@chakra-ui/react'
 import { BrowserRouter } from 'react-router-dom'
 import { ReactKeycloakProvider } from '@react-keycloak/web'
-import keycloak from "./keycloak"
+import keycloak from "./Keycloak"
 
 createRoot(document.getElementById('root')!).render(
     <ReactKeycloakProvider authClient={keycloak}>

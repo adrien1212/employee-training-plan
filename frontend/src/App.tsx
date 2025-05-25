@@ -30,6 +30,7 @@ function App() {
       {/* Private Routes */}
       <Route element={<PrivateRoutes />}>
         <Route path="/departments" element={<DepartmentListPage />} />
+        <Route path="/departments/:id" element={<DepartmentPage />} />
         <Route path="/departments/new" element={<CreateDepartmentPage />} />
         <Route path="/departments/:id" element={<DepartmentDetail />} />
         <Route path="/employees/new" element={<EmployeePage />} />

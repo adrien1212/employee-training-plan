@@ -1,6 +1,5 @@
 import React from 'react';
 import SessionHistogramDashboard from '../components/dashboard/SessionHistogramDashboard'; // Importing the session histogram component
-import DepartmentList from '../components/DepartmentList'; // Importing the department list component
 import { Box, Heading } from '@chakra-ui/react';
 import AvgSessionsPerEmployeeCircle from '../components/dashboard/AvgSessionsPerEmployeeCircle';
 

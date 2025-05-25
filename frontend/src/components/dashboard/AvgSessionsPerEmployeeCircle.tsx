@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CircularProgress, CircularProgressLabel, Box, Text, VStack, Heading, Spinner } from '@chakra-ui/react';
-import axios from 'axios';
 import api from '../../service/api';
 
 const AvgSessionsPerEmployeeCircle = () => {

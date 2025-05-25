@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
-  Box, Heading, Button, Text, VStack, Collapse, Divider,
-  Container, Spinner, useDisclosure, IconButton,
+  Box, Heading, Button, Text, VStack, Collapse,
+  Container, Spinner,
   Link
 } from '@chakra-ui/react';
-import axios from 'axios';
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 import api from '../service/api';

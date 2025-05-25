@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Spinner,
   Heading, useToast, Container, Text, Input, VStack,
-  Button, Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton, useDisclosure,
-  HStack, Icon
+  Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure,
+  HStack
 } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
@@ -65,10 +64,10 @@ const EmployeeList = () => {
   }, [searchTerm, employees]);
 
   // Handler after successful employee creation (modal close and refresh)
-  const handleEmployeeCreated = () => {
-    onClose();
-    fetchEmployees(); // Refresh list
-  };
+  // const handleEmployeeCreated = () => {
+  //   onClose();
+  //   fetchEmployees(); // Refresh list
+  // };
 
   return (
     <Container maxW="6xl" py={10}>
@@ -129,7 +128,8 @@ const EmployeeList = () => {
           <ModalHeader>Create Employee</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <CreateEmployee onCreated={handleEmployeeCreated} />
+            {/* <CreateEmployee onCreated={handleEmployeeCreated} /> */}
+            <CreateEmployee/>
           </ModalBody>
         </ModalContent>
       </Modal>

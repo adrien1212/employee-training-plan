@@ -9,8 +9,7 @@ import {
     MenuButton,
     MenuList,
     MenuItem,
-    Button,
-    Link as ChakraLink,
+    Button
   } from '@chakra-ui/react';
   import { Link as RouterLink } from 'react-router-dom';
   import { ChevronDownIcon } from '@chakra-ui/icons';
