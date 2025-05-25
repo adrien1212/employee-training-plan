@@ -1,0 +1,57 @@
+package fr.adriencaubel.trainingplan.company.infrastructure.rest;
+
+import fr.adriencaubel.trainingplan.company.application.dto.CreateCompanyRequestModel;
+import fr.adriencaubel.trainingplan.company.application.dto.CreateDepartementRequestModel;
+import fr.adriencaubel.trainingplan.company.application.dto.DepartmentResponseModel;
+import fr.adriencaubel.trainingplan.company.application.service.CompanyService;
+import fr.adriencaubel.trainingplan.company.application.service.DepartmentService;
+import fr.adriencaubel.trainingplan.company.application.service.UserService;
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
+import fr.adriencaubel.trainingplan.company.domain.model.Department;
+import fr.adriencaubel.trainingplan.company.domain.model.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/v1/companies")
+@RequiredArgsConstructor
+public class CompanyController {
+
+    private final CompanyService companyService;
+
+    private final DepartmentService departmentService;
+
+    private final UserService userService;
+
+    @PostMapping
+    public ResponseEntity<Company> createCompany(@RequestBody CreateCompanyRequestModel createCompanyRequestModel, @AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.findByOidcUser(oidcUser);
+        Company company = companyService.createCompany(createCompanyRequestModel, user);
+        return new ResponseEntity<>(company, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/departments")
+    public ResponseEntity<Department> addDepartment(@RequestBody CreateDepartementRequestModel createDepartementRequestModel,
+                                                    @AuthenticationPrincipal OidcUser oidcUser) {
+        Department department = companyService.addDepartment(createDepartementRequestModel);
+        return new ResponseEntity<>(department, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/departments")
+    public ResponseEntity<List<DepartmentResponseModel>> getAllDepartment() {
+        List<DepartmentResponseModel> departments = departmentService.findAll().stream().map(this::toDepartmentResponseModel).collect(Collectors.toList());
+        return ResponseEntity.ok(departments);
+    }
+
+    public DepartmentResponseModel toDepartmentResponseModel(Department department) {
+        DepartmentResponseModel departmentResponseModel = new DepartmentResponseModel(department.getId(), department.getName());
+        return departmentResponseModel;
+    }
+}
