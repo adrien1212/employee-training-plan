@@ -62,7 +62,9 @@ import {
               <MenuList>
                 <MenuItem as={RouterLink} to="/trainings/new">Create Training</MenuItem>
                 <MenuItem as={RouterLink} to="/trainings">All Trainings</MenuItem>
-                <MenuItem as={RouterLink} to="/sessions/subscribe">Subscribe to Session</MenuItem>
+                <MenuItem as={RouterLink} to="/sessions">All Sessions</MenuItem>
+                <MenuItem as={RouterLink} to="/feedbacks">Give Feedback</MenuItem>
+                <MenuItem as={RouterLink} to="/sessions/complete">Finish Session</MenuItem>
               </MenuList>
             </Menu>
 

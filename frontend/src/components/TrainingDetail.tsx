@@ -5,8 +5,6 @@ import {
   ModalBody, ModalFooter, Select, Input, HStack, Divider
 } from '@chakra-ui/react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
-import { useDropzone } from 'react-dropzone';
-import axios from 'axios';
 import { format } from 'date-fns';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -21,6 +19,7 @@ import {
 import TrainingEmployeeTabs from './TrainingEmployeeTabs';
 import TrainingSessionTabs from './TrainingSessionTabs';
 import api from '../service/api';
+import PdfUploader from './TrainingPdfUploader';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -127,45 +126,6 @@ const TrainingDetail = () => {
     fetchDepartments();
   }, [fetchTraining, fetchTrainingStats]);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file || !id) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      setUploading(true);
-      await axios.post(`http://localhost:8080/api/trainings/${id}/documents`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      setUploadedFileName(file.name);
-      toast({
-        title: 'PDF uploaded successfully.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch {
-      toast({
-        title: 'Upload failed.',
-        description: 'Could not upload PDF file.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setUploading(false);
-    }
-  }, [id, toast]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'application/pdf': ['.pdf'] },
-    multiple: false,
-  });
-
   const handleAddDepartment = async () => {
     if (!selectedDepartmentId || !id) return;
 
@@ -251,10 +211,12 @@ const TrainingDetail = () => {
 
         <Text><strong>Employees Trained:</strong> {statistics.employeesConducted}</Text>
 
+        {/*
         <Box w="100%" mt={4}>
           <Heading size="md" mb={2}>Training Histogram</Heading>
           <Bar data={getEnrollmentChartData()!} options={{ responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Employee Training by Month' } } }} />
         </Box>
+        */}
 
         <Button
           as={RouterLink}
@@ -275,23 +237,10 @@ const TrainingDetail = () => {
         </Button>
 
         <Heading size="md" mt={6}>Upload Training PDF</Heading>
-        <Box
-          {...getRootProps()}
-          border="2px dashed teal"
-          p={6}
-          w="100%"
-          textAlign="center"
-          borderRadius="md"
-          bg={isDragActive ? 'teal.50' : 'gray.50'}
-          cursor="pointer"
-        >
-          <input {...getInputProps()} />
-          {isDragActive ? (
-            <Text>Drop the PDF file here...</Text>
-          ) : (
-            <Text>Drag & drop a PDF file here, or click to select one</Text>
-          )}
-        </Box>
+        <PdfUploader
+          trainingId={id!}
+          onUploadSuccess={(fileName) => setUploadedFileName(fileName)}
+        />
         {uploadedFileName && (
           <Text fontSize="sm" color="green.600">Uploaded: {uploadedFileName}</Text>
         )}

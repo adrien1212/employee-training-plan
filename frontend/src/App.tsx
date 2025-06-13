@@ -17,6 +17,10 @@ import DashboardPage from './pages/DashboardPage';
 import SessionEmployeePage from './pages/SessionEmployeePage';
 import DepartmentDetail from './components/DepartmentDetail';
 import CreateDepartmentPage from './pages/CreateDepartmentPage';
+import SessionDetailPage from './pages/SessionDetailPage';
+import FeedbackPage from './pages/FeedbackPage';
+import SessionCompletePage from './pages/SessionComplexePage';
+import TrainingStatisticsPage from './pages/TrainingStatisticsPage';
 
 
 function App() {
@@ -41,7 +45,11 @@ function App() {
         <Route path="/trainings/:trainingId/sessions/new" element={<SessionPage />} />
         <Route path="/trainings/:trainingId/employee/new" element={<SessionEmployeePage />} />
         <Route path="/trainings/:id" element={<TrainingDetailPage />} />
-        <Route path="/sessions/subscribe" element={<ListSessionPage />} />
+        <Route path="/trainings/:id/statistics" element={<TrainingStatisticsPage />} />
+        <Route path="/sessions" element={<ListSessionPage />} />
+        <Route path="/sessions/:id" element={<SessionDetailPage />} />
+        <Route path="/sessions/complete" element={<SessionCompletePage />} />
+        <Route path="/feedbacks" element={<FeedbackPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Route>
 

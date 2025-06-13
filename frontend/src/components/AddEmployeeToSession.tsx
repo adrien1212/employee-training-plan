@@ -36,6 +36,36 @@ interface Department {
   name: string;
 }
 
+// Define a generic Page interface matching Spring’s Page<T> shape
+interface Page<T> {
+  content: T[];
+  pageable: {
+    sort: {
+      sorted: boolean;
+      unsorted: boolean;
+      empty: boolean;
+    };
+    offset: number;
+    pageNumber: number;
+    pageSize: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  totalPages: number;
+  totalElements: number;
+  last: boolean;
+  first: boolean;
+  sort: {
+    sorted: boolean;
+    unsorted: boolean;
+    empty: boolean;
+  };
+  numberOfElements: number;
+  size: number;
+  number: number;
+  empty: boolean;
+}
+
 const AddEmployeeToSession: React.FC = () => {
   const { trainingId } = useParams<{ trainingId: string }>();
   const location = useLocation();
@@ -43,7 +73,7 @@ const AddEmployeeToSession: React.FC = () => {
 
   // Get the auto-selected employeeId from navigation state (if present)
   const autoSelectEmployeeId: number | null =
-    location.state?.autoSelectEmployeeId ?? null;
+    (location.state as any)?.autoSelectEmployeeId ?? null;
 
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<number | null>(null);
@@ -67,14 +97,14 @@ const AddEmployeeToSession: React.FC = () => {
     const fetchSessions = async () => {
       setLoading(true);
       try {
-        const sesRes = await api.get<Session[]>(
+        const sesRes = await api.get<Page<Session>>(
           `/v1/sessions?trainingId=${trainingId}&sessionStatus=NOT_STARTED`
         );
-        setSessions(sesRes.data);
+        setSessions(sesRes.data.content);
 
         // Auto-select the first session only if none is selected
-        if (sesRes.data.length > 0 && !selectedSession) {
-          setSelectedSession(sesRes.data[0].id);
+        if (sesRes.data.content.length > 0 && !selectedSession) {
+          setSelectedSession(sesRes.data.content[0].id);
         }
       } catch (err) {
         toast({
@@ -99,14 +129,15 @@ const AddEmployeeToSession: React.FC = () => {
     }
     setLoading(true);
     try {
-      const empRes = await api.get<Employee[]>(
+      // Expecting a Page<Employee> instead of Employee[]
+      const empRes = await api.get<Page<Employee>>(
         `/v1/employees?sessionId=${sessionId}&isSubscribeToSession=false`
       );
-      setEmployees(empRes.data);
+      setEmployees(empRes.data.content);
 
       // Auto-select employee if provided and present in the list
       if (autoSelectEmployeeId) {
-        const found = empRes.data.some(
+        const found = empRes.data.content.some(
           (emp) => emp.id === autoSelectEmployeeId
         );
         if (found) {
@@ -122,6 +153,7 @@ const AddEmployeeToSession: React.FC = () => {
         duration: 3000,
         isClosable: true,
       });
+      setEmployees([]);
     } finally {
       setLoading(false);
     }
@@ -134,10 +166,11 @@ const AddEmployeeToSession: React.FC = () => {
     }
     setLoadingSubscribed(true);
     try {
-      const res = await api.get<Employee[]>(
+      // Expecting a Page<Employee> instead of Employee[]
+      const res = await api.get<Page<Employee>>(
         `/v1/employees?sessionId=${sessionId}&isSubscribeToSession=true`
       );
-      setSubscribedEmployees(res.data);
+      setSubscribedEmployees(res.data.content);
     } catch (err) {
       toast({
         title: 'Error loading subscribed employees',

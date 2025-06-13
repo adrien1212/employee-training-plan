@@ -1,158 +1,374 @@
-import { useEffect, useState } from 'react';
+// src/components/SessionList.tsx
+
+import { useEffect, useState } from "react";
 import {
-  Box, Table, Thead, Tbody, Tr, Th, Td,
-  Input, Button, Heading, useToast, Container, Spinner,
-  VStack, Text
-} from '@chakra-ui/react';
-import axios from 'axios';
+  Box,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Spinner,
+  Heading,
+  Container,
+  Text,
+  HStack,
+  Button,
+  Select,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  useToast,
+} from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+import api from "../service/api";
 
 interface Session {
   id: number;
-  startDate: string;
-  endDate: string;
-  trainingTitle?: string;
-}
+  title: string;
+  date: string; // ISO 8601 string, e.g. "2025-06-01T14:00:00Z"
+  speaker: string;
+  status: string;
 
-interface Employee {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
+  // ─── NEW FIELDS FOR COMPLETED STATISTICS ─────────────────────────────────
+  totalParticipants?: number;
+  totalFeedBackGiven?: number;
+  avgFeedbackRating?: number;
 }
 
 const ListSession = () => {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [searchInputs, setSearchInputs] = useState<Record<number, string>>({});
-  const [searchResults, setSearchResults] = useState<Record<number, Employee[]>>({});
-  const [loading, setLoading] = useState(true);
   const toast = useToast();
+  const navigate = useNavigate();
 
+  // ─── Active Sessions State ────────────────────────────────────────────
+  const [activeSessions, setActiveSessions] = useState<Session[]>([]);
+  const [activeLoading, setActiveLoading] = useState(true);
+  const [activePage, setActivePage] = useState(0);
+  const [activePageSize, setActivePageSize] = useState(10);
+  const [activeTotalPages, setActiveTotalPages] = useState(0);
+
+  // ─── Not Started Sessions State ───────────────────────────────────────
+  const [notStartedSessions, setNotStartedSessions] = useState<Session[]>([]);
+  const [notStartedLoading, setNotStartedLoading] = useState(true);
+  const [notStartedPage, setNotStartedPage] = useState(0);
+  const [notStartedPageSize, setNotStartedPageSize] = useState(10);
+  const [notStartedTotalPages, setNotStartedTotalPages] = useState(0);
+
+  // ─── Completed Sessions State & Stats ─────────────────────────────────
+  const [completedSessions, setCompletedSessions] = useState<Session[]>([]);
+  const [completedLoading, setCompletedLoading] = useState(true);
+  const [completedPage, setCompletedPage] = useState(0);
+  const [completedPageSize, setCompletedPageSize] = useState(10);
+  const [completedTotalPages, setCompletedTotalPages] = useState(0);
+
+  // ─── Fetch helper (reused for Active/Not Started) ─────────────────────
+  const fetchSessionsByStatus = async (
+    status: string,
+    page: number,
+    size: number,
+    setSessions: React.Dispatch<React.SetStateAction<Session[]>>,
+    setTotalPages: React.Dispatch<React.SetStateAction<number>>,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    setLoading(true);
+    try {
+      const params: any = {
+        page,
+        size,
+        sessionStatus: status,
+      };
+      const res = await api.get("v1/sessions", { params });
+      setSessions(res.data.content);
+      setTotalPages(res.data.totalPages);
+    } catch (err) {
+      toast({
+        title: `Failed to load ${status.toLowerCase().replace("_", " ")} sessions`,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── Fetch Active Sessions ─────────────────────────────────────────────
   useEffect(() => {
-    const fetchSessions = async () => {
+    fetchSessionsByStatus(
+      "ACTIVE",
+      activePage,
+      activePageSize,
+      setActiveSessions,
+      setActiveTotalPages,
+      setActiveLoading
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage, activePageSize]);
+
+  // ─── Fetch Not Started Sessions ────────────────────────────────────────
+  useEffect(() => {
+    fetchSessionsByStatus(
+      "NOT_STARTED",
+      notStartedPage,
+      notStartedPageSize,
+      setNotStartedSessions,
+      setNotStartedTotalPages,
+      setNotStartedLoading
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notStartedPage, notStartedPageSize]);
+
+  // ─── Fetch Completed Sessions + Statistics ─────────────────────────────
+  useEffect(() => {
+    const fetchCompleted = async () => {
+      setCompletedLoading(true);
       try {
-        const res = await axios.get('http://localhost:8080/api/sessions');
-        setSessions(res.data);
-      } catch {
-        // Fallback mock
-        setSessions([
-          { id: 1, startDate: '2024-05-01', endDate: '2024-05-10', trainingTitle: 'React' },
-          { id: 2, startDate: '2024-06-01', endDate: '2024-06-05', trainingTitle: 'Spring Boot' },
-        ]);
+        // 1) Fetch the “page” of completed sessions
+        const params: any = {
+          page: completedPage,
+          size: completedPageSize,
+          sessionStatus: "COMPLETED",
+        };
+        const res = await api.get("v1/sessions", { params });
+        const sessionsPage: Session[] = res.data.content;
+        setCompletedTotalPages(res.data.totalPages);
+
+        if (sessionsPage.length === 0) {
+          setCompletedSessions([]);
+          return;
+        }
+
+        // 2) For each session, call the statistics endpoint
+        const statsPromises = sessionsPage.map((sess) =>
+          api
+            .get(`v1/statistics/sessions/${sess.id}`)
+            .then((statRes) => ({
+              id: sess.id,
+              totalParticipants: statRes.data.totalParticipants,
+              totalFeedBackGiven: statRes.data.totalFeedBackGiven,
+              avgFeedbackRating: statRes.data.avgFeedbackRating,
+            }))
+            .catch(() => ({
+              id: sess.id,
+              totalParticipants: undefined,
+              totalFeedBackGiven: undefined,
+              avgFeedbackRating: undefined,
+            }))
+        );
+
+        const statsArray = await Promise.all(statsPromises);
+
+        // 3) Merge stats into each session object
+        const sessionsWithStats = sessionsPage.map((sess) => {
+          const stat = statsArray.find((s) => s.id === sess.id)!;
+          return {
+            ...sess,
+            totalParticipants: stat.totalParticipants,
+            totalFeedBackGiven: stat.totalFeedBackGiven,
+            avgFeedbackRating: stat.avgFeedbackRating,
+          };
+        });
+
+        setCompletedSessions(sessionsWithStats);
+      } catch (err) {
+        toast({
+          title: "Failed to load completed sessions",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       } finally {
-        setLoading(false);
+        setCompletedLoading(false);
       }
     };
 
-    fetchSessions();
-  }, []);
+    fetchCompleted();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completedPage, completedPageSize]);
 
-  const handleSearchChange = (sessionId: number, value: string) => {
-    setSearchInputs((prev) => ({ ...prev, [sessionId]: value }));
-  };
-
-  const handleSearch = async (sessionId: number) => {
-    const query = searchInputs[sessionId];
-    if (!query) return;
-
-    try {
-      const res = await axios.get(`http://localhost:8080/api/employees/search?query=${query}`);
-      setSearchResults((prev) => ({ ...prev, [sessionId]: res.data }));
-    } catch {
-      // mock fallback
-      setSearchResults((prev) => ({
-        ...prev,
-        [sessionId]: [
-          { id: 101, firstName: 'John', lastName: 'Doe', email: 'john@example.com' },
-          { id: 102, firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com' },
-        ],
-      }));
+  // ─── Generic “renderTable” with optional stats columns ─────────────────
+  const renderTable = (
+    sessions: Session[],
+    loading: boolean,
+    page: number,
+    totalPages: number,
+    pageSize: number,
+    onPrev: () => void,
+    onNext: () => void,
+    onSizeChange: (newSize: number) => void,
+    showStats: boolean
+  ) => {
+    if (loading) {
+      return <Spinner size="xl" />;
     }
-  };
 
-  const handleSubscribe = async (sessionId: number, employeeId: number) => {
-    try {
-      await axios.post(`http://localhost:8080/api/sessions/${sessionId}/subscribe/${employeeId}`);
-      toast({
-        title: `Employee ${employeeId} subscribed to session ${sessionId}`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-
-      // Clear search result after subscribing
-      setSearchInputs((prev) => ({ ...prev, [sessionId]: '' }));
-      setSearchResults((prev) => ({ ...prev, [sessionId]: [] }));
-    } catch (err) {
-      toast({
-        title: 'Error',
-        description: 'Could not subscribe employee',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+    if (sessions.length === 0) {
+      return <Text>No sessions found.</Text>;
     }
+
+    return (
+      <>
+        <Box overflowX="auto">
+          <Table variant="striped" colorScheme="teal">
+            <Thead>
+              <Tr>
+                <Th>ID</Th>
+                <Th>Title</Th>
+                <Th>Date</Th>
+                <Th>Speaker</Th>
+                <Th>Status</Th>
+                {showStats && <Th>Feedback Count</Th>}
+                {showStats && <Th>Average Rating</Th>}
+              </Tr>
+            </Thead>
+            <Tbody>
+              {sessions.map((session) => (
+                <Tr
+                  key={session.id}
+                  onClick={() => navigate(`/sessions/${session.id}`)}
+                  _hover={{ bg: "teal.100", cursor: "pointer" }}
+                >
+                  <Td>{session.id}</Td>
+                  <Td>{session.title}</Td>
+                  <Td>
+                    {new Date(session.date).toLocaleString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Td>
+                  <Td>{session.speaker}</Td>
+                  <Td>{session.status}</Td>
+
+                  {showStats && (
+                    <>
+                      <Td>
+                        {session.totalFeedBackGiven != null &&
+                        session.totalParticipants != null
+                          ? `${session.totalFeedBackGiven}/${session.totalParticipants}`
+                          : "—"}
+                      </Td>
+                      <Td>
+                        {session.avgFeedbackRating != null
+                          ? session.avgFeedbackRating.toFixed(2)
+                          : "—"}
+                      </Td>
+                    </>
+                  )}
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+
+        <HStack justify="center" mt={4}>
+          <Button onClick={onPrev} isDisabled={page === 0 || loading}>
+            Previous
+          </Button>
+          <Text>
+            Page {page + 1} of {totalPages}
+          </Text>
+          <Button
+            onClick={onNext}
+            isDisabled={page >= totalPages - 1 || loading}
+          >
+            Next
+          </Button>
+          <Select
+            value={pageSize}
+            onChange={(e) => onSizeChange(Number(e.target.value))}
+            width="100px"
+            isDisabled={loading}
+          >
+            {[5, 10, 20, 50].map((size) => (
+              <option key={size} value={size}>
+                {size} / page
+              </option>
+            ))}
+          </Select>
+        </HStack>
+      </>
+    );
   };
 
   return (
     <Container maxW="6xl" py={10}>
-      <Heading mb={6}>Subscribe Employees to Sessions</Heading>
-      {loading ? (
-        <Spinner size="xl" />
-      ) : (
-        <Table variant="striped" colorScheme="teal">
-          <Thead>
-            <Tr>
-              <Th>Session ID</Th>
-              <Th>Training</Th>
-              <Th>Start</Th>
-              <Th>End</Th>
-              <Th>Search Employee</Th>
-              <Th>Results</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {sessions.map((session) => (
-              <Tr key={session.id}>
-                <Td>{session.id}</Td>
-                <Td>{session.trainingTitle}</Td>
-                <Td>{session.startDate}</Td>
-                <Td>{session.endDate}</Td>
-                <Td>
-                  <VStack spacing={2} align="start">
-                    <Input
-                      size="sm"
-                      placeholder="Search by email or last name"
-                      value={searchInputs[session.id] || ''}
-                      onChange={(e) => handleSearchChange(session.id, e.target.value)}
-                    />
-                    <Button size="xs" onClick={() => handleSearch(session.id)}>
-                      Search
-                    </Button>
-                  </VStack>
-                </Td>
-                <Td>
-                  <VStack spacing={2} align="start">
-                    {(searchResults[session.id] || []).map((emp) => (
-                      <Box key={emp.id} display="flex" alignItems="center" gap={2}>
-                        <Text fontSize="sm">
-                          {emp.firstName} {emp.lastName} ({emp.email})
-                        </Text>
-                        <Button
-                          size="xs"
-                          colorScheme="blue"
-                          onClick={() => handleSubscribe(session.id, emp.id)}
-                        >
-                          Subscribe
-                        </Button>
-                      </Box>
-                    ))}
-                  </VStack>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+      {/* ─── Active Sessions (no stats) ────────────────────────────────────── */}
+      <Heading mb={4}>Active Sessions</Heading>
+      {renderTable(
+        activeSessions,
+        activeLoading,
+        activePage,
+        activeTotalPages,
+        activePageSize,
+        () => setActivePage((prev) => Math.max(prev - 1, 0)),
+        () => setActivePage((prev) => Math.min(prev + 1, activeTotalPages - 1)),
+        (newSize) => {
+          setActivePageSize(newSize);
+          setActivePage(0);
+        },
+        false // → do NOT show stats
       )}
+
+      {/* ─── Other Sessions in Tabs ───────────────────────────────────────── */}
+      <Heading mt={10} mb={4}>
+        Other Sessions
+      </Heading>
+      <Tabs variant="enclosed">
+        <TabList>
+          <Tab>Not Started</Tab>
+          <Tab>Completed</Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel p={0} pt={4}>
+            {/* Not Started (no stats) */}
+            {renderTable(
+              notStartedSessions,
+              notStartedLoading,
+              notStartedPage,
+              notStartedTotalPages,
+              notStartedPageSize,
+              () => setNotStartedPage((prev) => Math.max(prev - 1, 0)),
+              () =>
+                setNotStartedPage((prev) =>
+                  Math.min(prev + 1, notStartedTotalPages - 1)
+                ),
+              (newSize) => {
+                setNotStartedPageSize(newSize);
+                setNotStartedPage(0);
+              },
+              false // → do NOT show stats
+            )}
+          </TabPanel>
+
+          <TabPanel p={0} pt={4}>
+            {/* Completed (WITH stats) */}
+            {renderTable(
+              completedSessions,
+              completedLoading,
+              completedPage,
+              completedTotalPages,
+              completedPageSize,
+              () => setCompletedPage((prev) => Math.max(prev - 1, 0)),
+              () =>
+                setCompletedPage((prev) =>
+                  Math.min(prev + 1, completedTotalPages - 1)
+                ),
+              (newSize) => {
+                setCompletedPageSize(newSize);
+                setCompletedPage(0);
+              },
+              true // → show stats
+            )}
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Container>
   );
 };
