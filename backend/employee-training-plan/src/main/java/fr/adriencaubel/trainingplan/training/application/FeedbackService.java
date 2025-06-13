@@ -1,28 +1,39 @@
 package fr.adriencaubel.trainingplan.training.application;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
+import fr.adriencaubel.trainingplan.training.application.dto.FeedbackRequestModel;
 import fr.adriencaubel.trainingplan.training.domain.Feedback;
-import fr.adriencaubel.trainingplan.training.domain.Session;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
+import fr.adriencaubel.trainingplan.training.infrastructure.FeedbackRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.SessionEnrollmentRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.SessionRepository;
+import fr.adriencaubel.trainingplan.training.infrastructure.specifciation.FeedbackSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class FeedbackService {
-    private final SessionEnrollmentRepository sessionEnrollmentRepository;
-
     private final SessionRepository sessionRepository;
 
-    public List<Feedback> getFeedbacksBySessionId(Long sessionId) {
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Session " + sessionId + " not found"));
+    private final SessionEnrollmentRepository sessionEnrollmentRepository;
+    private final FeedbackRepository feedbackRepository;
 
-        return session.getFeedbacks();
+    public Page<Feedback> getFeedbacksBy(Long trainingId, Long sessionId, Pageable pageable) {
+        Specification<Feedback> specification = FeedbackSpecification.filter(trainingId, sessionId);
+        return feedbackRepository.findAll(specification, pageable);
+    }
+
+    @Transactional
+    public void giveFeedback(String feedbackToken, FeedbackRequestModel feedbackRequestModel) {
+        SessionEnrollment sessionEnrollment = sessionEnrollmentRepository.findByFeedbackToken(feedbackToken).orElseThrow(() -> new DomainException("Invalid feedback token"));
+
+        sessionEnrollment.addFeedback(feedbackRequestModel.getComment(), feedbackRequestModel.getRating());
+
+        sessionEnrollmentRepository.save(sessionEnrollment);
     }
 }

@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+// Owner
 public class User {
 
     @Id
@@ -19,15 +20,15 @@ public class User {
     @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
     private Company company;
 
-    public enum Role {
-        ADMIN
-    }
-
     public User() {
 
     }
 
     public User(String sub) {
         this.sub = sub;
+    }
+
+    public enum Role {
+        ADMIN
     }
 }

@@ -4,13 +4,13 @@ import fr.adriencaubel.trainingplan.company.application.dto.DepartmentResponseMo
 import fr.adriencaubel.trainingplan.company.application.service.DepartmentService;
 import fr.adriencaubel.trainingplan.company.domain.model.Department;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("v1/departments")
@@ -19,10 +19,10 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @GetMapping
-    public ResponseEntity<List<DepartmentResponseModel>> getAll() {
-        List<Department> departments = departmentService.findAll();
+    public ResponseEntity<Page<DepartmentResponseModel>> getAll(Pageable pageable) {
+        Page<Department> departments = departmentService.findAll(pageable);
 
-        List<DepartmentResponseModel> departmentResponseModels = departments.stream().map(DepartmentResponseModel::toDto).toList();
+        Page<DepartmentResponseModel> departmentResponseModels = departments.map(DepartmentResponseModel::toDto);
 
         return ResponseEntity.ok(departmentResponseModels);
     }

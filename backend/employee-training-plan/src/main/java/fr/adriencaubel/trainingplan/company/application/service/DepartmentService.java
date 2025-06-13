@@ -5,9 +5,9 @@ import fr.adriencaubel.trainingplan.company.domain.model.Department;
 import fr.adriencaubel.trainingplan.company.infrastructure.repository.DepartmentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +28,8 @@ public class DepartmentService {
         return departmentRepository.findById(departmentId).orElseThrow(() -> new EntityNotFoundException("Department with id " + departmentId + " not found"));
     }
 
-    public List<Department> findAll() {
+    public Page<Department> findAll(Pageable pageable) {
         Company company = userService.getCompanyOfAuthenticatedUser();
-        return departmentRepository.findAllByCompany(company);
+        return departmentRepository.findAllByCompany(company, pageable);
     }
 }

@@ -1,7 +1,10 @@
 package fr.adriencaubel.trainingplan.common.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -13,49 +16,44 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class RabbitMQConfig {
+    
+    @Value("${rabbitmq.exchange.commands}")
+    private String commandsExchange;
 
-    private final ConnectionFactory connectionFactory;
+    @Value("${rabbitmq.queue.commands}")
+    private String commandsQueueName;
 
-    @Value("${rabbitmq.exchange.email}")
-    private String emailExchange;
-
-    @Value("${rabbitmq.queue.subscription}")
-    private String subscriptionQueueName;
-
-    @Value("${rabbitmq.routing.subscription}")
-    private String subscriptionRoutingKey;
+    @Value("${rabbitmq.routing.key.create}")
+    private String commandsCreateRoutingKey;
 
     @Bean
-    public DirectExchange emailExchange() {
-        return new DirectExchange(emailExchange);
-    }
-
-    @Bean
-    public Queue subscriptionQueue() {
-        return new Queue(subscriptionQueueName);
-    }
-
-    @Bean
-    public Binding subscriptionBinding() {
-        return BindingBuilder
-                .bind(subscriptionQueue())
-                .to(emailExchange())
-                .with(subscriptionRoutingKey);
-    }
-
-    /**
-     * Allow to send message to the queue
-     */
-    @Bean
-    public AmqpTemplate amqpTemplate() {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(jacksonConverter());
-        return rabbitTemplate;
-    }
-
-    @Bean
-    public MessageConverter jacksonConverter() {
+    public MessageConverter jackson2JsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory cf,
+                                         MessageConverter converter) {
+        RabbitTemplate tpl = new RabbitTemplate(cf);
+        tpl.setMessageConverter(converter);
+        return tpl;
+    }
+
+    @Bean
+    public TopicExchange commandsExchange() {
+        return new TopicExchange(commandsExchange);
+    }
+
+    @Bean
+    public Queue commandsQueueName() {
+        return new Queue(commandsQueueName);
+    }
+
+    @Bean
+    public Binding commandsCreateRoutingKey() {
+        return BindingBuilder
+                .bind(commandsQueueName())
+                .to(commandsExchange())
+                .with(commandsCreateRoutingKey);
+    }
 }

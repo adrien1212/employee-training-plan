@@ -1,6 +1,7 @@
 package fr.adriencaubel.trainingplan.employee.domain;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.company.domain.model.Department;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import jakarta.persistence.*;
@@ -9,7 +10,11 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+/**
+ * email + codeEmployee permet d'accéder aux pages publiques
+ */
 @Entity
 @Getter
 @Setter
@@ -19,9 +24,14 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
+    private Company company;
+
     private String firstName;
     private String lastName;
     private String email;
+    private String codeEmployee;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
@@ -29,6 +39,8 @@ public class Employee {
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SessionEnrollment> sessionEnrollments = new ArrayList<>();
+
+    private boolean active;
 
     public Employee() {
     }
@@ -39,6 +51,10 @@ public class Employee {
         this.lastName = lastName;
         this.email = email;
         this.department = department;
+        this.company = department.getCompany();
+        Random rand = new Random();
+        this.codeEmployee = "" + (rand.nextInt(99999) + 100000);
+        this.active = true;
     }
 
     // Factory method - explicit and clear intent

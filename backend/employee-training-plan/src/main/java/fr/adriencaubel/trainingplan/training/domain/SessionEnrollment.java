@@ -2,11 +2,13 @@ package fr.adriencaubel.trainingplan.training.domain;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
+import fr.adriencaubel.trainingplan.signature.domain.Signature;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -26,30 +28,42 @@ public class SessionEnrollment {
     @JoinColumn(name = "session_id")
     private Session session;
 
-    private boolean completed = false;
-
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "sessionEnrollment", cascade = CascadeType.ALL, optional = false)
     private Feedback feedback;
 
-    private String feedbackToken;
+    @OneToMany(mappedBy = "sessionEnrollment", cascade = CascadeType.ALL)
+    private List<Signature> signatures = new ArrayList<>();
 
-    private LocalDateTime tokenExpiration;
+    private String accessToken;
 
-    public SessionEnrollment() {}
+    public SessionEnrollment() {
+    }
 
     public SessionEnrollment(Employee employee, Session session) {
         this.employee = employee;
         this.session = session;
+        this.accessToken = UUID.randomUUID().toString();
+        this.feedback = Feedback.create(session.getTraining().getCompany());
+        feedback.setSessionEnrollment(this);
     }
 
     public void openFeedback() {
-        feedbackToken = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
-        tokenExpiration = LocalDateTime.now().plusDays(7);
+        //feedbackToken = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
+        //tokenExpiration = LocalDateTime.now().plusDays(7);
     }
 
-    public void addFeedback(Feedback feedback) {
-        if(this.getFeedback() != null) throw new DomainException("Feedback already enrolled");
+    public void addFeedback(String comment, int rating) {
+        if (this.getFeedback() != null) throw new DomainException("Feedback already enrolled");
 
+        if (comment == null || comment.isBlank()) throw new DomainException("Comment is required");
+
+        if (rating < 0 || rating > 5) throw new DomainException("Rating must be between 0 and 5");
+
+        Feedback feedback = new Feedback(rating, comment);
+        feedback.setCompany(session.getTraining().getCompany());
+        feedback.setComment(comment);
+        feedback.setRating(rating);
+        feedback.setSessionEnrollment(this);
         this.feedback = feedback;
     }
 }

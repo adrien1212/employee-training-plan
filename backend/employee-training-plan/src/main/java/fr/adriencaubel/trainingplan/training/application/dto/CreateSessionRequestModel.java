@@ -1,5 +1,6 @@
 package fr.adriencaubel.trainingplan.training.application.dto;
 
+import fr.adriencaubel.trainingplan.training.domain.SessionStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,4 +11,7 @@ import java.time.LocalDate;
 public class CreateSessionRequestModel {
     private LocalDate startDate;
     private LocalDate endDate;
+    private SessionStatus sessionStatus;
+    private String location;
+    private Long trainerId;
 }

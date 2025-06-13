@@ -1,10 +1,13 @@
 package fr.adriencaubel.trainingplan.training.application;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
+import fr.adriencaubel.trainingplan.company.application.service.UserService;
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.employee.infrastructure.EmployeeRepository;
+import fr.adriencaubel.trainingplan.signature.application.SlotManagementService;
 import fr.adriencaubel.trainingplan.training.application.dto.CreateSessionRequestModel;
-import fr.adriencaubel.trainingplan.training.application.dto.FeedbackRequestModel;
+import fr.adriencaubel.trainingplan.training.application.dto.UpdateSessionRequestModel;
 import fr.adriencaubel.trainingplan.training.domain.*;
 import fr.adriencaubel.trainingplan.training.domain.event.EmployeeSubscribedEvent;
 import fr.adriencaubel.trainingplan.training.domain.event.SessionCompletedEvent;
@@ -15,6 +18,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,48 +27,47 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SessionService {
 
+    private final SlotManagementService slotManagementService;
     private final SessionRepository sessionRepository;
-
     private final SessionEnrollmentRepository sessionEnrollmentRepository;
-
     private final TrainingService trainingService;
-
     private final EmployeeRepository employeeRepository;
-
     private final ApplicationEventPublisher eventPublisher;
-
     private final EmailNotificationPort emailNotificationPort;
+    private final NotificationPort notificationPort;
+    private final UserService userService;
+    private final TrainerService trainerService;
 
     @Transactional
-    public Session createSession(CreateSessionRequestModel createSessionRequestModel, Long trainingId) {
+    public Session createSession(Long trainingId, CreateSessionRequestModel createSessionRequestModel) {
         Training training = trainingService.getTrainingById(trainingId);
-        return training.createSession(createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate());
+        Trainer trainer = trainerService.getTrainerById(createSessionRequestModel.getTrainerId());
+        return training.createSession(createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate(), createSessionRequestModel.getLocation(), trainer);
     }
 
     @Transactional
-    public Session completeTraining(Long sessionId, String accessToken) {
+    public Session completeSession(String accessToken) {
         // Fetch training with proper error handling
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session not found with id: " + sessionId));
+        Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollment(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with access token: " + accessToken));
 
         // Check if training can be completed
-        session.complete(accessToken);
+        session.complete();
 
         // Save the aggregate root
         session = sessionRepository.save(session);
 
         // Fetch all enrolled employees
-        List<Employee> enrolledEmployees = sessionEnrollmentRepository
-                .findBySession(session).stream().map(SessionEnrollment::getEmployee).collect(Collectors.toList());
+        List<SessionEnrollment> sessionEnrollments = sessionEnrollmentRepository
+                .findBySession(session);
 
         // Publish domain event for training completion
-        eventPublisher.publishEvent(new SessionCompletedEvent(session, enrolledEmployees));
+        eventPublisher.publishEvent(new SessionCompletedEvent(session, sessionEnrollments));
         return session;
     }
 
@@ -97,23 +101,9 @@ public class SessionService {
         sessionRepository.save(session);
     }
 
-    public List<Session> getSessionsForTraining(Long trainingId, SessionStatus sessionStatus) {
-        Specification<Session> specification = SessionSpecification.filter(trainingId, sessionStatus, null, null);
-        return sessionRepository.findAll(specification);
-    }
-
-    @Transactional
-    public void giveFeedback(String feedbackToken, FeedbackRequestModel feedbackRequestModel) {
-        SessionEnrollment sessionEnrollment = sessionEnrollmentRepository.findByFeedbackToken(feedbackToken).orElseThrow(() -> new DomainException("Invalid feedback token"));
-
-        Feedback feedback = new Feedback(feedbackRequestModel.getRating(), feedbackRequestModel.getComment());
-        sessionEnrollment.addFeedback(feedback);
-
-        sessionEnrollmentRepository.save(sessionEnrollment);
-    }
-
-    public List<SessionEnrollment> getSessionEnrollmentBySessionId(Long sessionId) {
-        return sessionEnrollmentRepository.findBySessionId(sessionId);
+    public Page<Session> getSessions(Long trainingId, Long trainerId, SessionStatus sessionStatus, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Specification<Session> specification = SessionSpecification.filter(trainingId, trainerId, sessionStatus, startDate, endDate);
+        return sessionRepository.findAll(specification, pageable);
     }
 
     @EventListener
@@ -122,13 +112,20 @@ public class SessionService {
                 event.getEmployee(),
                 event.getSession()
         );
-    }
-    
-    public List<Feedback> getFeedbacksBySessionId(Long sessionId) {
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Session " + sessionId + " not found"));
 
-        return session.getFeedbacks();
+        notificationPort.sendNotification(event.getEmployee());
+    }
+
+    @EventListener
+    public void handleSessionCompletedEvent(SessionCompletedEvent event) {
+        // Envoyer un mail à tous les participants
+        for (SessionEnrollment enrollment : event.getSessionEnrollments()) {
+            emailNotificationPort.sendFeedbackEmail(
+                    enrollment.getEmployee(),
+                    enrollment.getSession(),
+                    enrollment.getFeedback().getFeedbackToken()
+            );
+        }
     }
 
     public List<Session> getSessionByMonth(int month, int year) {
@@ -138,11 +135,86 @@ public class SessionService {
     }
 
     public List<Session> findAllByTrainingIdAndSessionDate(Long trainingId, LocalDate startDate, LocalDate endDate) {
-        Specification<Session> specification = SessionSpecification.filter(trainingId, null, startDate, endDate);
+        Specification<Session> specification = SessionSpecification.filter(trainingId, null, null, startDate, endDate);
         return sessionRepository.findAll(specification);
     }
 
     public List<Session> findAllByTrainingIdWithEnrollments(Long trainingId, LocalDate startDate, LocalDate endDate) {
         return sessionRepository.findAllByTrainingIdWithEnrollments(trainingId, startDate, endDate);
+    }
+
+    public Session findBySessionIdWithEnrollments(Long sessionId) {
+        return sessionRepository.findByIdWithSessionEnrollment(sessionId).orElseThrow(() -> new IllegalArgumentException("Session " + sessionId + " not found"));
+    }
+
+    public Session getSessionById(Long id) {
+        return sessionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Session " + id + " not found"));
+    }
+
+    @Transactional
+    public Session updateStatus(Long sessionId, SessionStatus newSessionStatus) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new DomainException("Session not found: " + sessionId));
+
+        SessionStatus current = session.getLastStatus();
+        // If the newStatus is the same as current, you can choose to treat it as no-op:
+        if (current == newSessionStatus) {
+            return session;
+        }
+
+        // Check allowed transitions:
+        session.changeStatus(newSessionStatus);
+
+        if (newSessionStatus == SessionStatus.ACTIVE) {
+            slotManagementService.createSlotsFor(session);
+        }
+
+        return sessionRepository.save(session);
+    }
+
+    public int count() {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        return (int) sessionRepository.countByCompany(company);
+    }
+
+    @Transactional
+    public Session updateSession(Long id, UpdateSessionRequestModel updateSessionRequestModel) {
+        Session session = getSessionById(id);
+
+        if (session.getLastStatus() == SessionStatus.COMPLETED) {
+            throw new DomainException("Impossible to update session completed");
+        }
+
+        if (updateSessionRequestModel.getStartDate() != null) {
+            session.setStartDate(updateSessionRequestModel.getStartDate());
+        }
+        if (updateSessionRequestModel.getEndDate() != null) {
+            session.setEndDate(updateSessionRequestModel.getEndDate());
+        }
+        if (updateSessionRequestModel.getLocation() != null) {
+            session.setLocation(updateSessionRequestModel.getLocation());
+        }
+        if (updateSessionRequestModel.getStatus() != null) {
+            updateStatus(id, updateSessionRequestModel.getStatus());
+        }
+
+        return sessionRepository.save(session);
+    }
+
+    @Transactional
+    public void deleteSession(Long id) {
+        Session session = getSessionById(id);
+
+        if (session.getLastStatus() == SessionStatus.COMPLETED) {
+            throw new DomainException("Impossible to delete session completed");
+        }
+        session.changeStatus(SessionStatus.CANCELLED);
+        sessionRepository.save(session);
+    }
+
+    public Session getSessionByAccessToken(String accessToken) {
+        Session session = sessionRepository.findByEmployeeAccessTokenWithSessionEnrollment(accessToken).orElseThrow(() -> new DomainException("Session not found: " + accessToken));
+        return session;
     }
 }

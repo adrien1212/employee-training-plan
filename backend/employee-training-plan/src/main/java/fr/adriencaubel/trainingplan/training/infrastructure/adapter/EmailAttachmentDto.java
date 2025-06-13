@@ -8,5 +8,5 @@ import lombok.Setter;
 public class EmailAttachmentDto {
     private String fileName;
     private String contentType;
-    private String base64Content;
+    private byte[] content;
 }

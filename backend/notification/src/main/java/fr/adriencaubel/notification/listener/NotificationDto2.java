@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NotificationDto {
-    private Long employeeId;
+public class NotificationDto2 {
+    private Long sessionId;
     private String type;
 }

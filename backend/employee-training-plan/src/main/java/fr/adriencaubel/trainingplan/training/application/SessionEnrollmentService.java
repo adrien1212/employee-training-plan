@@ -1,10 +1,13 @@
 package fr.adriencaubel.trainingplan.training.application;
 
+import fr.adriencaubel.trainingplan.common.exception.DomainException;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import fr.adriencaubel.trainingplan.training.domain.SessionStatus;
 import fr.adriencaubel.trainingplan.training.infrastructure.SessionEnrollmentRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.specifciation.SessionEnrollmentSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -16,18 +19,50 @@ import java.util.List;
 public class SessionEnrollmentService {
     private final SessionEnrollmentRepository sessionEnrollmentRepository;
 
-    public List<SessionEnrollment> findAllByTrainingIdOrEmployeeId(Long trainingId, Long employeeId, SessionStatus sessionStatus) {
-        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(trainingId, employeeId, sessionStatus, null, null);
-        return sessionEnrollmentRepository.findAll(specification);
+    public Page<SessionEnrollment> findAllByTrainingIdOrEmployeeId(Long trainingId, Long employeeId, Long sessionId, SessionStatus sessionStatus, Boolean completed, Pageable pageable) {
+        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(trainingId, employeeId, sessionId, sessionStatus, completed, null, null);
+        return sessionEnrollmentRepository.findAll(specification, pageable);
     }
 
     public List<SessionEnrollment> findAllByEmployeeIdAndSessionDate(Long employeeId, LocalDate startDate, LocalDate endDate) {
-        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(null, employeeId, null, startDate, endDate);
+        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(null, employeeId, null, null, null, startDate, endDate);
         return sessionEnrollmentRepository.findAll(specification);
     }
 
     public List<SessionEnrollment> findAllByTrainingIdAndSessionDate(Long trainingId, LocalDate startDate, LocalDate endDate) {
-        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(trainingId, null, null, startDate, endDate);
+        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(trainingId, null, null, null, null, startDate, endDate);
         return sessionEnrollmentRepository.findAll(specification);
+    }
+
+    public SessionEnrollment findByAccessToken(String accessToken) {
+        return sessionEnrollmentRepository.findByAccessToken(accessToken).orElseThrow();
+    }
+
+    public SessionEnrollment validateToken(String token) {
+        if (token == null || token.isBlank()) {
+            throw new DomainException("Token must not be blank");
+        }
+
+
+        SessionEnrollment enroll = sessionEnrollmentRepository.findByFeedbackToken(token)
+                .orElseThrow(() -> new DomainException("Invalid feedback token"));
+
+        if (enroll.getFeedback().getComment() != null) {
+            throw new DomainException("Vous avez déjà donné votre avis");
+        }
+
+        if (enroll.getFeedback().isTokenExpired()) {
+            throw new DomainException("Token has expired");
+        }
+
+        if (!SessionStatus.COMPLETED.equals(enroll.getSession().getLastStatus())) {
+            throw new DomainException("Session is not complete");
+        }
+
+        return enroll;
+    }
+
+    public SessionEnrollment findById(Long id) {
+        return sessionEnrollmentRepository.findById(id).orElseThrow(() -> new DomainException("SessionEnrollment Invalid id"));
     }
 }

@@ -12,6 +12,28 @@ services:
     ports:
       - "3306:3306"
 
+  mongo:
+    image: mongo:8.0.9
+    container_name: mongo_container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: training-plan
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "27016:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root
+      ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+  
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
@@ -19,6 +41,13 @@ services:
     ports:
       - "5672:5672"    # AMQP protocol port
       - "15672:15672"  # Management UI port
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: always
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
   keycloak:
     container_name: keycloak.openid-provider
@@ -29,6 +58,7 @@ services:
     ports:
       - 7980:8080
     volumes:
+      - keycloak-data:/opt/keycloak/data     # persist everything under /opt/keycloak/data
       - ./keycloak/:/opt/keycloak/data/import/
     environment:
       KEYCLOAK_ADMIN: admin
@@ -51,4 +81,6 @@ services:
 
 volumes:
   mysql-data:
+  mongo-data:
+  keycloak-data:
 

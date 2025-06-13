@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateEmployeeRequestModel {
+public class EmployeeRequestModel {
     private String firstName;
     private String lastName;
     private String email;

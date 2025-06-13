@@ -7,13 +7,22 @@ import fr.adriencaubel.trainingplan.training.application.TrainingService;
 import fr.adriencaubel.trainingplan.training.application.dto.*;
 import fr.adriencaubel.trainingplan.training.domain.Session;
 import fr.adriencaubel.trainingplan.training.domain.Training;
+import fr.adriencaubel.trainingplan.training.domain.TrainingDocument;
 import fr.adriencaubel.trainingplan.training.domain.TrainingStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/trainings")
@@ -27,21 +36,30 @@ public class TrainingController {
     private final EmployeeService employeeService;
 
     @PostMapping
-    public ResponseEntity<Training> createTraining(@RequestBody CreateTrainingRequestModel createTrainingRequestModel) {
+    public ResponseEntity<TrainingResponseModel> createTraining(@RequestBody CreateTrainingRequestModel createTrainingRequestModel) {
         Training training = trainingService.createTraining(createTrainingRequestModel);
-        return new ResponseEntity<>(training, HttpStatus.CREATED);
+        return ResponseEntity.ok(TrainingResponseModel.toDto(training));
     }
 
-    @PostMapping("{trainingId}/departments")
+    @PostMapping("{trainingId}/department")
     public ResponseEntity<TrainingResponseModel> addDepartmentToTraining(@PathVariable Long trainingId, @RequestBody DepartmentIdRequestModel departmentIdRequestModel) {
         Training training = trainingService.addDepartmentToTraining(trainingId, departmentIdRequestModel);
         return ResponseEntity.ok(TrainingResponseModel.toDto(training));
     }
 
+    @PostMapping("{trainingId}/session")
+    public ResponseEntity<Session> createSession(@PathVariable Long trainingId, @RequestBody CreateSessionRequestModel createSessionRequestModel) {
+        Session session = sessionService.createSession(trainingId, createSessionRequestModel);
+        return new ResponseEntity<>(session, HttpStatus.CREATED);
+    }
+
     @GetMapping
-    public ResponseEntity<List<TrainingResponseModel>> getAllTrainings(@RequestParam(required = false) TrainingStatus status, @RequestParam(required = false) Long departmentId, @RequestParam(required = false) Long employeeId) {
-        List<Training> trainings = trainingService.getAllTraining(status, departmentId, employeeId);
-        return ResponseEntity.ok(trainings.stream().map(TrainingResponseModel::toDto).toList());
+    public ResponseEntity<Page<TrainingResponseModel>> getAllTrainings(@RequestParam(required = false) TrainingStatus status, @RequestParam(required = false) Long departmentId, @RequestParam(required = false) Long employeeId, Pageable pageable) {
+        Page<Training> trainings = trainingService.getAllTraining(status, departmentId, employeeId, pageable);
+
+        Page<TrainingResponseModel> responseModelPagedModel = trainings.map(TrainingResponseModel::toDto);
+
+        return ResponseEntity.ok(responseModelPagedModel);
     }
 
     @GetMapping("{id}")
@@ -56,9 +74,59 @@ public class TrainingController {
         return ResponseEntity.ok(employees);
     }
 
-    @PostMapping("{id}/sessions")
-    public ResponseEntity<Session> createSession(@PathVariable Long id, @RequestBody CreateSessionRequestModel createSessionRequestModel) {
-        Session session = sessionService.createSession(createSessionRequestModel, id);
-        return new ResponseEntity<>(session, HttpStatus.CREATED);
+    @PostMapping("/{trainingId}/documents")
+    public ResponseEntity<?> uploadTrainingPdf(
+            @PathVariable Long trainingId,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            TrainingDocument savedDoc = trainingService.uploadTrainingPdf(
+                    file,
+                    trainingId
+            );
+
+            return ResponseEntity.ok(Map.of(
+                    "documentId", savedDoc.getId(),
+                    "filename", savedDoc.getFilename(),
+                    "uploadedAt", savedDoc.getUploadedAt()
+            ));
+
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "File upload failed", e);
+        }
+    }
+
+    @GetMapping("/{trainingId}/documents")
+    public ResponseEntity<List<TrainingDocumentMetadata>> listTrainingDocuments(@PathVariable Long trainingId) {
+        List<TrainingDocument> documents = trainingService.getTrainingDocuments(trainingId);
+
+        List<TrainingDocumentMetadata> metadataList = documents.stream()
+                .map(doc -> new TrainingDocumentMetadata(
+                        doc.getId(),
+                        doc.getFilename(),
+                        doc.getUploadedAt(),
+                        doc.getUploadedByUserId(),
+                        doc.getSize()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(metadataList);
+    }
+
+    @GetMapping("/{trainingId}/documents/{documentId}/download")
+    public ResponseEntity<byte[]> downloadTrainingPdf(@PathVariable Long trainingId, @PathVariable String documentId) {
+        TrainingDocument document = trainingService.getTrainingDocumentById(trainingId, documentId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getFilename() + "\"")
+                .body(document.getFileData());
+    }
+
+    @DeleteMapping("/{trainingId}/documents/{documentId}")
+    public ResponseEntity<Void> deleteTrainingPdf(@PathVariable Long trainingId, @PathVariable String documentId) {
+        trainingService.deleteTrainingDocumentBy(trainingId, documentId);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

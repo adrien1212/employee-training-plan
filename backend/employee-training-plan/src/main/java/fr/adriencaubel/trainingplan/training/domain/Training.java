@@ -1,5 +1,6 @@
 package fr.adriencaubel.trainingplan.training.domain;
 
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.company.domain.model.Department;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,6 +18,10 @@ public class Training {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
+    private Company company;
+
     private String title;
     private String description;
     private String provider;
@@ -31,13 +36,17 @@ public class Training {
     })
     private Set<Department> departments = new HashSet<>();
 
+    private Integer duration; // in hours
+
     public Training() {
     }
 
-    public Training(String title, String description, String provider, Set<Department> departments) {
+    public Training(Company company, String title, String description, String provider, Set<Department> departments, Integer duration) {
+        this.company = company;
         this.title = title;
         this.description = description;
         this.provider = provider;
+        this.duration = duration;
         for (Department department : departments) {
             this.addDepartment(department); // sync both sides
         }
@@ -58,14 +67,15 @@ public class Training {
         return token.substring(0, Math.min(token.length(), 30));
     }
 
-    public Session createSession(LocalDate startDate, LocalDate endDate) {
+    public Session createSession(LocalDate startDate, LocalDate endDate, String location, Trainer trainer) {
         Session session = new Session();
         session.setStartDate(startDate);
         session.setEndDate(endDate);
-        session.setStatus(SessionStatus.NOT_STARTED);
-        session.setAccessToken(generateSecureToken());
-        session.setAccessTokenExpiresAt(endDate.atStartOfDay().plusDays(1L));
-
+        session.setLocation(location);
+        session.changeStatus(SessionStatus.NOT_STARTED);
+        session.setEmployeeAccessToken(generateSecureToken());
+        session.setTrainerAccessToken(generateSecureToken());
+        session.setTrainer(trainer);
         sessions.add(session);
         session.setTraining(this);
         return session;

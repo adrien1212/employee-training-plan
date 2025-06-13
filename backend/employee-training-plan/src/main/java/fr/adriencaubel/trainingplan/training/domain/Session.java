@@ -2,18 +2,16 @@ package fr.adriencaubel.trainingplan.training.domain;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
+import fr.adriencaubel.trainingplan.signature.domain.ModeSignature;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -22,27 +20,45 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private LocalDate startDate;
-
     private LocalDate endDate;
-
-    private SessionStatus status = SessionStatus.NOT_STARTED;
-
-    private String accessToken;
-
-    private LocalDateTime accessTokenExpiresAt;
-
+    private String location;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("changedAt DESC")
+    private List<SessionStatusHistory> sessionStatusHistories = new ArrayList<>();
+    private String trainerAccessToken;
+    private String employeeAccessToken;
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
     private List<SessionEnrollment> sessionEnrollments;
-
     @ManyToOne
     @JoinColumn(name = "training_id")
     private Training training;
+    @Enumerated(EnumType.STRING)
+    private ModeSignature modeSignature;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+    )
+    private Trainer trainer;
+
+    @Transient
+    public SessionStatusHistory getLastStatusHistory() {
+        return sessionStatusHistories.isEmpty()
+                ? null
+                : sessionStatusHistories.get(0);
+    }
+
+    @Transient
+    public SessionStatus getLastStatus() {
+        SessionStatusHistory last = getLastStatusHistory();
+        return last != null
+                ? last.getStatus()
+                : null;
+    }
 
     public SessionEnrollment enrollEmployee(Employee employee) {
-        if (!status.equals(SessionStatus.NOT_STARTED)) {
-            throw new DomainException("Cannot enroll in a " + status + " session");
+        if (!SessionStatus.NOT_STARTED.equals(getLastStatus())) {
+            throw new DomainException("Cannot enroll in a " + getLastStatus() + " session");
         }
 
         // Check if already enrolled
@@ -59,8 +75,8 @@ public class Session {
     }
 
     public void cancelEnrollment(Employee employee) {
-        if (!status.equals(SessionStatus.NOT_STARTED)) {
-            throw new DomainException("Cannot cancel enrollment in a " + status + " session");
+        if (!SessionStatus.NOT_STARTED.equals(getLastStatus())) {
+            throw new DomainException("Cannot cancel enrollment in a " + getLastStatus() + " session");
         }
 
         SessionEnrollment enrollmentToRemove = sessionEnrollments.stream()
@@ -76,53 +92,40 @@ public class Session {
         }
     }
 
-    public void complete(String accessToken) {
-        if (status != SessionStatus.ACTIVE) {
+    public void complete() {
+        if (getLastStatus() != SessionStatus.ACTIVE) {
             throw new IllegalArgumentException("Can only complete active trainings");
         }
 
-        if (!this.accessToken.equals(accessToken)) {
-            throw new DomainException("Wrong session token");
-        }
-
         sessionEnrollments.forEach(SessionEnrollment::openFeedback);
-        this.status = SessionStatus.COMPLETED;
+        changeStatus(SessionStatus.COMPLETED);
 
         // Envoyer un mail a chacun des participants +
     }
 
     public boolean isSessionComplete() {
-        return status == SessionStatus.COMPLETED;
+        return getLastStatus() == SessionStatus.COMPLETED;
     }
 
-    public List<Feedback> getFeedbacks() {
-        if (!this.isSessionComplete()) {
-            throw new DomainException("Session is not complete.");
-        }
-        return sessionEnrollments.stream()
-                .map(SessionEnrollment::getFeedback)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
+    public void changeStatus(SessionStatus target) {
+        if (this.getLastStatus() == null) {
+            // TODO si on crée une session
+        } else {
+            if (this.getLastStatus() == target) {
+                throw new DomainException("This status is already set to " + target);
+            }
 
-    public BigDecimal calculateRatingAverage() {
-        int sumOfRating = 0;
-        int votersCount = 0;
-
-        for (SessionEnrollment enrollment : sessionEnrollments) {
-            Feedback feedback = enrollment.getFeedback();
-            if (feedback != null && feedback.getRating() != 0) {
-                sumOfRating += feedback.getRating();
-                votersCount++;
+            if (!SessionStatus.canTransitionTo(this.getLastStatus(), target)) {
+                throw new IllegalStateException(
+                        "Cannot change status from " + this.getLastStatus() + " to " + target);
             }
         }
-
-        if (votersCount == 0) {
-            return BigDecimal.ZERO; // Avoid division by zero
-        }
-
-        return BigDecimal.valueOf(sumOfRating)
-                .divide(BigDecimal.valueOf(votersCount), 2, RoundingMode.HALF_UP);
+        SessionStatusHistory sessionStatusHistory = new SessionStatusHistory();
+        sessionStatusHistory.setStatus(target);
+        sessionStatusHistory.setSession(this);
+        sessionStatusHistory.setChangedAt(LocalDateTime.now());
+        sessionStatusHistory.setUpdateBy("toto");
+        sessionStatusHistories.add(sessionStatusHistory);
     }
 
     public int getSessionDuration() {

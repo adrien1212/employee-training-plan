@@ -6,15 +6,11 @@ import fr.adriencaubel.trainingplan.training.application.dto.SessionEnrollmentRe
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import fr.adriencaubel.trainingplan.training.domain.SessionStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("v1/sessions-enrollment")
@@ -27,14 +23,27 @@ public class SessionEnrollmentController {
     // Soit le trainingId ou employeeID doit être présent
     // TODO voir s'il n'est pas préférable d'avoir les salarié par session (au lieu que par training)
     @GetMapping
-    public ResponseEntity<List<SessionEnrollmentResponseModel>> getAllEmployeesByTrainingId(
+    public ResponseEntity<Page<SessionEnrollmentResponseModel>> getAll(
             @RequestParam(value = "trainingId", required = false) Long trainingId,
             @RequestParam(value = "employeeId", required = false) Long employeeId,
-            @RequestParam(value = "sessionStatus", required = false) SessionStatus sessionStatus) {
-        List<SessionEnrollment> sessionEnrollments = sessionEnrollmentService.findAllByTrainingIdOrEmployeeId(trainingId, employeeId, sessionStatus);
+            @RequestParam(value = "sessionId", required = false) Long sessionId,
+            @RequestParam(value = "sessionStatus", required = false) SessionStatus sessionStatus,
+            @RequestParam(value = "completed", required = false) Boolean completed,
+            Pageable pageable) {
+        Page<SessionEnrollment> sessionEnrollments = sessionEnrollmentService.findAllByTrainingIdOrEmployeeId(trainingId, employeeId, sessionId, sessionStatus, completed, pageable);
 
-        List<SessionEnrollmentResponseModel> sessionEnrollmentResponseModel = sessionEnrollments.stream().map(SessionEnrollmentResponseModel::toDto).collect(Collectors.toList());
+        if (!sessionEnrollments.hasContent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Page<SessionEnrollmentResponseModel> sessionEnrollmentResponseModel = sessionEnrollments.map(SessionEnrollmentResponseModel::toDto);
 
         return new ResponseEntity<>(sessionEnrollmentResponseModel, HttpStatus.OK);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<SessionEnrollmentResponseModel> getById(@PathVariable Long id) {
+        SessionEnrollment sessionEnrollment = sessionEnrollmentService.findById(id);
+        return new ResponseEntity<>(SessionEnrollmentResponseModel.toDto(sessionEnrollment), HttpStatus.OK);
     }
 }

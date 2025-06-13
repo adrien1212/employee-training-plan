@@ -11,5 +11,6 @@ public class CreateTrainingRequestModel {
     private String title;
     private String description;
     private String provider;
-    private List<Long> departmentId;
+    private Integer duration;
+    private List<Long> departmentIds;
 }
