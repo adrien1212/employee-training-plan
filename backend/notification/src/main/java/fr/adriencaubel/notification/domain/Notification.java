@@ -1,12 +1,16 @@
 package fr.adriencaubel.notification.domain;
 
-import io.hypersistence.utils.hibernate.type.json.JsonType;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.adriencaubel.notification.listener.dto.NotificationPayload;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -21,14 +25,12 @@ public class Notification {
     private NotificationType notificationType;
 
     /**
-     * When the notification should be executed.
+     * When the notification is persisted
      */
-    private LocalDateTime dueDate;
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
     /**
-     * 	When the job was actually enqueued for execution (after scheduler picks it up).
+     * When the notification should be executed.
      */
     private LocalDateTime scheduledAt;
 
@@ -43,9 +45,36 @@ public class Notification {
     /**
      * If cancelled, reason code/message (INACTIVE_USER, ERROR, etc).
      */
+    @Column(columnDefinition = "TEXT")
     private String cancelledReason;
 
-    @Type(JsonType.class)
-    @Column(columnDefinition = "json")
-    private String payload;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> payload;
+
+    public static Notification create(NotificationType notificationType, LocalDateTime scheduledAt, NotificationPayload payload) {
+        Notification notification = new Notification();
+        notification.setNotificationType(notificationType);
+        notification.setScheduledAt(scheduledAt);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> map = objectMapper.convertValue(
+                payload,
+                new TypeReference<Map<String, String>>() {}
+        );
+
+        notification.setPayload(map);
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setNotificationStatus(NotificationStatus.PENDING);
+        return notification;
+    }
+
+    public void markSend() {
+        this.sendAt = LocalDateTime.now();
+        this.notificationStatus = NotificationStatus.SENT;
+    }
+
+    public void markFailed(String reason) {
+        this.notificationStatus = NotificationStatus.FAILED;
+        this.cancelledReason = reason;
+    }
 }

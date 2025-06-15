@@ -15,6 +15,7 @@ import fr.adriencaubel.trainingplan.training.infrastructure.SessionEnrollmentRep
 import fr.adriencaubel.trainingplan.training.infrastructure.SessionRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.specifciation.SessionSpecification;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -23,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -38,7 +41,6 @@ public class SessionService {
     private final TrainingService trainingService;
     private final EmployeeRepository employeeRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final EmailNotificationPort emailNotificationPort;
     private final NotificationPort notificationPort;
     private final UserService userService;
     private final TrainerService trainerService;
@@ -53,7 +55,7 @@ public class SessionService {
     @Transactional
     public Session completeSession(String accessToken) {
         // Fetch training with proper error handling
-        Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollment(accessToken)
+        Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(accessToken)
                 .orElseThrow(() -> new EntityNotFoundException("Session not found with access token: " + accessToken));
 
         // Check if training can be completed
@@ -82,10 +84,18 @@ public class SessionService {
 
         session.enrollEmployee(employee);
 
-        // Publish domain event for email notification
-        eventPublisher.publishEvent(new EmployeeSubscribedEvent(session, employee));
+        Session toReturn = sessionRepository.saveAndFlush(session);
 
-        return sessionRepository.save(session);
+        SessionEnrollment persisted = toReturn.getSessionEnrollments().stream()
+                .filter(e -> e.getEmployee().getId().equals(employeeId))
+                .filter(e -> e.getId() != null)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Enrollment wasn’t saved"));
+
+        // Publish domain event for email notification
+        eventPublisher.publishEvent(new EmployeeSubscribedEvent(persisted));
+
+        return toReturn;
     }
 
     @Transactional
@@ -106,26 +116,25 @@ public class SessionService {
         return sessionRepository.findAll(specification, pageable);
     }
 
-    @EventListener
-    public void handleEmployeeSubscribedEvent(EmployeeSubscribedEvent event) {
-        emailNotificationPort.sendTrainingSubscriptionEmail(
-                event.getEmployee(),
-                event.getSession()
-        );
+    public Session findByTrainerAccessToken(@NotNull String trainerAccessToken) {
+        return sessionRepository.findByTrainerAccessToken(trainerAccessToken).orElseThrow(() -> new EntityNotFoundException("Session not found with access token: " + trainerAccessToken));
+    }
 
-        notificationPort.sendNotification(event.getEmployee());
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleEmployeeSubscribedEvent(EmployeeSubscribedEvent event) {
+        notificationPort.sendSubscribeNotification(event.getSessionEnrollment());
     }
 
     @EventListener
     public void handleSessionCompletedEvent(SessionCompletedEvent event) {
         // Envoyer un mail à tous les participants
-        for (SessionEnrollment enrollment : event.getSessionEnrollments()) {
+        /*for (SessionEnrollment enrollment : event.getSessionEnrollments()) {
             emailNotificationPort.sendFeedbackEmail(
                     enrollment.getEmployee(),
                     enrollment.getSession(),
                     enrollment.getFeedback().getFeedbackToken()
             );
-        }
+        }*/
     }
 
     public List<Session> getSessionByMonth(int month, int year) {
@@ -214,7 +223,8 @@ public class SessionService {
     }
 
     public Session getSessionByAccessToken(String accessToken) {
-        Session session = sessionRepository.findByEmployeeAccessTokenWithSessionEnrollment(accessToken).orElseThrow(() -> new DomainException("Session not found: " + accessToken));
+        Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(accessToken).orElseThrow(() -> new DomainException("Session not found: " + accessToken));
         return session;
     }
+
 }

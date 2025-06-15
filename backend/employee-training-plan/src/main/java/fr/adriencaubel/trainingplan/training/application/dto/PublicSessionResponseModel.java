@@ -21,6 +21,7 @@ public class PublicSessionResponseModel {
     private String employeeAccessToken;
     private TrainingMini training;
     private List<PublicSessionEnrollmentResponseModel> sessionsEnrollment;
+    private List<PublicSlotSignatureResponseModel> slotsSignature;
 
     public static PublicSessionResponseModel toDto(Session session) {
         PublicSessionResponseModel sessionResponseModel = new PublicSessionResponseModel();
@@ -32,6 +33,7 @@ public class PublicSessionResponseModel {
         sessionResponseModel.setEmployeeAccessToken(session.getEmployeeAccessToken());
         sessionResponseModel.setTraining(new TrainingMini(session.getTraining().getId(), session.getTraining().getTitle()));
         sessionResponseModel.setSessionsEnrollment(session.getSessionEnrollments().stream().map(PublicSessionEnrollmentResponseModel::toDto).collect(Collectors.toList()));
+        sessionResponseModel.setSlotsSignature(session.getSlotSignatures().stream().map(PublicSlotSignatureResponseModel::toDto).collect(Collectors.toList()));
         return sessionResponseModel;
     }
 

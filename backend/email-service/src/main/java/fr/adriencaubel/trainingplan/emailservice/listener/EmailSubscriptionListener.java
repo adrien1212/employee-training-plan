@@ -10,6 +10,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import javax.management.Notification;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -17,15 +19,13 @@ public class EmailSubscriptionListener {
 
     private final EmailService emailService;
 
-    @RabbitListener(queues = "${rabbitmq.queue.subscription}")
-    public void handleEmailSubscription(String data) {
+    @RabbitListener(queues = "${rabbitmq.queue.email}")
+    public void handleEmailSubscription(EmailMessageDto emailMessage) {
         try {
-            log.info("Received email message: {}", data);
-
-            EmailMessageDto emailMessage = new ObjectMapper().readValue(data, EmailMessageDto.class);
+            log.info("Received email message: {}", emailMessage);
             emailService.sendEmail(emailMessage);
         } catch (Exception e) {
-            log.error("Error processing email message: {}", data, e);
+            log.error("Error processing email message: {}", emailMessage, e);
         }
     }
 }

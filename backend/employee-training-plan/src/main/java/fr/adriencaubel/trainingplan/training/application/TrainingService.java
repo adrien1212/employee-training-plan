@@ -68,7 +68,7 @@ public class TrainingService {
         return trainingRepository.findNotEnrolledByEmployeeAndStatus(employee.getDepartment(), employee, TrainingStatus.valueOf(status));
     }
 
-    @PreAuthorize("@trainingSecurityEvaluator.canAccessTraining(#trainingId)")
+    //@PreAuthorize("@trainingSecurityEvaluator.canAccessTraining(#trainingId)")
     public Training getTrainingById(Long trainingId) {
         return trainingRepository.findByIdWithDepartments(trainingId).orElseThrow(() -> new EntityNotFoundException("Training not found with id: " + trainingId));
     }
@@ -87,7 +87,7 @@ public class TrainingService {
 
     // @Transactional permet d'éviter LazyInitializeException car on garde la transaction ouverte sur toute la méthode (en plus du fait detre transactionnelle)
     @Transactional
-    @PreAuthorize("@trainingSecurityEvaluator.canAccessTraining(#trainingId) && @departmentSecurityEvaluator.canAccessDepartment(#departmentIdRequestModel.departmentId)")
+    //@PreAuthorize("@trainingSecurityEvaluator.canAccessTraining(#trainingId) && @departmentSecurityEvaluator.canAccessDepartment(#departmentIdRequestModel.departmentId)")
     public Training addDepartmentToTraining(Long trainingId, DepartmentIdRequestModel departmentIdRequestModel) {
         Training training = getTrainingById(trainingId);
         Department department = departmentService.findById(departmentIdRequestModel.getDepartmentId());

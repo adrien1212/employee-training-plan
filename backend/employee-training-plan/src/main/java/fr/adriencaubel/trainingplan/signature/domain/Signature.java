@@ -26,4 +26,14 @@ public class Signature implements Serializable {
 
     @ManyToOne
     private SlotSignature slotSignature;
+
+    public Signature() {
+    }
+
+    public Signature(SlotSignature slotSignature, SessionEnrollment sessionEnrollment, String signature) {
+        this.signature = signature;
+        this.slotSignature = slotSignature;
+        this.sessionEnrollment = sessionEnrollment;
+        this.signatureDate = LocalDateTime.now();
+    }
 }

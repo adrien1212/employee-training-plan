@@ -1,60 +1,90 @@
-import './App.css'
-import { Route, Routes } from 'react-router-dom';
-import CompanyPage from './pages/CompanyPage';
-import DepartmentPage from './pages/DepartmentPage';
-import EmployeePage from './pages/EmployeePage';
-import Layout from './components/Layout';
-import EmployeeListPage from './pages/EmployeeListPage';
-import TrainingPage from './pages/TrainingPage';
-import SessionPage from './pages/SessionPage';
-import TrainingListPage from './pages/TrainingListPage';
-import ListSessionPage from './pages/ListSessionPage';
-import TrainingDetailPage from './pages/TrainingDetailPage';
-import DepartmentListPage from './pages/DepartmentListPage';
-import PrivateRoutes from './components/PrivateRoute';
-import EmployeeDetail from './components/EmployeeDetail';
-import DashboardPage from './pages/DashboardPage';
-import SessionEmployeePage from './pages/SessionEmployeePage';
-import DepartmentDetail from './components/DepartmentDetail';
-import CreateDepartmentPage from './pages/CreateDepartmentPage';
-import SessionDetailPage from './pages/SessionDetailPage';
-import FeedbackPage from './pages/FeedbackPage';
-import SessionCompletePage from './pages/SessionComplexePage';
-import TrainingStatisticsPage from './pages/TrainingStatisticsPage';
+
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Departments from "./pages/Departments";
+import Employees from "./pages/Employees";
+import Trainings from "./pages/Trainings";
+import Sessions from "./pages/Sessions";
+import NotFound from "./pages/NotFound";
+import PrivateRoutes from "./services/PrivateRoute";
+import TrainingDetail from "./pages/TrainingDetail";
+import DepartmentDetail from "./pages/DepartmentDetail";
+import Statistics from "./pages/Statistics";
+import Feedbacks from "./pages/Feedbacks";
+import GiveFeedback from "./pages/GiveFeedback";
+import EmployeeDetail from "./pages/EmployeeDetail";
+import AddEmployeeToSession from "./pages/AddEmployeeToSession";
+import SessionDetailPage from "./pages/SessionDetailPage";
+import SessionSignature from "./pages/public/SessionSignature";
+import TrainerSpace from "./pages/TrainerSpace";
+import StudentSpace from "./pages/StudentSpace";
+import TrainersManagement from "./pages/Trainers";
+import Trainers from "./pages/Trainers";
+import BudgetManagement from "./pages/BudgetManagement";
+import NotificationsManagement from "./pages/NotificationsManagement";
+import TrainerDetail from "./pages/TrainerDetail";
+import Planning from "./pages/Planning";
+import Certificates from "./pages/Certificates";
+import Reports from "./pages/Reports";
+import Billing from "./pages/Billings";
+import Support from "./pages/Support";
+import SlotSessionSignature from "./pages/public/SlotSessionSignature";
+import SessionSignatureMatrix from "./pages/SessionSignatureMatrix";
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+
+          {/* Public Routes */}
+
+          {/* Private Routes */}
+          <Route element={<PrivateRoutes />}>
+            <Route path="/" element={<Index />} />
+            <Route path="/planning" element={<Planning />} />
+            <Route path="/departments" element={<Departments />} />
+            <Route path="/departments/:id" element={<DepartmentDetail />} />
+            <Route path="/employees" element={<Employees />} />
+            <Route path="/employees/:id" element={<EmployeeDetail />} />
+            <Route path="/trainers" element={<Trainers />} />
+            <Route path="/trainers/:id" element={<TrainerDetail />} />
+            <Route path="/add-employee-session" element={<AddEmployeeToSession />} />
+            <Route path="/trainings" element={<Trainings />} />
+            <Route path="/trainings/:id" element={<TrainingDetail />} />
+            <Route path="/sessions" element={<Sessions />} />
+            <Route path="/sessions/:id" element={<SessionDetailPage />} />
+            <Route path="/feedbacks" element={<Feedbacks />} />
+            <Route path="/notifications" element={<NotificationsManagement />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/budget" element={<BudgetManagement />} />
+            <Route path="/give-feedback" element={<GiveFeedback />} />
+            <Route path="/espace-formateur/:trainingAccessToken" element={<TrainerSpace />} />
+            <Route path="/espace-etudiants" element={<StudentSpace />} />
+            <Route path="/certificates" element={<Certificates />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/billing" element={<Billing />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/signatures" element={<SessionSignatureMatrix />} />
 
 
-function App() {
-  return (
-    <Layout>
-    <Routes>
+            <Route path="/public/signature/:trainerAccessToken" element={<SessionSignature />} />
+            <Route path="/public/slot/:slotAccessToken" element={<SlotSessionSignature />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
-      {/* Public Routes */}
-      <Route path="/" element={<CompanyPage />} />
-
-      {/* Private Routes */}
-      <Route element={<PrivateRoutes />}>
-        <Route path="/departments" element={<DepartmentListPage />} />
-        <Route path="/departments/:id" element={<DepartmentPage />} />
-        <Route path="/departments/new" element={<CreateDepartmentPage />} />
-        <Route path="/departments/:id" element={<DepartmentDetail />} />
-        <Route path="/employees/new" element={<EmployeePage />} />
-        <Route path="/employees" element={<EmployeeListPage />} />
-        <Route path="/employees/:id" element={<EmployeeDetail />} />
-        <Route path="/trainings/new" element={<TrainingPage />} />
-        <Route path="/trainings" element={<TrainingListPage />} />
-        <Route path="/trainings/:trainingId/sessions/new" element={<SessionPage />} />
-        <Route path="/trainings/:trainingId/employee/new" element={<SessionEmployeePage />} />
-        <Route path="/trainings/:id" element={<TrainingDetailPage />} />
-        <Route path="/trainings/:id/statistics" element={<TrainingStatisticsPage />} />
-        <Route path="/sessions" element={<ListSessionPage />} />
-        <Route path="/sessions/:id" element={<SessionDetailPage />} />
-        <Route path="/sessions/complete" element={<SessionCompletePage />} />
-        <Route path="/feedbacks" element={<FeedbackPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-      </Route>
-
-    </Routes>
-  </Layout>
-  );
-}
-export default App
+export default App;

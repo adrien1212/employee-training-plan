@@ -19,8 +19,8 @@ import java.util.List;
 public class SessionEnrollmentService {
     private final SessionEnrollmentRepository sessionEnrollmentRepository;
 
-    public Page<SessionEnrollment> findAllByTrainingIdOrEmployeeId(Long trainingId, Long employeeId, Long sessionId, SessionStatus sessionStatus, Boolean completed, Pageable pageable) {
-        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(trainingId, employeeId, sessionId, sessionStatus, completed, null, null);
+    public Page<SessionEnrollment> findAllByTrainingIdOrEmployeeId(Long trainingId, Long employeeId, Long sessionId, SessionStatus sessionStatus, Boolean isFeedbackGiven, Pageable pageable) {
+        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(trainingId, employeeId, sessionId, sessionStatus, isFeedbackGiven, null, null);
         return sessionEnrollmentRepository.findAll(specification, pageable);
     }
 

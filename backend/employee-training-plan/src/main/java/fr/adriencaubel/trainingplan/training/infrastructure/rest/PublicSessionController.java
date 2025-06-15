@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class PublicSessionController {
     private final SessionService sessionService;
 
-    @GetMapping("/{employeeAccessToken}")
-    public ResponseEntity<PublicSessionResponseModel> getSessionById(@PathVariable String employeeAccessToken) {
-        Session session = sessionService.getSessionByAccessToken(employeeAccessToken);
+    @GetMapping("/{trainerAccessToken}")
+    public ResponseEntity<PublicSessionResponseModel> getSessionById(@PathVariable String trainerAccessToken) {
+        Session session = sessionService.getSessionByAccessToken(trainerAccessToken);
         return ResponseEntity.ok(PublicSessionResponseModel.toDto(session));
     }
 }

@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -84,7 +85,7 @@ public class DashboardService {
 
     public BetterSessionStatisticsData createStatisticBySession(Long sessionId) {
         Session session = sessionService.findBySessionIdWithEnrollments(sessionId);
-        List<SessionEnrollment> sessionEnrollments = session.getSessionEnrollments();
+        Set<SessionEnrollment> sessionEnrollments = session.getSessionEnrollments();
 
         BetterSessionStatisticsData betterSessionStatisticsData = new BetterSessionStatisticsData();
         betterSessionStatisticsData.setStatus(session.getLastStatus());

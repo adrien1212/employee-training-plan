@@ -1,21 +1,22 @@
 package fr.adriencaubel.trainingplan.signature.infrastructure;
 
 import fr.adriencaubel.trainingplan.signature.application.SignatureService;
-import fr.adriencaubel.trainingplan.signature.application.SlotManagementService;
+import fr.adriencaubel.trainingplan.signature.domain.Signature;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/public/signature")
+@RequestMapping("/v1/public/signatures")
 @RequiredArgsConstructor
 public class PublicSignatureController {
 
     private final SignatureService signatureService;
-    private final SlotManagementService slotManagementService;
 
-/*    @PostMapping
+    @PostMapping
     public void postSignature(@RequestBody SignatureRequestModel signatureRequestModel) {
         Signature signature = signatureService.signer(signatureRequestModel);
-    }*/
+    }
 }

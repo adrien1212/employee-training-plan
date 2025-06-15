@@ -2,6 +2,7 @@ package fr.adriencaubel.trainingplan.training.infrastructure;
 
 import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.training.domain.Session;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,8 @@ public interface SessionRepository extends JpaRepository<Session, Long>, JpaSpec
     @Query("SELECT COUNT(s) FROM Session s WHERE s.training.company = :company")
     int countByCompany(Company company);
 
-    @Query("SELECT s FROM Session s LEFT JOIN FETCH s.sessionEnrollments WHERE s.trainerAccessToken = :accessToken")
-    Optional<Session> findByTrainerAccessTokenWithSessionEnrollment(String accessToken);
+    @Query("SELECT s FROM Session s LEFT JOIN FETCH s.sessionEnrollments LEFT JOIN FETCH s.slotSignatures WHERE s.trainerAccessToken = :accessToken")
+    Optional<Session> findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(String accessToken);
+
+    Optional<Session> findByTrainerAccessToken(@NotNull String trainerAccessToken);
 }

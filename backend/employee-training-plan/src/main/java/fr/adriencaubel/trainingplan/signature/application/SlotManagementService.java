@@ -171,8 +171,18 @@ public class SlotManagementService {
         return slotRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Slot not found"));
     }
 
+    public SlotSignature findBySlotAccessToken(String slotAccessToken) {
+        return slotRepository.findByToken(slotAccessToken).orElseThrow(() -> new IllegalArgumentException("Slot not found"));
+    }
+
     public SlotSignature ouvrirSignature(Long slotSignatureId) {
         SlotSignature slotSignature = findById(slotSignatureId);
+        slotSignature.ouvrirSignature();
+        return slotRepository.save(slotSignature);
+    }
+
+    public SlotSignature ouvrirSignature(String slotAccessToken) {
+        SlotSignature slotSignature = findBySlotAccessToken(slotAccessToken);
         slotSignature.ouvrirSignature();
         return slotRepository.save(slotSignature);
     }

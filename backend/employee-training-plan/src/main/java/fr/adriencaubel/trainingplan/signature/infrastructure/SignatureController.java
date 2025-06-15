@@ -30,6 +30,12 @@ public class SignatureController {
         return ResponseEntity.ok(models);
     }
 
+    @GetMapping("/is-signed")
+    public ResponseEntity<Boolean> isSigned(@RequestParam Long slotSignatureId, @RequestParam Long sessionEnrollmentId) {
+        boolean exist = signatureService.exist(slotSignatureId, sessionEnrollmentId);
+        return ResponseEntity.ok(exist);
+    }
+
     @GetMapping("/status/{sessionEnrollmentId}")
     public ResponseEntity<EnrollmentSignatureStatus> getStatusSignature(@PathVariable Long sessionEnrollmentId) {
         EnrollmentSignatureStatus enrollmentSignatureStatus = slotManagementService.getSignatureStatus(sessionEnrollmentId);

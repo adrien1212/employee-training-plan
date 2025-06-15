@@ -21,20 +21,18 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.exchange.commands}")
     private String commandsExchange;
 
-    @Value("${rabbitmq.exchange.exec}")
-    private String execExchange;
+    @Value("${rabbitmq.queues.session-enrollment}")
+    private String sessionEnrollmentQueue;
 
-    @Value("${rabbitmq.queue.commands}")
-    private String commandsQueue;
+    @Value("${rabbitmq.routing-keys.session-enrollment}")
+    private String sessionEnrollmentKey;
 
-    @Value("${rabbitmq.queue.exec}")
-    private String execQueue;
+    @Value("${rabbitmq.queues.trainer}")
+    private String trainerQueue;
 
-    @Value("${rabbitmq.routing.key.create}")
-    private String createRoutingKey;
+    @Value("${rabbitmq.routing-keys.trainer}")
+    private String trainerKey;
 
-    @Value("${rabbitmq.routing.key.exec}")
-    private String execRoutingKey;
 
     @Bean
     public TopicExchange commandsExchange() {
@@ -42,34 +40,29 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public TopicExchange execExchange() {
-        return new TopicExchange(execExchange);
+    public Queue sessionEnrollmentQueue() {
+        return QueueBuilder.durable(sessionEnrollmentQueue).build();
     }
 
     @Bean
-    public Queue commandsQueue() {
-        return QueueBuilder.durable(commandsQueue).build();
+    public Queue trainerQueue() {
+        return QueueBuilder.durable(trainerQueue).build();
     }
 
     @Bean
-    public Queue execQueue() {
-        return QueueBuilder.durable(execQueue).build();
-    }
-
-    @Bean
-    public Binding commandCreateBinding() {
+    public Binding sessionEnrollmentBinding() {
         return BindingBuilder
-                .bind(commandsQueue())
+                .bind(sessionEnrollmentQueue())
                 .to(commandsExchange())
-                .with(createRoutingKey);
+                .with(sessionEnrollmentKey);
     }
 
     @Bean
-    public Binding execBinding() {
+    public Binding trainerBinding() {
         return BindingBuilder
-                .bind(execQueue())
-                .to(execExchange())
-                .with(execRoutingKey);
+                .bind(trainerQueue())
+                .to(commandsExchange())
+                .with(trainerKey);
     }
 
     @Bean

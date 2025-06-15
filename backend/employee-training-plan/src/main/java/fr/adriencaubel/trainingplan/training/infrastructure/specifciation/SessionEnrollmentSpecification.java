@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class SessionEnrollmentSpecification {
-    public static Specification<SessionEnrollment> filter(Long trainingId, Long employeeId, Long sessionId, SessionStatus status, Boolean completed, LocalDate startDate, LocalDate endDate) {
+    public static Specification<SessionEnrollment> filter(Long trainingId, Long employeeId, Long sessionId, SessionStatus status, Boolean isFeedbackGiven, LocalDate startDate, LocalDate endDate) {
         Specification<SessionEnrollment> specification = Specification.where(null);
 
         if (trainingId != null) {
@@ -26,10 +26,6 @@ public class SessionEnrollmentSpecification {
             specification = specification.and(hasSession(sessionId));
         }
 
-        if (completed != null) {
-            specification = specification.and(isCompleted(completed));
-        }
-
         if (status != null) {
             specification = specification.and(hasStatus(status));
         }
@@ -38,12 +34,11 @@ public class SessionEnrollmentSpecification {
             specification = specification.and(hasSessionDateBetween(startDate, endDate));
         }
 
-        return specification;
-    }
+        if (isFeedbackGiven != null) {
+            specification = specification.and(isFeedbackGiven(isFeedbackGiven));
+        }
 
-    private static Specification<SessionEnrollment> isCompleted(Boolean completed) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("completed"), completed);
+        return specification;
     }
 
     public static Specification<SessionEnrollment> hasTraining(Long trainingId) {
@@ -59,6 +54,16 @@ public class SessionEnrollmentSpecification {
     public static Specification<SessionEnrollment> hasSession(Long sessionId) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("session").get("id"), sessionId);
+    }
+
+    public static Specification<SessionEnrollment> isFeedbackGiven(boolean isFeedbackGiven) {
+        return (root, query, cb) -> {
+            Path<?> feedbackRating = root.get("feedback").get("rating");
+            // if they want “feedback given” → id ≠ null; otherwise “not given” → id = null
+            return isFeedbackGiven
+                    ? cb.notEqual(feedbackRating, 0) // true → WHERE feedback.rating != 0
+                    : cb.equal(feedbackRating, 0);   // false → WHERE feedback.id == 0
+        };
     }
 
     public static Specification<SessionEnrollment> hasStatus(SessionStatus status) {

@@ -16,6 +16,7 @@ public class SessionEnrollmentResponseModel {
     private boolean hasFeedback;
     private FeedbackMini feedback;
     private boolean hasSigned;
+    private String sessionEnrollmentToken;
 
     public static SessionEnrollmentResponseModel toDto(SessionEnrollment sessionEnrollment) {
         SessionEnrollmentResponseModel sessionEnrollmentResponseModel = new SessionEnrollmentResponseModel();
@@ -25,6 +26,7 @@ public class SessionEnrollmentResponseModel {
         sessionEnrollmentResponseModel.setFeedbackToken(sessionEnrollment.getFeedback().getFeedbackToken());
         sessionEnrollmentResponseModel.setEmployee(EmployeeResponseModel.toDto(sessionEnrollment.getEmployee()));
         //sessionEnrollmentResponseModel.setHasSigned(sessionEnrollment.getSignature().getSignature() != null);
+        sessionEnrollmentResponseModel.setSessionEnrollmentToken(sessionEnrollment.getAccessToken());
         if (sessionEnrollment.getFeedback() != null) {
             sessionEnrollmentResponseModel.setFeedback(new FeedbackMini(sessionEnrollment.getFeedback().getId(), sessionEnrollment.getFeedback().getComment(), sessionEnrollment.getFeedback().getRating()));
         }

@@ -3,6 +3,7 @@ package fr.adriencaubel.trainingplan.training.domain;
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.signature.domain.ModeSignature;
+import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -29,7 +31,7 @@ public class Session {
     private String trainerAccessToken;
     private String employeeAccessToken;
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
-    private List<SessionEnrollment> sessionEnrollments;
+    private Set<SessionEnrollment> sessionEnrollments;
     @ManyToOne
     @JoinColumn(name = "training_id")
     private Training training;
@@ -40,6 +42,10 @@ public class Session {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
     private Trainer trainer;
+
+    @OneToMany(mappedBy = "session")
+    // because multiple bag with sessioNEnrollment when findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures
+    private Set<SlotSignature> slotSignatures;
 
     @Transient
     public SessionStatusHistory getLastStatusHistory() {
@@ -56,7 +62,7 @@ public class Session {
                 : null;
     }
 
-    public SessionEnrollment enrollEmployee(Employee employee) {
+    public void enrollEmployee(Employee employee) {
         if (!SessionStatus.NOT_STARTED.equals(getLastStatus())) {
             throw new DomainException("Cannot enroll in a " + getLastStatus() + " session");
         }
@@ -71,7 +77,6 @@ public class Session {
 
         SessionEnrollment enrollment = new SessionEnrollment(employee, this);
         sessionEnrollments.add(enrollment);
-        return enrollment;
     }
 
     public void cancelEnrollment(Employee employee) {

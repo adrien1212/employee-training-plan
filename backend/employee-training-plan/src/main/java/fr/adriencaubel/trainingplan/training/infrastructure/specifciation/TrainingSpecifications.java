@@ -36,7 +36,7 @@ public class TrainingSpecifications {
 
     public static Specification<Training> hasCompany(Long companyId) {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("departments").get("company").get("id"), companyId);
+                criteriaBuilder.equal(root.get("company").get("id"), companyId);
     }
 
     public static Specification<Training> hasStatus(TrainingStatus status) {

@@ -20,7 +20,7 @@ public class PublicSessionEnrollmentResponseModel {
     private LocalDate sessionEndDate;
     private SessionStatus sessionStatus;
     private boolean hasSigned;
-    private String signatureToken;
+    private String sessionEnrollmentToken;
 
     public static PublicSessionEnrollmentResponseModel toDto(SessionEnrollment sessionEnrollment) {
         PublicSessionEnrollmentResponseModel sessionResponseModel = new PublicSessionEnrollmentResponseModel();
@@ -34,7 +34,7 @@ public class PublicSessionEnrollmentResponseModel {
         sessionResponseModel.setSessionEndDate(sessionEnrollment.getSession().getEndDate());
         sessionResponseModel.setSessionStatus(sessionEnrollment.getSession().getLastStatus());
         //sessionResponseModel.setHasSigned(sessionEnrollment.getSignature().getSignature() != null);
-        //sessionResponseModel.setSignatureToken(sessionEnrollment.getSignature().getAccessToken());
+        sessionResponseModel.setSessionEnrollmentToken(sessionEnrollment.getAccessToken());
         return sessionResponseModel;
     }
 }

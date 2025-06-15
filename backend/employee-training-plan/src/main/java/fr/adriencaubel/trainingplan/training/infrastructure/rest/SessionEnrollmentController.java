@@ -21,16 +21,15 @@ public class SessionEnrollmentController {
     private final SessionService sessionService;
 
     // Soit le trainingId ou employeeID doit être présent
-    // TODO voir s'il n'est pas préférable d'avoir les salarié par session (au lieu que par training)
     @GetMapping
     public ResponseEntity<Page<SessionEnrollmentResponseModel>> getAll(
             @RequestParam(value = "trainingId", required = false) Long trainingId,
             @RequestParam(value = "employeeId", required = false) Long employeeId,
             @RequestParam(value = "sessionId", required = false) Long sessionId,
             @RequestParam(value = "sessionStatus", required = false) SessionStatus sessionStatus,
-            @RequestParam(value = "completed", required = false) Boolean completed,
+            @RequestParam(value = "isFeedbackGiven", required = false) Boolean isFeedbackGiven,
             Pageable pageable) {
-        Page<SessionEnrollment> sessionEnrollments = sessionEnrollmentService.findAllByTrainingIdOrEmployeeId(trainingId, employeeId, sessionId, sessionStatus, completed, pageable);
+        Page<SessionEnrollment> sessionEnrollments = sessionEnrollmentService.findAllByTrainingIdOrEmployeeId(trainingId, employeeId, sessionId, sessionStatus, isFeedbackGiven, pageable);
 
         if (!sessionEnrollments.hasContent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

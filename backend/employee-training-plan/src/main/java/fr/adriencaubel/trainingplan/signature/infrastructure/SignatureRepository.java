@@ -21,5 +21,7 @@ public interface SignatureRepository extends JpaRepository<Signature, Long>, Jpa
             """)
     List<Signature> findBySlotSignature_Session_Id(Long sessionId);
 
+    boolean existsBySlotSignatureIdAndSessionEnrollmentId(Long slotSignatureId, Long enrollmentId);
+
     boolean existsBySlotSignatureAndSessionEnrollment(SlotSignature slotSignature, SessionEnrollment enrollment);
 }

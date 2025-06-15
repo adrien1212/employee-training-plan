@@ -16,11 +16,11 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.exchange.email}")
     private String emailExchange;
 
-    @Value("${rabbitmq.queue.subscription}")
-    private String subscriptionQueue;
+    @Value("${rabbitmq.queue.email}")
+    private String emailQueue;
 
-    @Value("${rabbitmq.routing.subscription}")
-    private String subscriptionRoutingKey;
+    @Value("${rabbitmq.routing.key.email}")
+    private String emailRoutingKey;
 
     @Bean
     public TopicExchange emailExchange() {
@@ -28,16 +28,16 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue subscriptionQueue() {
-        return QueueBuilder.durable(subscriptionQueue).build();
+    public Queue emailQueue() {
+        return QueueBuilder.durable(emailQueue).build();
     }
 
     @Bean
     public Binding subscriptionBinding() {
         return BindingBuilder
-                .bind(subscriptionQueue())
+                .bind(emailQueue())
                 .to(emailExchange())
-                .with(subscriptionRoutingKey);
+                .with(emailRoutingKey);
     }
 
     @Bean

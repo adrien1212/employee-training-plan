@@ -1,10 +1,6 @@
 package fr.adriencaubel.trainingplan.common.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -16,15 +12,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class RabbitMQConfig {
-    
+
     @Value("${rabbitmq.exchange.commands}")
     private String commandsExchange;
 
-    @Value("${rabbitmq.queue.commands}")
-    private String commandsQueueName;
+    @Value("${rabbitmq.queues.session-enrollment}")
+    private String sessionEnrollmentQueue;
 
-    @Value("${rabbitmq.routing.key.create}")
-    private String commandsCreateRoutingKey;
+    @Value("${rabbitmq.routing-keys.session-enrollment}")
+    private String sessionEnrollmentKey;
+
+    @Value("${rabbitmq.queues.trainer}")
+    private String trainerQueue;
+
+    @Value("${rabbitmq.routing-keys.trainer}")
+    private String trainerKey;
 
     @Bean
     public MessageConverter jackson2JsonMessageConverter() {
@@ -39,21 +41,34 @@ public class RabbitMQConfig {
         return tpl;
     }
 
-    @Bean
+/*    @Bean
     public TopicExchange commandsExchange() {
         return new TopicExchange(commandsExchange);
     }
 
     @Bean
-    public Queue commandsQueueName() {
-        return new Queue(commandsQueueName);
+    public Queue sessionEnrollmentQueue() {
+        return QueueBuilder.durable(sessionEnrollmentQueue).build();
     }
 
     @Bean
-    public Binding commandsCreateRoutingKey() {
-        return BindingBuilder
-                .bind(commandsQueueName())
-                .to(commandsExchange())
-                .with(commandsCreateRoutingKey);
+    public Queue trainerQueue() {
+        return QueueBuilder.durable(trainerQueue).build();
     }
+
+    @Bean
+    public Binding sessionEnrollmentBinding() {
+        return BindingBuilder
+                .bind(sessionEnrollmentQueue())
+                .to(commandsExchange())
+                .with(sessionEnrollmentKey);
+    }
+
+    @Bean
+    public Binding trainerBinding() {
+        return BindingBuilder
+                .bind(trainerQueue())
+                .to(commandsExchange())
+                .with(trainerKey);
+    }*/
 }
