@@ -52,7 +52,6 @@ const App = () => (
           {/* Private Routes */}
           <Route element={<PrivateRoutes />}>
             <Route path="/" element={<Index />} />
-            <Route path="/planning" element={<Planning />} />
             <Route path="/departments" element={<Departments />} />
             <Route path="/departments/:id" element={<DepartmentDetail />} />
             <Route path="/employees" element={<Employees />} />

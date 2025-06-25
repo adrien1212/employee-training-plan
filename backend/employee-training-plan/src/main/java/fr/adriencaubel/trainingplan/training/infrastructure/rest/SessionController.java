@@ -30,6 +30,18 @@ public class SessionController {
         return ResponseEntity.ok(sessionResponseModels);
     }
 
+    /**
+     * @param date to get for exemple the session of today give now() date, to get session of specific date give a date
+     */
+    @GetMapping("/ofDay")
+    public ResponseEntity<Page<SessionResponseModel>> getTodaySessions(@RequestParam(value = "date") LocalDate date, @RequestParam(value = "trainingId", required = false) Long trainingId, @RequestParam(value = "trainerId", required = false) Long trainerId, @RequestParam(value = "sessionStatus", required = false) SessionStatus sessionStatus, Pageable pageable) {
+        Page<Session> sessions = sessionService.getSessionOfDay(date, trainingId, trainerId, sessionStatus, pageable);
+
+        Page<SessionResponseModel> sessionResponseModels = sessions.map(SessionResponseModel::toDto);
+
+        return ResponseEntity.ok(sessionResponseModels);
+    }
+
     @GetMapping("{id}")
     public ResponseEntity<SessionResponseModel> getSessionById(@PathVariable Long id) {
         Session session = sessionService.getSessionById(id);
@@ -75,5 +87,11 @@ public class SessionController {
         // Set the trainingId from the path variable to ensure consistency
         Session session = sessionService.completeSession(token);
         return ResponseEntity.ok(session);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countSessions(@RequestParam(name = "sessionStatus", required = false) SessionStatus sessionStatus) {
+        Long sessionNumber = sessionService.count(sessionStatus);
+        return ResponseEntity.ok(sessionNumber);
     }
 }

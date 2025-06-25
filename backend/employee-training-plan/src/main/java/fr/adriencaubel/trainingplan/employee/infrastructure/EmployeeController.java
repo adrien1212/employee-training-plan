@@ -5,15 +5,11 @@ import fr.adriencaubel.trainingplan.employee.application.dto.EmployeeResponseMod
 import fr.adriencaubel.trainingplan.employee.application.service.EmployeeService;
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.training.application.TrainingService;
-import fr.adriencaubel.trainingplan.training.application.dto.TrainingResponseModel;
-import fr.adriencaubel.trainingplan.training.domain.Training;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("v1/employees")
@@ -42,23 +38,16 @@ public class EmployeeController {
         return ResponseEntity.ok(employeePage);
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> countEmployees() {
+        Long employeesNumber = employeeService.count();
+        return ResponseEntity.ok(employeesNumber);
+    }
+
     @GetMapping("{id}")
     public EmployeeResponseModel getEmployee(@PathVariable Long id) {
         Employee employee = employeeService.getEmployeeById(id);
         return EmployeeResponseModel.toDto(employee);
-    }
-
-    @GetMapping("{id}/training")
-    public List<TrainingResponseModel> getEmployeeTraining(@PathVariable Long id, @RequestParam(required = false) String status) {
-        List<Training> trainings = trainingService.getEnrolledTrainingsForEmployeeId(id, status);
-        return trainings.stream().map(TrainingResponseModel::toDto).toList();
-    }
-
-    // Récupérer tous les training au quel l'employee n'a pas encore participé
-    @GetMapping("{id}/training/no-enrolled")
-    public List<TrainingResponseModel> getNoYetEnrolledEmployeeTraining(@PathVariable Long id, @RequestParam(required = false) String status) {
-        List<Training> trainings = trainingService.getNotEnrolledByEmployeeAndStatus(id, status);
-        return trainings.stream().map(TrainingResponseModel::toDto).toList();
     }
 
     @PostMapping

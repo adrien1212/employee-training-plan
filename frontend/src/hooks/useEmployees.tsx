@@ -77,6 +77,20 @@ export function useEmployee(id?: number, enabled: boolean = true) {
 }
 
 /**
+ * COUNT
+ */
+export function useCountEmployees(enabled: boolean = true) {
+    return useQuery<number, Error>(
+        employeeKey(),
+        () => api.get<number>(`/v1/employees/count`).then(res => res.data),
+        {
+            enabled: enabled,
+            staleTime: 0,
+        }
+    );
+}
+
+/**
  * CREATE: add a new employee
  */
 export function useCreateEmployee(options: UseEmployeesOptions = {}) {

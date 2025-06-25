@@ -2,6 +2,7 @@ package fr.adriencaubel.trainingplan.training.infrastructure;
 
 import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.training.domain.Session;
+import fr.adriencaubel.trainingplan.training.domain.SessionStatus;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -32,4 +33,19 @@ public interface SessionRepository extends JpaRepository<Session, Long>, JpaSpec
     Optional<Session> findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(String accessToken);
 
     Optional<Session> findByTrainerAccessToken(@NotNull String trainerAccessToken);
+
+
+    @Query("""
+            SELECT COUNT(s)
+              FROM Session s
+              JOIN SessionStatusHistory h
+                ON h.session = s
+             WHERE h.changedAt = (
+                     SELECT MAX(h2.changedAt)
+                       FROM SessionStatusHistory h2
+                      WHERE h2.session = s
+                   )
+               AND (:sessionStatus IS NULL OR h.status = :sessionStatus)
+            """)
+    Long countByStatus(SessionStatus sessionStatus);
 }

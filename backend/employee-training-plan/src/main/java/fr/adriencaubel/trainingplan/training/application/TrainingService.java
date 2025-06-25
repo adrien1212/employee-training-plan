@@ -139,4 +139,7 @@ public class TrainingService {
         return trainingDocumentRepository.findByTrainingId(trainingId);
     }
 
+    public Long count(TrainingStatus trainingStatus) {
+        return trainingRepository.countByStatus(trainingStatus);
+    }
 }

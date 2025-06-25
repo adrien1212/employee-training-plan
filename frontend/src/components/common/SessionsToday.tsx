@@ -6,36 +6,26 @@ import { SessionDetail } from "@/types/SessionDetail";
 import api from "@/services/api";
 import { PageResponse } from "@/types/PageResponse";
 import { Badge } from '../ui/badge';
+import { useSessions, useTodaySessions } from '@/hooks/useSessions';
 
 
 interface SessionTodayProps {
-    trainingId?: string;
+    trainingId?: number;
 }
 
 const SessionsToday: React.FC<SessionTodayProps> = ({ trainingId }) => {
-    const [sessionsToday, setSessionsToday] = useState<SessionDetail[]>([]);
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
 
-    useEffect(() => {
-        const fetchAndFilter = async () => {
-            try {
-                const today = new Date();
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                const todayStr = `${yyyy}-${mm}-${dd}`;
-                const res = await api.get<PageResponse<SessionDetail>>(
-                    '/v1/sessions',
-                    { params: { trainingId, startDate: todayStr, endDate: todayStr, page: 0, size: 100 } }
-                );
 
-                setSessionsToday(res.data.content);
-            } catch (err) {
-                console.error('Error fetching sessions', err);
-            }
-        };
-
-        fetchAndFilter();
-    }, [trainingId]);
+    const {
+        data: sessionsToday,
+        isLoading,
+        isError
+    } = useTodaySessions({ ofDay: todayStr, trainingId: trainingId })
 
     const getStatusBadge = (status: SessionDetail['status']) => {
         const variants = {
@@ -55,13 +45,21 @@ const SessionsToday: React.FC<SessionTodayProps> = ({ trainingId }) => {
         );
     };
 
+    if (isLoading) {
+        return <div>Chargement</div>
+    }
+
+    if (isError) {
+        return <div>Error</div>
+    }
+
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Sessions du jour</CardTitle>
             </CardHeader>
             <CardContent>
-                {sessionsToday.length > 0 ? (
+                {sessionsToday && sessionsToday.content.length > 0 ? (
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -72,7 +70,7 @@ const SessionsToday: React.FC<SessionTodayProps> = ({ trainingId }) => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {sessionsToday.map(session => (
+                            {sessionsToday.content.map(session => (
                                 <TableRow key={session.id}>
                                     <TableCell>{session.training.title}</TableCell>
                                     <TableCell>{session.startDate}</TableCell>

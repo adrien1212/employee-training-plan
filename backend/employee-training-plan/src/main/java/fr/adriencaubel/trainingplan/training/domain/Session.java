@@ -1,11 +1,13 @@
 package fr.adriencaubel.trainingplan.training.domain;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.signature.domain.ModeSignature;
 import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -22,6 +24,9 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ManyToOne
+    @NonNull
+    private Company company;
     private LocalDate startDate;
     private LocalDate endDate;
     private String location;

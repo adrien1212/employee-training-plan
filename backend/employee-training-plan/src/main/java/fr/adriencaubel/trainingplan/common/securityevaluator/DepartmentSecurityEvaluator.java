@@ -30,4 +30,9 @@ public class DepartmentSecurityEvaluator {
         }
         return true;
     }
+
+    public boolean hasAccess(Long departmentId) {
+        return departmentService.existsByIdAndCompany(departmentId,
+                userService.getCompanyOfAuthenticatedUser());
+    }
 }

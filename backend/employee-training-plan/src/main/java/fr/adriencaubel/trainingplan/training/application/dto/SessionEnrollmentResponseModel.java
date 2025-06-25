@@ -21,7 +21,7 @@ public class SessionEnrollmentResponseModel {
     public static SessionEnrollmentResponseModel toDto(SessionEnrollment sessionEnrollment) {
         SessionEnrollmentResponseModel sessionEnrollmentResponseModel = new SessionEnrollmentResponseModel();
         sessionEnrollmentResponseModel.setId(sessionEnrollment.getId());
-        sessionEnrollmentResponseModel.setHasFeedback(sessionEnrollment.getFeedback().getRating() != 0);
+        sessionEnrollmentResponseModel.setHasFeedback(sessionEnrollment.getFeedback() != null && sessionEnrollment.getFeedback().getRating() != 0);
         sessionEnrollmentResponseModel.setSession(SessionResponseModel.toDto(sessionEnrollment.getSession()));
         sessionEnrollmentResponseModel.setFeedbackToken(sessionEnrollment.getFeedback().getFeedbackToken());
         sessionEnrollmentResponseModel.setEmployee(EmployeeResponseModel.toDto(sessionEnrollment.getEmployee()));

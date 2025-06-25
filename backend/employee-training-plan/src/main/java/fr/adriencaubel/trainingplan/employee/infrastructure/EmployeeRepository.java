@@ -47,4 +47,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
                  WHERE e.email = :email AND e.codeEmployee = :codeEmployee
             """)
     Employee findByEmailAndCodeEmployee(String email, String codeEmployee);
+
+    Long countByActive(boolean isActive);
 }

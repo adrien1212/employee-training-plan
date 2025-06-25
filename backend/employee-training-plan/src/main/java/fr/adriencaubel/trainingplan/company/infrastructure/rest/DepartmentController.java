@@ -32,4 +32,10 @@ public class DepartmentController {
         Department department = departmentService.findById(id);
         return ResponseEntity.ok(DepartmentResponseModel.toDto(department));
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countDepartments() {
+        Long departmentNumber = departmentService.count();
+        return ResponseEntity.ok(departmentNumber);
+    }
 }

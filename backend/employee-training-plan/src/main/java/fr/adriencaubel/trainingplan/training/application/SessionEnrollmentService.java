@@ -29,11 +29,6 @@ public class SessionEnrollmentService {
         return sessionEnrollmentRepository.findAll(specification);
     }
 
-    public List<SessionEnrollment> findAllByTrainingIdAndSessionDate(Long trainingId, LocalDate startDate, LocalDate endDate) {
-        Specification<SessionEnrollment> specification = SessionEnrollmentSpecification.filter(trainingId, null, null, null, null, startDate, endDate);
-        return sessionEnrollmentRepository.findAll(specification);
-    }
-
     public SessionEnrollment findByAccessToken(String accessToken) {
         return sessionEnrollmentRepository.findByAccessToken(accessToken).orElseThrow();
     }

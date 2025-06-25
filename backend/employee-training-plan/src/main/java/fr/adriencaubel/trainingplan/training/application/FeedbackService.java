@@ -6,7 +6,6 @@ import fr.adriencaubel.trainingplan.training.domain.Feedback;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import fr.adriencaubel.trainingplan.training.infrastructure.FeedbackRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.SessionEnrollmentRepository;
-import fr.adriencaubel.trainingplan.training.infrastructure.SessionRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.specifciation.FeedbackSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class FeedbackService {
-    private final SessionRepository sessionRepository;
-
     private final SessionEnrollmentRepository sessionEnrollmentRepository;
     private final FeedbackRepository feedbackRepository;
 

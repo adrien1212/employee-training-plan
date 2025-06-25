@@ -84,6 +84,13 @@ public class SessionSpecification {
 
     public static Specification<Session> isBefore(LocalDate endDate) {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.lessThanOrEqualTo(root.get("startDate"), endDate);
+                criteriaBuilder.lessThanOrEqualTo(root.get("endDate"), endDate);
+    }
+
+    public static Specification<Session> isToday(LocalDate ofTheDay) {
+        return (root, query, cb) -> cb.and(
+                cb.lessThanOrEqualTo(root.get("startDate"), ofTheDay),
+                cb.greaterThanOrEqualTo(root.get("endDate"), ofTheDay)
+        );
     }
 }

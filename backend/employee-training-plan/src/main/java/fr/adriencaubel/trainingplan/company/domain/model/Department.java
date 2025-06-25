@@ -36,6 +36,8 @@ public class Department {
             inverseJoinColumns = {@JoinColumn(name = "fk_training_id")})
     private Set<Training> trainings = new HashSet<>();
 
+    private boolean active = true;
+
     public Department() {
     }
 

@@ -18,6 +18,7 @@ import { SessionDetail } from "@/types/SessionDetail";
 import SessionsTabs from "@/components/common/SessionsTabs";
 import { SessionStatus } from "@/types/SessionStatus";
 import SessionsToday from "@/components/common/SessionsToday";
+import Planning from "@/components/common/Planning";
 
 interface Session {
   id: number;
@@ -51,7 +52,7 @@ const Sessions = () => {
 
           <div className="p-6">
             <div className="grid grid-cols-1  gap-6">
-              <SessionsToday />
+              <Planning />
               <SessionsTabs />
             </div>
           </div>

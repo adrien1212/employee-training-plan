@@ -11,6 +11,9 @@ interface Options {
     size?: number;
 }
 
+const trainingKey = (id?: number) => ['training', id] as const;
+
+
 function useTrainings({
     departmentId,
     employeeId,
@@ -39,6 +42,20 @@ function useTrainings({
         isLoading,
         error,
     };
+}
+
+/**
+ * COUNT
+ */
+export function useCountTrainings(enabled: boolean = true) {
+    return useQuery<number, Error>(
+        trainingKey(),
+        () => api.get<number>(`/v1/trainings/count`).then(res => res.data),
+        {
+            enabled: enabled,
+            staleTime: 0,
+        }
+    );
 }
 
 export default useTrainings

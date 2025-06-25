@@ -125,7 +125,7 @@ public class DashboardService {
 
         int trainingNumber = trainingService.getAllTraining(null, null, null, null).getNumber();
         int departmentNumber = departmentService.findAll(null).getNumber();
-        int sessionsNumber = sessionService.count();
+        int sessionsNumber = Math.toIntExact(sessionService.count(null));
         int employeeNumber = employeeService.getAllEmployees(null, null, null, null, null, null, Pageable.unpaged()).getSize();
 
         globalStatisticData.setTotalDepartments(departmentNumber);

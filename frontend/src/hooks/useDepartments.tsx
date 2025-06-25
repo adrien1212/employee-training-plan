@@ -47,3 +47,17 @@ export function useDepartment(id?: number) {
         { enabled: !!id }
     );
 }
+
+/**
+ * COUNT
+ */
+export function useCountDepartments(enabled: boolean = true) {
+    return useQuery<number, Error>(
+        departmentKey(),
+        () => api.get<number>(`/v1/departments/count`).then(res => res.data),
+        {
+            enabled: enabled,
+            staleTime: 0,
+        }
+    );
+}

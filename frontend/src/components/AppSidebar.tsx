@@ -40,11 +40,6 @@ const navigationItems = [
     icon: Home,
   },
   {
-    title: "Planning",
-    url: "/planning",
-    icon: Calendar,
-  },
-  {
     title: "Départements",
     url: "/departments",
     icon: Building2,

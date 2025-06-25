@@ -54,4 +54,12 @@ public interface TrainingRepository extends JpaRepository<Training, Long>, JpaSp
 
     @Query("SELECT a FROM Training a JOIN a.sessions s JOIN s.sessionEnrollments sE")
     Optional<Training> findByIdWithSessionEnrollment(Long trainingId);
+
+    @Query("""
+            SELECT COUNT(t)
+              FROM Training t
+             WHERE (:trainingStatus IS NULL
+                    OR t.status = :trainingStatus)
+            """)
+    Long countByStatus(TrainingStatus trainingStatus);
 }

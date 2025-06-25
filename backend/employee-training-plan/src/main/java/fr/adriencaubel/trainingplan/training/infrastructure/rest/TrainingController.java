@@ -129,4 +129,10 @@ public class TrainingController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countTrainings(@RequestParam(required = false) TrainingStatus status) {
+        Long trainingNumber = trainingService.count(status);
+        return ResponseEntity.ok(trainingNumber);
+    }
 }

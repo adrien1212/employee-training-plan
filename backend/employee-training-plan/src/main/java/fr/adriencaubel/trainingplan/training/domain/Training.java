@@ -67,8 +67,9 @@ public class Training {
         return token.substring(0, Math.min(token.length(), 30));
     }
 
-    public Session createSession(LocalDate startDate, LocalDate endDate, String location, Trainer trainer) {
+    public Session createSession(Company company, LocalDate startDate, LocalDate endDate, String location, Trainer trainer) {
         Session session = new Session();
+        session.setCompany(company);
         session.setStartDate(startDate);
         session.setEndDate(endDate);
         session.setLocation(location);

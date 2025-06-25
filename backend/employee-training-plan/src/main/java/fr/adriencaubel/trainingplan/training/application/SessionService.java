@@ -49,7 +49,8 @@ public class SessionService {
     public Session createSession(Long trainingId, CreateSessionRequestModel createSessionRequestModel) {
         Training training = trainingService.getTrainingById(trainingId);
         Trainer trainer = trainerService.getTrainerById(createSessionRequestModel.getTrainerId());
-        return training.createSession(createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate(), createSessionRequestModel.getLocation(), trainer);
+        Company company = userService.getCompanyOfAuthenticatedUser();
+        return training.createSession(company, createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate(), createSessionRequestModel.getLocation(), trainer);
     }
 
     @Transactional
@@ -113,6 +114,12 @@ public class SessionService {
 
     public Page<Session> getSessions(Long trainingId, Long trainerId, SessionStatus sessionStatus, LocalDate startDate, LocalDate endDate, Pageable pageable) {
         Specification<Session> specification = SessionSpecification.filter(trainingId, trainerId, sessionStatus, startDate, endDate);
+        return sessionRepository.findAll(specification, pageable);
+    }
+
+    public Page<Session> getSessionOfDay(LocalDate ofTheDay, Long trainingId, Long trainerId, SessionStatus sessionStatus, Pageable pageable) {
+        Specification<Session> specification = SessionSpecification.filter(trainingId, trainerId, sessionStatus, null, null);
+        specification = specification.and(SessionSpecification.isToday(ofTheDay));
         return sessionRepository.findAll(specification, pageable);
     }
 
@@ -181,10 +188,10 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-    public int count() {
-        Company company = userService.getCompanyOfAuthenticatedUser();
+    public Long count(SessionStatus sessionStatus) {
+        //Company company = userService.getCompanyOfAuthenticatedUser();
 
-        return (int) sessionRepository.countByCompany(company);
+        return sessionRepository.countByStatus(sessionStatus);
     }
 
     @Transactional
@@ -226,5 +233,6 @@ public class SessionService {
         Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(accessToken).orElseThrow(() -> new DomainException("Session not found: " + accessToken));
         return session;
     }
+
 
 }

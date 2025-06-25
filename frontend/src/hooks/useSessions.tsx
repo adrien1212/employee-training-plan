@@ -11,9 +11,15 @@ export interface UseSessionsOptions {
     trainingId?: number; // quand on crée une session
     trainerId?: number
     sessionStatus?: SessionStatus;
+    startDate?: string,
+    endDate?: string
     page?: number;
     size?: number;
     enabled?: boolean;
+}
+
+export type UseTodaySessionsOptions = UseSessionsOptions & {
+    ofDay: string;
 }
 
 /**
@@ -23,10 +29,22 @@ const sessionsKeys = ({
     trainingId,
     trainerId,
     sessionStatus,
+    startDate,
+    endDate,
     page = 0,
     size = 10,
 }: UseSessionsOptions) =>
-    ['sessions', trainingId, trainerId, sessionStatus, page, size] as const;
+    ['sessions', trainingId, trainerId, sessionStatus, startDate, endDate, page, size] as const;
+
+const todayKeys = ({
+    ofDay,
+    trainingId,
+    trainerId,
+    sessionStatus,
+    page = 0,
+    size = 10,
+}: UseTodaySessionsOptions) =>
+    ['sessions-today', trainingId, trainerId, sessionStatus, page, size] as const;
 
 /**
  * Query key for single session
@@ -41,18 +59,20 @@ export function useSessions(options: UseSessionsOptions = {}) {
         trainingId,
         trainerId,
         sessionStatus,
+        startDate,
+        endDate,
         page = 0,
         size = 10,
         enabled = true,
     } = options;
-    const key = sessionsKeys({ trainingId, trainerId, sessionStatus, page, size });
+    const key = sessionsKeys({ trainingId, trainerId, sessionStatus, startDate, endDate, page, size });
 
     return useQuery<PageResponse<SessionDetail>, Error>(
         key,
         () =>
             api
                 .get<PageResponse<SessionDetail>>('/v1/sessions', {
-                    params: { trainingId, sessionStatus, page, size },
+                    params: { trainingId, sessionStatus, startDate, endDate, page, size },
                 })
                 .then(res => res.data),
         {
@@ -134,6 +154,57 @@ export function useDeleteSession(options: UseSessionsOptions = {}) {
             onSuccess: () => {
                 qc.invalidateQueries(key);
             }
+        }
+    );
+}
+
+/**
+ * COUNT
+ */
+export function useCountSessions(sessionStatus?: SessionStatus, enabled: boolean = true) {
+    return useQuery<number, Error>(
+        sessionKey(),
+        () => api.get<number>(`/v1/sessions/count`, {
+            params: { sessionStatus }
+        }).then(res => res.data),
+
+        {
+            enabled: enabled,
+            staleTime: 0,
+        }
+    );
+}
+
+/**
+ * TODAY /
+ */
+export function useTodaySessions(options: UseTodaySessionsOptions) {
+    const {
+        ofDay,
+        trainingId,
+        trainerId,
+        sessionStatus,
+        page = 0,
+        size = 10,
+        enabled = true,
+    } = options;
+    const key = todayKeys({ ofDay, trainingId, trainerId, sessionStatus, page, size });
+
+    return useQuery<PageResponse<SessionDetail>, Error>(
+        key,
+        () =>
+            api
+                .get<PageResponse<SessionDetail>>('/v1/sessions/ofDay', {
+                    params: { date: ofDay, trainingId, sessionStatus, page, size },
+                })
+                .then(res => res.data),
+        {
+            enabled,
+            staleTime: 0,
+            cacheTime: 0,
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
         }
     );
 }

@@ -10,4 +10,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
     boolean existsByIdAndCompany(Long departementId, Company company);
 
     Page<Department> findAllByCompany(Company company, Pageable pageable);
+
+    Long countByCompanyAndActive(Company company, boolean isActive);
 }
