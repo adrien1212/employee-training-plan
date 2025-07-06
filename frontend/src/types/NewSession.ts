@@ -1,3 +1,4 @@
+import { ModeSignature } from "./ModeSignature";
 import { SessionStatus } from "./SessionStatus";
 
 export interface NewSession {
@@ -5,5 +6,6 @@ export interface NewSession {
     endDate: string,
     location: string,
     status: SessionStatus
+    modeSignature: ModeSignature
     trainerId: number
 }

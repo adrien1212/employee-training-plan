@@ -24,6 +24,7 @@ import { toast } from '@/components/ui/use-toast';
 import useTrainings from '@/hooks/useTrainings';
 import { Training } from '@/types/Training';
 import { Trainer } from '@/types/Trainer';
+import { ModeSignature } from '@/types/ModeSignature';
 
 interface SessionDialogProps {
     open: boolean;
@@ -39,6 +40,7 @@ type FormState = {
     startDate: string;
     endDate: string;
     location: string;
+    modeSignature: ModeSignature;
     status: SessionStatus;
 };
 
@@ -57,6 +59,7 @@ export default function SessionDialog({
         startDate: '',
         endDate: '',
         location: '',
+        modeSignature: ModeSignature.GLOBAL,
         status: SessionStatus.Draft,
     });
 
@@ -69,6 +72,7 @@ export default function SessionDialog({
                 startDate: session.startDate,
                 endDate: session.endDate,
                 location: session.location,
+                modeSignature: session.modeSignature,
                 status: session.status,
             });
         } else {
@@ -78,6 +82,7 @@ export default function SessionDialog({
                 startDate: '',
                 endDate: '',
                 location: '',
+                modeSignature: ModeSignature.GLOBAL,
                 status: SessionStatus.Draft,
             });
         }
@@ -109,6 +114,7 @@ export default function SessionDialog({
             endDate: formData.endDate,
             location: formData.location,
             status: formData.status,
+            modeSignature: formData.modeSignature,
             trainerId: formData.trainerId
         };
 
@@ -225,6 +231,31 @@ export default function SessionDialog({
                                 {Object.values(SessionStatus).map((stat) => (
                                     <SelectItem key={stat} value={stat}>
                                         {stat}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="status">Signature</Label>
+                        <Select
+                            value={formData.modeSignature}
+                            onValueChange={(val) =>
+                                setFormData({
+                                    ...formData,
+                                    modeSignature: val as ModeSignature,
+                                })
+                            }
+                            disabled={busy}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Sélectionner un mode de signature" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.values(ModeSignature).map((modeSignature) => (
+                                    <SelectItem key={modeSignature} value={modeSignature}>
+                                        {modeSignature}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

@@ -16,6 +16,8 @@ public interface SessionEnrollmentRepository extends JpaRepository<SessionEnroll
 
     List<SessionEnrollment> findBySessionId(Long sessionId);
 
+    Integer countBySessionId(Long sessionId);
+
     //@Query("SELECT sE FROM SessionEnrollment sE JOIN Session s where s.training.id = :trainingId and (:sessionStatus is NULL OR s.status = :sessionStatus)")
     //List<SessionEnrollment> findByTrainingIdAndSessionStatus(@Param("trainingId") Long trainingId, @Param("sessionStatus") SessionStatus sessionStatus);
 

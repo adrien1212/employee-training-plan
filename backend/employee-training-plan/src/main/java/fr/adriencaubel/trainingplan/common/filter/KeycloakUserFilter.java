@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,12 +32,12 @@ public class KeycloakUserFilter extends OncePerRequestFilter {
         // Get the authenticated principal
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated() && authentication instanceof OAuth2AuthenticationToken) {
-            OAuth2AuthenticationToken keycloakAuth = (OAuth2AuthenticationToken) authentication;
-            OidcUser principal = (OidcUser) keycloakAuth.getPrincipal();
+        if (authentication != null && authentication.isAuthenticated() && authentication instanceof JwtAuthenticationToken) {
+            JwtAuthenticationToken keycloakAuth = (JwtAuthenticationToken) authentication;
+            Jwt principal = (Jwt) keycloakAuth.getPrincipal();
 
             // Get Keycloak subject ID
-            String sub = principal.getAttributes().get("sub").toString();
+            String sub = principal.getClaimAsString("sub");
 
             // Check if user exists in our database
             if (!userRepository.existsBySub(sub)) {

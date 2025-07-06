@@ -54,7 +54,7 @@ export default function DotMatrix({ sessionId }) {
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="text-red-500">{error}</div>;
-    if (!slots.length || !enrollments.length) return <div>No data available</div>;
+    if (!slots.length || enrollments == null || !enrollments.length) return <div>No data available</div>;
 
     return (
         <Card>
@@ -110,8 +110,8 @@ export default function DotMatrix({ sessionId }) {
                                             <div key={key} className="w-24 flex justify-center">
                                                 <div
                                                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${signed
-                                                            ? 'bg-green-500 border-green-500'
-                                                            : 'bg-gray-200 border-gray-300'
+                                                        ? 'bg-green-500 border-green-500'
+                                                        : 'bg-gray-200 border-gray-300'
                                                         }`}
                                                     title={signed ? 'Signé' : 'Non signé'}
                                                 >

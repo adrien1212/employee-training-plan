@@ -50,7 +50,7 @@ public class SessionService {
         Training training = trainingService.getTrainingById(trainingId);
         Trainer trainer = trainerService.getTrainerById(createSessionRequestModel.getTrainerId());
         Company company = userService.getCompanyOfAuthenticatedUser();
-        return training.createSession(company, createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate(), createSessionRequestModel.getLocation(), trainer);
+        return training.createSession(company, createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate(), createSessionRequestModel.getLocation(), trainer, createSessionRequestModel.getModeSignature());
     }
 
     @Transactional
@@ -130,6 +130,16 @@ public class SessionService {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEmployeeSubscribedEvent(EmployeeSubscribedEvent event) {
         notificationPort.sendSubscribeNotification(event.getSessionEnrollment());
+
+        // si un NotificationParameter#SESSION_REMINDER existe alors créer des messages différés
+        /*List<NotificationParameter> notificationParameters = notificationParameterRepository.findAllByNotificationType(NotificationType.SESSION_REMINDER);
+        for (NotificationParameter notificationParameter : notificationParameters) {
+            SessionEnrollment sessionEnrollment = event.getSessionEnrollment();
+
+            LocalDate startDate = sessionEnrollment.getSession().getStartDate();
+            LocalDate notificationDate = startDate.minusDays(notificationParameter.getPeriod());
+            notificationPort.sendSessionReminderNotification(event.getSessionEnrollment(), LocalDateTime.of(notificationDate, LocalTime.MIDNIGHT));
+        }*/
     }
 
     @EventListener
@@ -182,6 +192,11 @@ public class SessionService {
         session.changeStatus(newSessionStatus);
 
         if (newSessionStatus == SessionStatus.ACTIVE) {
+            // Verifier qu'il y ait des sessionEnrollment
+            if (sessionEnrollmentRepository.countBySessionId(sessionId) == 0) {
+                throw new DomainException("Session " + sessionId + " has no active enrollments");
+            }
+
             slotManagementService.createSlotsFor(session);
         }
 

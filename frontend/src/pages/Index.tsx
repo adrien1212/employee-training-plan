@@ -14,10 +14,18 @@ import { useCountDepartments } from "@/hooks/useDepartments";
 import { useCountTrainings } from "@/hooks/useTrainings";
 import { useCountSessions } from "@/hooks/useSessions";
 import { SessionStatus } from "@/types/SessionStatus";
+import { useCurrentPlan } from "@/hooks/usePlan";
+import { Badge } from "@/components/ui/badge";
 
 const Index = () => {
   // 1) Set up state to hold the array of stat-objects
   const [recentSessions, setRecentSessions] = useState<SessionDetail[]>([]);
+
+  const {
+    data: plan,
+    isLoading: isPlanLoading,
+    isError: isPlanError
+  } = useCurrentPlan()
 
   const {
     data: employeeNumber,
@@ -59,11 +67,11 @@ const Index = () => {
     fetchRecentSessions();
   }, []);
 
-  if (isEmployeeNumberLoading || isDepartmentNumberLoading || isTrainingNumberLoading || isSessionNumberLoading) {
+  if (isEmployeeNumberLoading || isDepartmentNumberLoading || isTrainingNumberLoading || isSessionNumberLoading || isPlanLoading) {
     return <div>Chargement</div>
   }
 
-  if (isEmployeeNumberError || isDepartmentNumberError || isTrainingNumberError || isSessionNumberError) {
+  if (isEmployeeNumberError || isDepartmentNumberError || isTrainingNumberError || isSessionNumberError || isPlanError) {
     return <div>Error</div>
   }
 
@@ -79,6 +87,7 @@ const Index = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Gestion des Formations</h1>
                   <p className="text-gray-600">Tableau de bord principal</p>
+                  <Badge className="bg-blue-100 text-blue-800">{plan.name} - {employeeNumber}/{plan.maxEmployees}</Badge>
                 </div>
               </div>
             </div>

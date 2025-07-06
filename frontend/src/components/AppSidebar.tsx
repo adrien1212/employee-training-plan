@@ -64,11 +64,11 @@ const navigationItems = [
     url: "/feedbacks",
     icon: Calendar,
   },
-  {
-    title: "Certificats",
-    url: "/certificates",
-    icon: Euro,
-  },
+  /*  {
+      title: "Certificats",
+      url: "/certificates",
+      icon: Euro,
+    },*/
   {
     title: "Give feedback",
     url: "/give-feedback",

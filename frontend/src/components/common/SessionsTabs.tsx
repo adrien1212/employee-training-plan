@@ -142,61 +142,97 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
         : null;
 
     const renderTable = (list: SessionDetail[]) => (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Formation</TableHead>
-                    <TableHead>Début</TableHead>
-                    <TableHead>Fin</TableHead>
-                    <TableHead>Lieu</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {list.map(session => (
-                    <TableRow
-                        key={session.id}
-                        className="cursor-pointer hover:text-blue-600"
-                        onClick={() => navigate(`/sessions/${session.id}`)}
-                    >
-                        <TableCell>{session.training.title}</TableCell>
-                        <TableCell>{new Date(session.startDate).toLocaleDateString()}</TableCell>
-                        <TableCell>{session.endDate && new Date(session.endDate).toLocaleDateString()}</TableCell>
-                        <TableCell>{session.location}</TableCell>
-                        <TableCell>{getStatusBadge(session.status)}</TableCell>
-                        <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={e => { e.stopPropagation(); handlePlayClick(session); }}
-                                    disabled={busy}
-                                >
-                                    <Play className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={e => { e.stopPropagation(); openDialog(session); }}
-                                    disabled={busy}
-                                >
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={e => { e.stopPropagation(); handleDelete(session.id); }}
-                                    disabled={busy}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </TableCell>
+        <>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Formation</TableHead>
+                        <TableHead>Début</TableHead>
+                        <TableHead>Fin</TableHead>
+                        <TableHead>Lieu</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                </TableHeader>
+                <TableBody>
+                    {list.map(session => (
+                        <TableRow
+                            key={session.id}
+                            className="cursor-pointer hover:text-blue-600"
+                            onClick={() => navigate(`/sessions/${session.id}`)}
+                        >
+                            <TableCell>{session.training.title}</TableCell>
+                            <TableCell>{new Date(session.startDate).toLocaleDateString()}</TableCell>
+                            <TableCell>{session.endDate && new Date(session.endDate).toLocaleDateString()}</TableCell>
+                            <TableCell>{session.location}</TableCell>
+                            <TableCell>{getStatusBadge(session.status)}</TableCell>
+                            <TableCell className="text-right">
+                                <div className="flex justify-end gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={e => { e.stopPropagation(); handlePlayClick(session); }}
+                                        disabled={busy}
+                                    >
+                                        <Play className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={e => { e.stopPropagation(); openDialog(session); }}
+                                        disabled={busy}
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={e => { e.stopPropagation(); handleDelete(session.id); }}
+                                        disabled={busy}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+            {/* Pagination Controls */}
+            <div className="flex justify-between items-center py-4">
+                <div className="flex items-center space-x-2">
+                    <span>Afficher par page:</span>
+                    <select
+                        className="border rounded p-1"
+                        value={pageSize}
+                        onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }}
+                    >
+                        {[10, 20, 50].map(size => (
+                            <option key={size} value={size}>{size}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(p => Math.max(p - 1, 0))}
+                        disabled={page === 0}
+                    >
+                        Précédent
+                    </Button>
+                    <span>Page {page + 1} sur {totalPages}</span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(p => Math.min(p + 1, totalPages - 1))}
+                        disabled={page + 1 >= totalPages}
+                    >
+                        Suivant
+                    </Button>
+                </div>
+            </div>
+        </>
     );
 
     return (

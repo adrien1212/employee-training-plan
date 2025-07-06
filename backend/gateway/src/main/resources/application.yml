@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+    healthcheck:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.web: DEBUG
+
+spring:
+  application:
+    name: gateway
+  main:
+    allow-bean-definition-overriding: true
+
+  security:
+    oauth2:
+      resource-server:
+        jwt:
+          # Use Keycloak?s JWKS endpoint to validate tokens
+          issuer-uri: ${KEYCLOAK_ISSUER:http://host.docker.internal:7980/realms/employee-training-plan}
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: notification-service
+              uri: ${NOTIFICATION_SERVICE_URL:http://host.docker.internal:8010}
+              predicates:
+                - Path=/v1/notifications/**
+              filters:
+                - TokenRelay
+            - id: core-service
+              uri: ${CORE_SERVICE_URL:http://host.docker.internal:8081}
+              predicates:
+                - Path=/**
+              filters:
+                - TokenRelay

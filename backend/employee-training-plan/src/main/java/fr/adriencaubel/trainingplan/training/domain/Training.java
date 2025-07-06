@@ -2,6 +2,7 @@ package fr.adriencaubel.trainingplan.training.domain;
 
 import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.company.domain.model.Department;
+import fr.adriencaubel.trainingplan.signature.domain.ModeSignature;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -67,7 +68,7 @@ public class Training {
         return token.substring(0, Math.min(token.length(), 30));
     }
 
-    public Session createSession(Company company, LocalDate startDate, LocalDate endDate, String location, Trainer trainer) {
+    public Session createSession(Company company, LocalDate startDate, LocalDate endDate, String location, Trainer trainer, ModeSignature modeSignature) {
         Session session = new Session();
         session.setCompany(company);
         session.setStartDate(startDate);
@@ -77,6 +78,7 @@ public class Training {
         session.setEmployeeAccessToken(generateSecureToken());
         session.setTrainerAccessToken(generateSecureToken());
         session.setTrainer(trainer);
+        session.setModeSignature(modeSignature);
         sessions.add(session);
         session.setTraining(this);
         return session;

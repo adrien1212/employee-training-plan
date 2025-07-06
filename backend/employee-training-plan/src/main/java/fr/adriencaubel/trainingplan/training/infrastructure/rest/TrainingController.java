@@ -48,9 +48,10 @@ public class TrainingController {
     }
 
     @PostMapping("{trainingId}/session")
-    public ResponseEntity<Session> createSession(@PathVariable Long trainingId, @RequestBody CreateSessionRequestModel createSessionRequestModel) {
+    public ResponseEntity<SessionResponseModel> createSession(@PathVariable Long trainingId, @RequestBody CreateSessionRequestModel createSessionRequestModel) {
         Session session = sessionService.createSession(trainingId, createSessionRequestModel);
-        return new ResponseEntity<>(session, HttpStatus.CREATED);
+        SessionResponseModel sessionResponseModel = SessionResponseModel.toDto(session);
+        return new ResponseEntity<>(sessionResponseModel, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -97,18 +98,17 @@ public class TrainingController {
     }
 
     @GetMapping("/{trainingId}/documents")
-    public ResponseEntity<List<TrainingDocumentMetadata>> listTrainingDocuments(@PathVariable Long trainingId) {
-        List<TrainingDocument> documents = trainingService.getTrainingDocuments(trainingId);
+    public ResponseEntity<Page<TrainingDocumentMetadata>> listTrainingDocuments(@PathVariable Long trainingId, Pageable pageable) {
+        Page<TrainingDocument> documents = trainingService.getTrainingDocuments(trainingId, pageable);
 
-        List<TrainingDocumentMetadata> metadataList = documents.stream()
+        Page<TrainingDocumentMetadata> metadataList = documents
                 .map(doc -> new TrainingDocumentMetadata(
                         doc.getId(),
                         doc.getFilename(),
                         doc.getUploadedAt(),
                         doc.getUploadedByUserId(),
                         doc.getSize()
-                ))
-                .toList();
+                ));
 
         return ResponseEntity.ok(metadataList);
     }

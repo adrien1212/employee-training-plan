@@ -135,8 +135,8 @@ public class TrainingService {
         trainingDocumentRepository.delete(trainingDocument);
     }
 
-    public List<TrainingDocument> getTrainingDocuments(Long trainingId) {
-        return trainingDocumentRepository.findByTrainingId(trainingId);
+    public Page<TrainingDocument> getTrainingDocuments(Long trainingId, Pageable pageable) {
+        return trainingDocumentRepository.findByTrainingId(trainingId, pageable);
     }
 
     public Long count(TrainingStatus trainingStatus) {

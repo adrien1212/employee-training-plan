@@ -19,6 +19,7 @@ import {
     useDeleteEmployee,
 } from '@/hooks/useEmployees'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { useCurrentPlan, usePlan } from '@/hooks/usePlan'
 
 interface Props {
     departmentId?: number
@@ -31,6 +32,12 @@ export default function EmployeeTable({ departmentId, sessionId }: Props) {
     const [pageSize, setPageSize] = useState(10)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
+
+    const {
+        data: plan,
+        isLoading: isPlanLoading,
+        isError: isPlanError,
+    } = useCurrentPlan()
 
     // — READ
     const {
@@ -83,8 +90,8 @@ export default function EmployeeTable({ departmentId, sessionId }: Props) {
         }
     }
 
-    if (isEmpLoading) return <div className="p-4 text-center text-gray-500">Chargement…</div>
-    if (empError || deptError) return <div className="p-4 text-center text-red-500">Erreur de chargement</div>
+    if (isEmpLoading || isPlanLoading) return <div className="p-4 text-center text-gray-500">Chargement…</div>
+    if (empError || deptError || isPlanError) return <div className="p-4 text-center text-red-500">Erreur de chargement</div>
 
     return (
         <>
@@ -92,6 +99,7 @@ export default function EmployeeTable({ departmentId, sessionId }: Props) {
                 <CardHeader>
                     <CardTitle>Liste des employés</CardTitle>
                     <CardDescription>
+                        Vous pouvez ajouter jusqu'à {plan.maxEmployees}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

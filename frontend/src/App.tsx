@@ -27,7 +27,6 @@ import Trainers from "./pages/Trainers";
 import BudgetManagement from "./pages/BudgetManagement";
 import NotificationsManagement from "./pages/NotificationsManagement";
 import TrainerDetail from "./pages/TrainerDetail";
-import Planning from "./pages/Planning";
 import Certificates from "./pages/Certificates";
 import Reports from "./pages/Reports";
 import Billing from "./pages/Billings";

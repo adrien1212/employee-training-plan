@@ -7,7 +7,6 @@ import fr.adriencaubel.trainingplan.signature.domain.ModeSignature;
 import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -20,12 +19,13 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@Table
 public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @NonNull
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
     private Company company;
     private LocalDate startDate;
     private LocalDate endDate;

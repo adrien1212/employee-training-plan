@@ -23,7 +23,7 @@ public class UserService {
     }
 
 
-    private User findByJwt(Jwt jwt) {
+    public User findByJwt(Jwt jwt) {
         String keycloakId = jwt.getSubject();
 
         // Find user by Keycloak ID or create if not exists

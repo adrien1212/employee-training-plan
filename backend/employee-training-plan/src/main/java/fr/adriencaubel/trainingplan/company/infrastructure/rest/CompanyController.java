@@ -1,5 +1,6 @@
 package fr.adriencaubel.trainingplan.company.infrastructure.rest;
 
+import fr.adriencaubel.trainingplan.company.application.dto.CompanyResponseModel;
 import fr.adriencaubel.trainingplan.company.application.dto.CreateCompanyRequestModel;
 import fr.adriencaubel.trainingplan.company.application.dto.CreateDepartementRequestModel;
 import fr.adriencaubel.trainingplan.company.application.service.CompanyService;
@@ -13,10 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/companies")
@@ -29,11 +28,19 @@ public class CompanyController {
 
     private final UserService userService;
 
+    @GetMapping
+    public ResponseEntity<CompanyResponseModel> getCurrentCompany() {
+        Company company = companyService.getCurrentCompany();
+        CompanyResponseModel companyResponseModel = CompanyResponseModel.toDTO(company);
+        return new ResponseEntity<>(companyResponseModel, HttpStatus.OK);
+    }
+
     @PostMapping
-    public ResponseEntity<Company> createCompany(@RequestBody CreateCompanyRequestModel createCompanyRequestModel, @AuthenticationPrincipal OidcUser oidcUser) {
-        User user = userService.findByOidcUser(oidcUser);
+    public ResponseEntity<CompanyResponseModel> createCompany(@RequestBody CreateCompanyRequestModel createCompanyRequestModel, @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.findByJwt(jwt);
         Company company = companyService.createCompany(createCompanyRequestModel, user);
-        return new ResponseEntity<>(company, HttpStatus.CREATED);
+        CompanyResponseModel companyResponseModel = CompanyResponseModel.toDTO(company);
+        return new ResponseEntity<>(companyResponseModel, HttpStatus.CREATED);
     }
 
     @PostMapping("/departments")

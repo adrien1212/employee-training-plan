@@ -15,9 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
-    @Autowired
-    CustomCorsConfiguration customCorsConfiguration;
     @Autowired
     private KeycloakUserFilter keycloakUserFilter;
 
@@ -31,11 +28,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(c -> c.configurationSource(customCorsConfiguration))
                 // Configures authorization rules for different endpoints
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/").permitAll() // Allows public access to the root URL
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/**").permitAll() // http://localhost:8080/api/swagger-ui/index.html#/ et  http://localhost:8080/api/v3/api-docs
                         .requestMatchers("/menu").authenticated() // Requires authentication to access "/menu"
                         .anyRequest().authenticated() // Requires authentication for any other request
@@ -49,7 +46,10 @@ public class SecurityConfig {
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(Customizer.withDefaults())
-                );
+                )
+                .csrf(csrf -> csrf
+                        .disable()
+                )
         ;
 
         return http.build();

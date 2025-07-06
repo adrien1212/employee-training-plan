@@ -49,4 +49,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
     Employee findByEmailAndCodeEmployee(String email, String codeEmployee);
 
     Long countByActive(boolean isActive);
+
+    Integer countByCompany(Company company);
 }

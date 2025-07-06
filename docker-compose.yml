@@ -1,6 +1,56 @@
 version: '3.8'
 
 services:
+  discovery:
+    build:
+      context: ./backend/discovery
+      dockerfile: Dockerfile
+    container_name: discovery
+    restart: always
+    ports:
+      - "8761:8761"
+    networks:
+      - app-network
+  gateway:
+    build:
+      context: ./backend/gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery
+      - notification
+    environment:
+       - EUREKA_SERVER=http://discovery:8761/eureka
+       - KEYCLOAK_ISSUER=http://host.docker.internal:7980/realms/employee-training-plan
+       - NOTIFICATION_SERVICE_URL=http://host.docker.internal:8010
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+  notification:
+    build:
+      context: ./backend/ms-notification
+      dockerfile: Dockerfile
+    container_name: ms-notification
+    restart: always
+    depends_on:
+      - mysql
+      - rabbitmq
+      - discovery
+    ports:
+      - "8010:8010"
+    environment:
+       - EUREKA_SERVER=http://discovery:8761/eureka
+       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/db_training_plan_notification
+       - RABBIT_HOST=host.docker.internal
+       - KEYCLOACK_ISSUER=http://host.docker.internal:7980/realms/employee-training-plan
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
   backend:
     build:
       context: ./backend/employee-training-plan
@@ -10,6 +60,14 @@ services:
     depends_on:
       - mysql
       - rabbitmq
+      - discovery
+    environment:
+      - EUREKA_SERVER=http://discovery:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/db_training_plan_notification
+      - RABBIT_HOST=host.docker.internal
+      - KEYCLOACK_ISSUER=http://host.docker.internal:7980/realms/employee-training-plan
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - app-network
 
@@ -87,9 +145,12 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HTTP_PORT: 8080
-      KC_HOSTNAME_URL: http://localhost:8080
-      KC_HOSTNAME_ADMIN_URL: http://localhost:8080
-      KC_HOSTNAME_STRICT_BACKCHANNEL: true
+      KC_HOSTNAME: host.docker.internal           # Set the hostname
+      KC_HOSTNAME_PORT: 7980                      # Set the port
+      KC_HOSTNAME_URL: http://host.docker.internal:7980
+      KC_HOSTNAME_ADMIN_URL: http://localhost:7980
+      KC_HOSTNAME_STRICT: false                           # Allow flexible hostname handling
+      KC_HOSTNAME_STRICT_BACKCHANNEL: false  
       KC_HTTP_RELATIVE_PATH: /
       KC_HTTP_ENABLED: true
       KC_HEALTH_ENABLED: true
@@ -101,6 +162,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+    networks:
+      - app-network
 
 volumes:
   mysql-data:

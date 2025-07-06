@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
-    boolean existsByIdAndCompany(Long departementId, Company company);
+    boolean existsByIdAndCompany(Long departmentId, Company company);
 
     Page<Department> findAllByCompany(Company company, Pageable pageable);
 

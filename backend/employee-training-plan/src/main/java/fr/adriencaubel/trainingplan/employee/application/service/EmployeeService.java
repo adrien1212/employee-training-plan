@@ -8,6 +8,7 @@ import fr.adriencaubel.trainingplan.employee.application.dto.EmployeeRequestMode
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.employee.infrastructure.EmployeeRepository;
 import fr.adriencaubel.trainingplan.employee.infrastructure.EmployeeSpecification;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,9 +44,20 @@ public class EmployeeService {
         return employeeRepository.findAllByTrainingId(trainingId, isCompleted);
     }
 
+    public Integer countEmployees() {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+        return employeeRepository.countByCompany(company);
+    }
+
     @Transactional
     //@PreAuthorize("@departmentSecurityEvaluator.canAccessDepartment(#createEmployeeRequestModel.departmentId)")
     public Employee createEmployee(EmployeeRequestModel createEmployeeRequestModel) {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        if (countEmployees() > company.getPlan().getMaxEmployees()) {
+            throw new EntityExistsException("Employees max value");
+        }
+        
         Department department = departmentService.findById(createEmployeeRequestModel.getDepartmentId());
 
         Employee employee = Employee.create(createEmployeeRequestModel.getFirstName(), createEmployeeRequestModel.getLastName(), createEmployeeRequestModel.getEmail(), department);

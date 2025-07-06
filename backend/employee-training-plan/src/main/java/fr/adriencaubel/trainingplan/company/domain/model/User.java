@@ -17,7 +17,10 @@ public class User {
     @Column(unique = true)
     private String sub;
 
-    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @ManyToOne(cascade = CascadeType.ALL)
     private Company company;
 
     public User() {
@@ -29,6 +32,7 @@ public class User {
     }
 
     public enum Role {
-        ADMIN
+        OWNER,
+        STAFF_MEMBER
     }
 }

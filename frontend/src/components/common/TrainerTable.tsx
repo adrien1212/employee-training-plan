@@ -19,9 +19,9 @@ export default function TrainerTable() {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingTrainer, setEditingTrainer] = useState<Trainer | null>(null)
 
-    const { data: response, isLoading } = useTrainers({ page, size: pageSize })
-    const items = response?.content ?? []
-    const totalPages = response?.totalPages ?? 0
+    const { data: dataTrainer, isLoading: isLoadingTrainer, isError: isErrorTrainer } = useTrainers({ page, size: pageSize })
+
+    const totalPages = dataTrainer?.totalPages ?? 0
 
     const getInitials = (first: string, last: string) =>
         `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
@@ -41,7 +41,8 @@ export default function TrainerTable() {
         setEditingTrainer(null)
     }
 
-    if (isLoading) return <div className="p-4 text-center text-gray-500">Chargement…</div>
+    if (isLoadingTrainer) return <div className="p-4 text-center text-gray-500">Chargement…</div>
+    if (isErrorTrainer) return <div className="p-4 text-center text-gray-500">Erreur</div>
 
     return (
         <>
@@ -51,7 +52,7 @@ export default function TrainerTable() {
                 </Button>
             </div>
 
-            {items.length === 0 ? (
+            {!isLoadingTrainer && dataTrainer.content.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">Aucun formateur trouvé.</div>
             ) : (
                 <Table>
@@ -64,7 +65,7 @@ export default function TrainerTable() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {items.map(trainer => (
+                        {dataTrainer.content.map(trainer => (
                             <TableRow key={trainer.id} className="hover:bg-gray-50 cursor-pointer"
                                 onClick={() => navigate(`/trainers/${trainer.id}`)}>
                                 <TableCell>
