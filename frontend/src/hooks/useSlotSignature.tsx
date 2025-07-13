@@ -64,7 +64,7 @@ export function useMissingSignatures(slotSignatureId: number) {
     const key = ['missingSignatures', slotSignatureId]
     const queryFn = () =>
         api
-            .get<PageResponse<SessionEnrollment>>(`/v1/slots-signature/missing-signature/${slotSignatureId}`)
+            .get<PageResponse<SessionEnrollment>>(`/v1/slots-signature/${slotSignatureId}/missing-signatures`)
             .then(res => res.data)
 
     const { data, isLoading, error } = useQuery(key, queryFn)

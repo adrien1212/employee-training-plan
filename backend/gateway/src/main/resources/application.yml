@@ -36,7 +36,7 @@ spring:
             - id: notification-service
               uri: ${NOTIFICATION_SERVICE_URL:http://host.docker.internal:8010}
               predicates:
-                - Path=/v1/notifications/**
+                - Path=/api/v1/notifications/**
               filters:
                 - TokenRelay
             - id: core-service

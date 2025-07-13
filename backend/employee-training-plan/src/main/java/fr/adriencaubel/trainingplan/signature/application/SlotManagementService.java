@@ -10,6 +10,7 @@ import fr.adriencaubel.trainingplan.training.application.SessionEnrollmentServic
 import fr.adriencaubel.trainingplan.training.domain.Session;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import fr.adriencaubel.trainingplan.training.infrastructure.SessionEnrollmentRepository;
+import fr.adriencaubel.trainingplan.training.infrastructure.adapter.RabbitMQNotificationAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -32,6 +33,7 @@ public class SlotManagementService {
     private final SessionEnrollmentService sessionEnrollmentService;
     private final SignatureRepository signatureRepository;
     private final SessionEnrollmentRepository sessionEnrollmentRepository;
+    private final RabbitMQNotificationAdapter rabbitMQNotificationAdapter;
 
     @Transactional
     public void createSlotsFor(Session session) {
@@ -178,12 +180,18 @@ public class SlotManagementService {
     public SlotSignature ouvrirSignature(Long slotSignatureId) {
         SlotSignature slotSignature = findById(slotSignatureId);
         slotSignature.ouvrirSignature();
+
+        rabbitMQNotificationAdapter.sendSlotOpenNotification(slotSignature);
+
         return slotRepository.save(slotSignature);
     }
 
     public SlotSignature ouvrirSignature(String slotAccessToken) {
         SlotSignature slotSignature = findBySlotAccessToken(slotAccessToken);
         slotSignature.ouvrirSignature();
+
+        rabbitMQNotificationAdapter.sendSlotOpenNotification(slotSignature);
+
         return slotRepository.save(slotSignature);
     }
 

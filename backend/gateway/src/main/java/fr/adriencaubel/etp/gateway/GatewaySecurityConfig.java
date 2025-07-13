@@ -23,11 +23,16 @@ public class GatewaySecurityConfig {
         http
                 .cors(c -> c.configurationSource(customCorsConfiguration))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/v1/signup").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/menu").authenticated()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                        .csrf(csrf -> csrf
+                .disable()
+        );
+
         return http.build();
     }
 }

@@ -1,6 +1,6 @@
 package fr.adriencaubel.etp.notification.infrastructure.adapter;
 
-import fr.adriencaubel.etp.notification.domain.email.EmailMessage;
+import fr.adriencaubel.etp.notification.parameters.domain.email.EmailMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;

@@ -5,6 +5,7 @@ import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import fr.adriencaubel.trainingplan.training.domain.SessionStatus;
 import fr.adriencaubel.trainingplan.training.infrastructure.SessionEnrollmentRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.specifciation.SessionEnrollmentSpecification;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +59,6 @@ public class SessionEnrollmentService {
     }
 
     public SessionEnrollment findById(Long id) {
-        return sessionEnrollmentRepository.findById(id).orElseThrow(() -> new DomainException("SessionEnrollment Invalid id"));
+        return sessionEnrollmentRepository.findById(id).orElseThrow(() -> new NotFoundException("SessionEnrollment Invalid id"));
     }
 }

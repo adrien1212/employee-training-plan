@@ -130,6 +130,8 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+    networks:
+      - app-network
 
   keycloak:
     container_name: keycloak.openid-provider

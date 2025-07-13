@@ -51,34 +51,23 @@ public class SlotSignature {
 
     }
 
-    public void sign(String signature, SessionEnrollment sessionEnrollment) throws DomainException {
-        if (slotSignatureStatus == SlotSignatureStatus.NOT_STARTED || slotSignatureStatus == SlotSignatureStatus.COMPLETED || expiresAt.isBefore(LocalDateTime.now())) {
-            throw new DomainException("This slot is closed");
+    public void signBy(SessionEnrollment enrollment, String signatureValue) throws DomainException {
+        if (this.getSlotSignatureStatus() != SlotSignatureStatus.OPEN || (this.getExpiresAt() != null && this.getExpiresAt().isBefore(LocalDateTime.now()))) {
+            throw new DomainException("Le créneau est fermé ou expiré");
         }
 
-        if (signature == null || signature.isEmpty()) {
-            throw new DomainException("Signature cannot be null or empty");
+        // 3) Vérifier l'appartenance de la session
+        if (!enrollment.getSession().getId().equals(this.getSession().getId())) {
+            throw new DomainException("Token non valide pour cette session");
+        }
+        // 4) Contrôle de doublon
+        boolean alreadySigned = this.getSignatures().stream()
+                .anyMatch(sig -> sig.getSessionEnrollment().getId().equals(enrollment.getId()));
+        if (alreadySigned) {
+            throw new DomainException("Déjà signé pour ce créneau");
         }
 
-        if (sessionEnrollment == null) {
-            throw new DomainException("SessionEnrollment cannot be null");
-        }
-
-        if (signatures.stream().anyMatch(s -> s.getSessionEnrollment().equals(sessionEnrollment))) {
-            throw new DomainException("Already signed this slot");
-        }
-
-        if (sessionEnrollment.getSession().getId() != this.session.getId()) {
-            throw new DomainException("SessionEnrollment cannot loinger to this session");
-        }
-
-        Signature signatureEntity = new Signature();
-        signatureEntity.setSignature(signature);
-        signatureEntity.setSessionEnrollment(sessionEnrollment);
-        signatureEntity.setSignatureDate(LocalDateTime.now());
-        signatureEntity.setSlotSignature(this);
-        this.signatures.add(signatureEntity);
-        sessionEnrollment.getSignatures().add(signatureEntity);
+        signatures.add(new Signature(this, enrollment, signatureValue));
     }
 
     public void ouvrirSignature() {

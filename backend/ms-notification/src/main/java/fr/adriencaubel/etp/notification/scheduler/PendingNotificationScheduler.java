@@ -1,16 +1,16 @@
 package fr.adriencaubel.etp.notification.scheduler;
 
-import fr.adriencaubel.etp.notification.domain.NotificationStatus;
-import fr.adriencaubel.etp.notification.domain.email.EmailMessage;
-import fr.adriencaubel.etp.notification.domain.sessionenrollment.NotificationSessionEnrollment;
-import fr.adriencaubel.etp.notification.domain.sessionenrollment.NotificationSessionEnrollmentRepository;
-import fr.adriencaubel.etp.notification.domain.sessionenrollment.NotificationSessionEnrollmentType;
+
+import fr.adriencaubel.etp.notification.config.feign.CoreAppFeign;
+import fr.adriencaubel.etp.notification.config.feign.dto.SessionEnrollmentFeignResponse;
 import fr.adriencaubel.etp.notification.infrastructure.adapter.RabbitMqEmailPublisher;
-import fr.adriencaubel.etp.notification.infrastructure.adapter.SessionEnrollmentFeign;
-import fr.adriencaubel.etp.notification.service.NotificationService;
-import fr.adriencaubel.etp.notification.type.SessionEnrollmentRequestModel;
+import fr.adriencaubel.etp.notification.parameters.domain.NotificationStatus;
+import fr.adriencaubel.etp.notification.parameters.domain.NotificationType;
+import fr.adriencaubel.etp.notification.parameters.domain.email.EmailMessage;
+import fr.adriencaubel.etp.notification.sessionenrollment.domain.NotificationSessionEnrollment;
+import fr.adriencaubel.etp.notification.sessionenrollment.repository.NotificationSessionEnrollmentRepository;
+import fr.adriencaubel.etp.notification.sessionenrollment.service.NotificationSessionEnrollmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +25,11 @@ import java.util.List;
 public class PendingNotificationScheduler {
     private final NotificationSessionEnrollmentRepository sessionEnrollmentRepository;
 
-    private final SessionEnrollmentFeign sessionEnrollmentFeign;
+    private final CoreAppFeign sessionEnrollmentFeign;
 
     private final RabbitMqEmailPublisher rabbitMqEmailPublisher;
 
-    private final NotificationService notificationService;
+    private final NotificationSessionEnrollmentService notificationService;
     private final NotificationSessionEnrollmentRepository notificationSessionEnrollmentRepository;
 
     /**
@@ -57,10 +57,10 @@ public class PendingNotificationScheduler {
                 break;
             }
 
-            ResponseEntity<SessionEnrollmentRequestModel> response =
-                    sessionEnrollmentFeign.getSessionEnrollment(notificationSessionEnrollment.getSessionEnrollmentId());
+            SessionEnrollmentFeignResponse response =
+                    sessionEnrollmentFeign.getSessionEnrollment(notificationSessionEnrollment.getSessionEnrollmentId()).getBody();
 
-            EmailMessage emailMessage = notificationService.buildEmail(notificationSessionEnrollment, response.getBody());
+            EmailMessage emailMessage = EmailMessage.builder().to(response.getEmployee().getEmail()).subject("a redfinir mais surement subscribe pour le moment").build();
 
             notificationSessionEnrollment.markSend();
 
@@ -71,7 +71,7 @@ public class PendingNotificationScheduler {
     }
 
     private boolean isSessionEnrollmentUnsubscribed(NotificationSessionEnrollment sessionEnrollment) {
-        List<NotificationSessionEnrollment> sessionEnrollments = sessionEnrollmentRepository.findByNotificationTypeAndSessionEnrollmentId(NotificationSessionEnrollmentType.UNSUBSCRIBE_TO_SESSION, sessionEnrollment.getSessionEnrollmentId());
+        List<NotificationSessionEnrollment> sessionEnrollments = sessionEnrollmentRepository.findByNotificationTypeAndSessionEnrollmentId(NotificationType.UNSUBSCRIBE_TO_SESSION, sessionEnrollment.getSessionEnrollmentId());
         return sessionEnrollments.size() > 0;
     }
 }

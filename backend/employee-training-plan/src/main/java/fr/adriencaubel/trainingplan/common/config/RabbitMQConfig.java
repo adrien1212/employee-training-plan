@@ -28,6 +28,12 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.routing-keys.trainer}")
     private String trainerKey;
 
+    @Value("${rabbitmq.queues.slot-signature}")
+    private String slotSignatureQueue;
+
+    @Value("${rabbitmq.routing-keys.slot-signature}")
+    private String slotSignatureKey;
+
     @Bean
     public MessageConverter jackson2JsonMessageConverter() {
         return new Jackson2JsonMessageConverter();

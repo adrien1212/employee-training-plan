@@ -1,8 +1,10 @@
 package fr.adriencaubel.trainingplan.training.infrastructure.adapter;
 
+import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
 import fr.adriencaubel.trainingplan.training.application.NotificationPort;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto.NotificationSessionEnrollmentRequestModel;
+import fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto.NotificationSlotSignatureRequestModel;
 import fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,6 +23,9 @@ public class RabbitMQNotificationAdapter implements NotificationPort {
 
     @Value("${rabbitmq.routing-keys.session-enrollment}")
     private String sessionEnrollmentKey;
+
+    @Value("${rabbitmq.routing-keys.slot-signature}")
+    private String slotSignatureKey;
 
     @Override
     public void sendSubscribeNotification(SessionEnrollment sessionEnrollment) {
@@ -51,6 +56,16 @@ public class RabbitMQNotificationAdapter implements NotificationPort {
                 commandsExchange,
                 sessionEnrollmentKey,
                 notificationRequestModel
+        );
+    }
+
+    @Override
+    public void sendSlotOpenNotification(SlotSignature slotSignature) {
+        NotificationSlotSignatureRequestModel notificationSlotSignatureRequestModel = new NotificationSlotSignatureRequestModel(NotificationType.SLOT_SIGNATURE_OPEN, slotSignature.getId());
+        rabbitTemplate.convertAndSend(
+                commandsExchange,
+                slotSignatureKey,
+                notificationSlotSignatureRequestModel
         );
     }
 

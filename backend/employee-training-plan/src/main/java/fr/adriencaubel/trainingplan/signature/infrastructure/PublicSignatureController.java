@@ -1,7 +1,6 @@
 package fr.adriencaubel.trainingplan.signature.infrastructure;
 
 import fr.adriencaubel.trainingplan.signature.application.SignatureService;
-import fr.adriencaubel.trainingplan.signature.domain.Signature;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +16,6 @@ public class PublicSignatureController {
 
     @PostMapping
     public void postSignature(@RequestBody SignatureRequestModel signatureRequestModel) {
-        Signature signature = signatureService.signer(signatureRequestModel);
+        signatureService.signer(signatureRequestModel);
     }
 }

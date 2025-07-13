@@ -33,6 +33,7 @@ import Billing from "./pages/Billings";
 import Support from "./pages/Support";
 import SlotSessionSignature from "./pages/public/SlotSessionSignature";
 import SessionSignatureMatrix from "./pages/SessionSignatureMatrix";
+import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,8 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
 
           {/* Public Routes */}
+          <Route path="/sign-up" element={<Signup />} />
+
 
           {/* Private Routes */}
           <Route element={<PrivateRoutes />}>

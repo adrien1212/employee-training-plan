@@ -18,6 +18,12 @@ public class SlotController {
 
     private final SlotManagementService slotManagementService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<SlotSignatureResponseModel> getSlotByID(@PathVariable Long id) {
+        SlotSignature slotSignature = slotManagementService.findById(id);
+        return ResponseEntity.ok(SlotSignatureResponseModel.toDto(slotSignature));
+    }
+
     @GetMapping
     public ResponseEntity<Page<SlotSignatureResponseModel>> getSlot(@RequestParam(required = true) Long sessionId, Pageable pageable) {
         Page<SlotSignature> slotSignatures = slotManagementService.findAll(sessionId, pageable);
@@ -30,7 +36,7 @@ public class SlotController {
         return ResponseEntity.ok(SlotSignatureResponseModel.toDto(slotSignature));
     }
 
-    @GetMapping("/missing-signature/{id}")
+    @GetMapping("/{id}/missing-signatures")
     public ResponseEntity<Page<SessionEnrollmentResponseModel>> getMissingSignature(@PathVariable Long id, Pageable pageable) {
         Page<SessionEnrollment> sessionEnrollments = slotManagementService.findMissingSignaturesForSlot(id, pageable);
         return ResponseEntity.ok(sessionEnrollments.map(SessionEnrollmentResponseModel::toDto));
