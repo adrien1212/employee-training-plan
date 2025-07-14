@@ -8,6 +8,5 @@ export interface Training {
   departments: Department[];
   duration: number; // in hours
   maxParticipants: number;
-  sessionsCount: number;
-  status: 'active' | 'inactive';
+  active: boolean
 }

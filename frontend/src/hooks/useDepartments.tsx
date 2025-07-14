@@ -6,6 +6,7 @@ import { PageResponse } from '@/types/PageResponse';
 import { Department } from '@/types/Department';
 
 export interface UseDepartmentOptions {
+    trainingId?: number,
     page?: number;
     size?: number;
     enabled?: boolean;
@@ -21,21 +22,25 @@ const departmentKey = (id?: number) => ['department', id] as const;
 
 
 const departmentsKey = ({
+    trainingId,
     page = 0,
     size = 10,
 }: UseDepartmentOptions) =>
-    ['departments', page, size] as const;
+    ['departments', trainingId, page, size] as const;
 
 export function useDepartments(options: UseDepartmentOptions = {}) {
     const {
+        trainingId,
         page = 0,
         size = 10,
         enabled = true,
     } = options;
-    const key = departmentsKey({ page, size });
+    const key = departmentsKey({ trainingId, page, size });
     return useQuery<PageResponse<Department>, Error>(
         key,
-        () => api.get<PageResponse<Department>>('/v1/departments').then(r => r.data),
+        () => api.get<PageResponse<Department>>('/v1/departments', {
+            params: { trainingId, page, size },
+        }).then(r => r.data),
         { keepPreviousData: true }
     );
 }

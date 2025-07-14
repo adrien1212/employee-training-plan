@@ -9,7 +9,7 @@ import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
 public class EmployeeSpecification {
-    public static Specification<Employee> filter(String firstName, String lastName, String email, Long companyId, Long sessionId, Boolean isSubscribeToSession, Long departmentId, Boolean isActive) {
+    public static Specification<Employee> filter(String firstName, String lastName, String email, Long companyId, Long sessionId, Boolean isSubscribeToSession, Long departmentId, Long trainingId, Boolean isActive) {
         Specification<Employee> specification = Specification.where(null);
 
         if (firstName != null) {
@@ -40,9 +40,55 @@ public class EmployeeSpecification {
             specification = specification.and(hasDepartment(departmentId));
         }
 
+        if (trainingId != null) {
+            specification = specification.and(isSubscribeToTrainingId(trainingId));
+        }
+
         if (isActive != null) {
             specification = specification.and(isActive(isActive));
 
+        }
+
+        return specification;
+    }
+
+    public static Specification<Employee> filterOr(String firstName, String lastName, String email, Long companyId, Long sessionId, Boolean isSubscribeToSession, Long departmentId, Long trainingId, Boolean isActive) {
+        Specification<Employee> specification = Specification.where(null);
+
+        if (firstName != null) {
+            specification = specification.or(hasFirstName(firstName));
+        }
+
+        if (lastName != null) {
+            specification = specification.or(hasLastname(lastName));
+        }
+
+        if (email != null) {
+            specification = specification.or(hasEmail(email));
+        }
+
+        if (companyId != null) {
+            specification = specification.and(hasCompany(companyId));
+        }
+
+        if (sessionId != null) {
+            if (Boolean.TRUE.equals(isSubscribeToSession)) {
+                specification = specification.and(isSubscribeTo(sessionId));
+            } else if (Boolean.FALSE.equals(isSubscribeToSession)) {
+                specification = specification.and(notSubscribedTo(sessionId));
+            }
+        }
+
+        if (trainingId != null) {
+            specification = specification.and(isSubscribeToTrainingId(trainingId));
+        }
+
+        if (departmentId != null) {
+            specification = specification.and(hasDepartment(departmentId));
+        }
+
+        if (isActive != null) {
+            specification = specification.and(isActive(isActive));
         }
 
         return specification;
@@ -100,4 +146,8 @@ public class EmployeeSpecification {
         };
     }
 
+    private static Specification<Employee> isSubscribeToTrainingId(Long trainingId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("sessionEnrollments").get("session").get("training").get("id"), trainingId);
+    }
 }

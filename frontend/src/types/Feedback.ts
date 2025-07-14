@@ -5,5 +5,5 @@ export interface Feedback {
   comment: string;
   rating?: number; // 1 through 5
   submittedAt: string;
-  sessionEnrollmentId: number;
+  sessionEnrollment: SessionEnrollment;
 }

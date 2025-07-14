@@ -21,10 +21,10 @@ import { NewSession } from '@/types/NewSession';
 import { SessionStatus } from '@/types/SessionStatus';
 import { useCreateSession, useUpdateSession } from '@/hooks/useSessions';
 import { toast } from '@/components/ui/use-toast';
-import useTrainings from '@/hooks/useTrainings';
 import { Training } from '@/types/Training';
 import { Trainer } from '@/types/Trainer';
 import { ModeSignature } from '@/types/ModeSignature';
+import { useTrainings } from '@/hooks/useTrainings';
 
 interface SessionDialogProps {
     open: boolean;

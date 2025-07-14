@@ -20,6 +20,29 @@ import SignatureMatrix from "@/components/common/SignatureMatrix";
 import SlotSignatureTable from "@/components/common/SlotSignatureTable";
 import { useTrainer } from "@/hooks/useTrainer";
 
+
+const getStatusColor = (status: SessionDetail['status']) => {
+    const colors: Record<SessionDetail['status'], string> = {
+        NOT_STARTED: 'bg-blue-100 text-blue-800',
+        ACTIVE: 'bg-green-100 text-green-800',
+        COMPLETED: 'bg-gray-100 text-gray-800',
+        CANCELLED: 'bg-red-100 text-red-800',
+        DRAFT: 'bg-red-100 text-red-800'
+    };
+    return colors[status];
+};
+
+const getStatusLabel = (status: SessionDetail['status']) => {
+    const labels: Record<SessionDetail['status'], string> = {
+        NOT_STARTED: 'Programmée',
+        ACTIVE: 'En cours',
+        COMPLETED: 'Terminée',
+        CANCELLED: 'Annulée',
+        DRAFT: "Draft"
+    };
+    return labels[status];
+};
+
 const SessionDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -111,13 +134,14 @@ const SessionDetailPage = () => {
                                     <div>
                                         <div>
                                             <label className="text-sm text-gray-600">Status</label>
-                                            <p className="font-medium">{session.status}</p>
                                         </div>
                                         <div className="mt-1">
                                             <ul className="list-disc list-inside">
                                                 {session.sessionStatusHistory.map((h) => (
                                                     <li key={h.id}>
-                                                        {h.status} - {new Date(h.changedAt).toLocaleDateString()}
+                                                        <Badge className={getStatusColor(session.status)}>
+                                                            {getStatusLabel(session.status)}
+                                                        </Badge> - {new Date(h.changedAt).toLocaleDateString()}
                                                     </li>
                                                 ))}
                                             </ul>

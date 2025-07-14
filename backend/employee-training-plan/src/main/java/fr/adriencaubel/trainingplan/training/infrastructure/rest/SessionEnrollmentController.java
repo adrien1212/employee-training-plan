@@ -32,7 +32,7 @@ public class SessionEnrollmentController {
         Page<SessionEnrollment> sessionEnrollments = sessionEnrollmentService.findAllByTrainingIdOrEmployeeId(trainingId, employeeId, sessionId, sessionStatus, isFeedbackGiven, pageable);
 
         if (!sessionEnrollments.hasContent()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(Page.empty(), HttpStatus.OK);
         }
 
         Page<SessionEnrollmentResponseModel> sessionEnrollmentResponseModel = sessionEnrollments.map(SessionEnrollmentResponseModel::toDto);

@@ -3,7 +3,6 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import api from '@/services/api';
 import { PageResponse } from '@/types/PageResponse';
-import { SessionDetail } from '@/types/SessionDetail';
 import { Trainer } from '@/types/Trainer';
 import { NewTrainer } from '@/types/NewTrainer';
 

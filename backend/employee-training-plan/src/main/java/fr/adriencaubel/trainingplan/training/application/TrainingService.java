@@ -5,7 +5,6 @@ import fr.adriencaubel.trainingplan.company.application.service.UserService;
 import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.company.domain.model.Department;
 import fr.adriencaubel.trainingplan.company.domain.model.User;
-import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.employee.infrastructure.EmployeeRepository;
 import fr.adriencaubel.trainingplan.training.application.dto.CreateTrainingRequestModel;
 import fr.adriencaubel.trainingplan.training.application.dto.DepartmentIdRequestModel;
@@ -27,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,20 +50,6 @@ public class TrainingService {
         Training training = new Training(company, createTrainingRequestModel.getTitle(), createTrainingRequestModel.getDescription(), createTrainingRequestModel.getProvider(), departments, createTrainingRequestModel.getDuration());
 
         return trainingRepository.save(training);
-    }
-
-    public List<Training> getEnrolledTrainingsForEmployeeId(Long employeeId, String status) {
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found with id: " + employeeId));
-
-        return trainingRepository.findByEmployeeAndStatus(employee, TrainingStatus.valueOf(status));
-    }
-
-    public List<Training> getNotEnrolledByEmployeeAndStatus(Long employeeId, String status) {
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found with id: " + employeeId));
-
-        return trainingRepository.findNotEnrolledByEmployeeAndStatus(employee.getDepartment(), employee, TrainingStatus.valueOf(status));
     }
 
     //@PreAuthorize("@trainingSecurityEvaluator.canAccessTraining(#trainingId)")
@@ -139,7 +123,7 @@ public class TrainingService {
         return trainingDocumentRepository.findByTrainingId(trainingId, pageable);
     }
 
-    public Long count(TrainingStatus trainingStatus) {
-        return trainingRepository.countByStatus(trainingStatus);
+    public Long count() {
+        return trainingRepository.countByActive(true);
     }
 }

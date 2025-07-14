@@ -26,10 +26,18 @@ public class EmployeeService {
     private final DepartmentService departmentService;
     private final UserService userService;
 
-    public Page<Employee> getAllEmployees(String firstName, String lastName, String email, Long sessionId, Boolean isSubscribeToSession, Long departmentId, Pageable pageable) {
+    public Page<Employee> getAllEmployees(String firstName, String lastName, String email, Long sessionId, Boolean isSubscribeToSession, Long departmentId, Long trainingId, Pageable pageable) {
         Company company = userService.getCompanyOfAuthenticatedUser();
 
-        Specification<Employee> specification = EmployeeSpecification.filter(firstName, lastName, email, company.getId(), sessionId, isSubscribeToSession, departmentId, true);
+        Specification<Employee> specification = EmployeeSpecification.filter(firstName, lastName, email, company.getId(), sessionId, isSubscribeToSession, departmentId, trainingId, true);
+
+        return employeeRepository.findAll(specification, pageable);
+    }
+
+    public Page<Employee> getAllEmployeesSearchOr(String firstName, String lastName, String email, Long sessionId, Boolean isSubscribeToSession, Long departmentId, Long trainingId, Pageable pageable) {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        Specification<Employee> specification = EmployeeSpecification.filterOr(firstName, lastName, email, company.getId(), sessionId, isSubscribeToSession, departmentId, trainingId, true);
 
         return employeeRepository.findAll(specification, pageable);
     }
@@ -57,7 +65,7 @@ public class EmployeeService {
         if (countEmployees() > company.getPlan().getMaxEmployees()) {
             throw new EntityExistsException("Employees max value");
         }
-        
+
         Department department = departmentService.findById(createEmployeeRequestModel.getDepartmentId());
 
         Employee employee = Employee.create(createEmployeeRequestModel.getFirstName(), createEmployeeRequestModel.getLastName(), createEmployeeRequestModel.getEmail(), department);
@@ -98,7 +106,9 @@ public class EmployeeService {
         return employeeRepository.findByEmailAndCodeEmployee(email, codeEmployee);
     }
 
-    public Long count() {
-        return employeeRepository.countByActive(true);
+    public Long count(Long departmentId, Long trainingId) {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+        Specification<Employee> specification = EmployeeSpecification.filter(null, null, null, company.getId(), null, null, departmentId, trainingId, true);
+        return employeeRepository.count(specification);
     }
 }

@@ -2,6 +2,9 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Button } from '@/components/ui/button';
 import { SessionEnrollment } from '@/types/SessionEnrollment';
 import useFeedback from '@/hooks/useFeedback';
+import { SessionStatus } from '@/types/SessionStatus';
+import { SessionDetail } from '@/types/SessionDetail';
+import { Badge } from '../ui/badge';
 
 interface Props {
     items: SessionEnrollment[];
@@ -11,6 +14,14 @@ interface Props {
     onPageChange: (newPage: number) => void;
 }
 
+const statusMap: Record<SessionStatus, { label: string; style: string }> = {
+    DRAFT: { label: "À l'étude", style: 'bg-orange-100 text-orange-800' },
+    NOT_STARTED: { label: 'Programmée', style: 'bg-blue-100 text-blue-800' },
+    ACTIVE: { label: 'En cours', style: 'bg-green-100 text-green-800' },
+    COMPLETED: { label: 'Terminée', style: 'bg-gray-100 text-gray-800' },
+    CANCELLED: { label: 'Annulée', style: 'bg-red-100 text-red-800' },
+};
+
 function EmployeeSessionsEnrollmentHistory({ items, page, totalPages, loading, onPageChange }: Props) {
     if (loading) {
         return <div className="p-4 text-center text-gray-500">Chargement…</div>;
@@ -18,6 +29,11 @@ function EmployeeSessionsEnrollmentHistory({ items, page, totalPages, loading, o
     if (!items.length) {
         return <div className="p-4 text-center text-gray-500">Aucune donnée</div>;
     }
+
+    const getStatusBadge = (status: SessionDetail['status']) => {
+        const cfg = statusMap[status];
+        return <Badge className={cfg.style}>{cfg.label}</Badge>;
+    };
 
     const renderStars = (rating: number) => {
         return "★".repeat(rating) + "☆".repeat(5 - rating);
@@ -43,7 +59,7 @@ function EmployeeSessionsEnrollmentHistory({ items, page, totalPages, loading, o
                                 <div className="font-medium">{sessionEnrollment.session.training.title}</div>
                             </TableCell>
                             <TableCell>{sessionEnrollment.session.startDate}</TableCell>
-                            <TableCell>{sessionEnrollment.session.status}</TableCell>
+                            <TableCell>{getStatusBadge(sessionEnrollment.session.status)}</TableCell>
                             <TableCell>
                                 {sessionEnrollment.feedback ? (
                                     <div className="text-yellow-500">

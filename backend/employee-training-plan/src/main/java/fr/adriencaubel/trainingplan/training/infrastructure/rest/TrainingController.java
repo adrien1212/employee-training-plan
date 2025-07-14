@@ -131,8 +131,8 @@ public class TrainingController {
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Long> countTrainings(@RequestParam(required = false) TrainingStatus status) {
-        Long trainingNumber = trainingService.count(status);
+    public ResponseEntity<Long> countTrainings() {
+        Long trainingNumber = trainingService.count();
         return ResponseEntity.ok(trainingNumber);
     }
 }

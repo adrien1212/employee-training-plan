@@ -124,9 +124,9 @@ public class DashboardService {
         GlobalStatisticData globalStatisticData = new GlobalStatisticData();
 
         int trainingNumber = trainingService.getAllTraining(null, null, null, null).getNumber();
-        int departmentNumber = departmentService.findAll(null).getNumber();
+        int departmentNumber = departmentService.findAll(null, null).getNumber();
         int sessionsNumber = Math.toIntExact(sessionService.count(null));
-        int employeeNumber = employeeService.getAllEmployees(null, null, null, null, null, null, Pageable.unpaged()).getSize();
+        int employeeNumber = employeeService.getAllEmployees(null, null, null, null, null, null, null, Pageable.unpaged()).getSize();
 
         globalStatisticData.setTotalDepartments(departmentNumber);
         globalStatisticData.setTotalEmployees(employeeNumber);

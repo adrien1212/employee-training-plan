@@ -77,6 +77,17 @@ public class SlotSignature {
         this.slotSignatureStatus = SlotSignatureStatus.OPEN;
     }
 
+    public void fermerSignature() {
+        if (this.slotSignatureStatus == SlotSignatureStatus.COMPLETED) {
+            throw new DomainException("Slot signature already closed");
+        }
+
+        if (this.slotSignatureStatus != SlotSignatureStatus.OPEN) {
+            throw new DomainException("Slot must be open before closed");
+        }
+        this.slotSignatureStatus = SlotSignatureStatus.COMPLETED;
+    }
+
     public void completeSignature() {
         if (this.slotSignatureStatus != SlotSignatureStatus.OPEN) {
             throw new DomainException("Slot signature already not open");

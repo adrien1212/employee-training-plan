@@ -188,12 +188,23 @@ public class SlotManagementService {
 
     public SlotSignature ouvrirSignature(String slotAccessToken) {
         SlotSignature slotSignature = findBySlotAccessToken(slotAccessToken);
-        slotSignature.ouvrirSignature();
+        return ouvrirSignature(slotSignature.getId());
+    }
+
+    public SlotSignature fermerSignature(Long slotSignatureId) {
+        SlotSignature slotSignature = findById(slotSignatureId);
+        slotSignature.fermerSignature();
 
         rabbitMQNotificationAdapter.sendSlotOpenNotification(slotSignature);
 
         return slotRepository.save(slotSignature);
     }
+
+    public SlotSignature fermerSignature(String slotAccessToken) {
+        SlotSignature slotSignature = findBySlotAccessToken(slotAccessToken);
+        return fermerSignature(slotSignature.getId());
+    }
+
 
     public Page<SessionEnrollment> findMissingSignaturesForSlot(Long id, Pageable pageable) {
         SlotSignature slotSignature = findById(id);

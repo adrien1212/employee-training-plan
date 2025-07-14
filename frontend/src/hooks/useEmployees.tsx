@@ -8,7 +8,11 @@ import { NewEmployee } from '@/types/NewEmployee';
 
 export interface UseEmployeesOptions {
     departmentId?: number;
+    trainingId?: number;
     sessionId?: number;
+    firstName?: string,
+    lastName?: string,
+    email?: string,
     page?: number;
     size?: number;
     enabled?: boolean;
@@ -19,11 +23,19 @@ export interface UseEmployeesOptions {
  */
 const employeesKey = ({
     departmentId,
+    trainingId,
     sessionId,
+    firstName,
+    lastName,
+    email,
     page = 0,
     size = 10,
 }: UseEmployeesOptions) =>
-    ['employees', departmentId, sessionId, page, size] as const;
+    ['employees', departmentId, trainingId, sessionId, firstName, lastName, email, page, size] as const;
+
+
+export const employeesCountKey = (params: { departmentId?: number; trainingId?: number; page: number; size: number }) =>
+    ['employees', 'count', params] as const
 
 /**
  * Query key for single employee
@@ -37,18 +49,56 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
     const {
         departmentId,
         sessionId,
+        firstName,
+        lastName,
+        email,
         page = 0,
         size = 10,
         enabled = true,
     } = options;
-    const key = employeesKey({ departmentId, sessionId, page, size });
+    const key = employeesKey({ departmentId, sessionId, firstName, lastName, email, page, size });
 
     return useQuery<PageResponse<Employee>, Error>(
         key,
         () =>
             api
                 .get<PageResponse<Employee>>('/v1/employees', {
-                    params: { departmentId, sessionId, page, size },
+                    params: { departmentId, sessionId, firstName, lastName, email, page, size },
+                })
+                .then(res => res.data),
+        {
+            enabled,
+            staleTime: 0,
+            cacheTime: 0,
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+        }
+    );
+}
+
+/**
+ * SEARCH: list & paginate employees
+ */
+export function useEmployeesSearch(options: UseEmployeesOptions = {}) {
+    const {
+        departmentId,
+        sessionId,
+        firstName,
+        lastName,
+        email,
+        page = 0,
+        size = 10,
+        enabled = true,
+    } = options;
+    const key = employeesKey({ departmentId, sessionId, firstName, lastName, email, page, size });
+
+    return useQuery<PageResponse<Employee>, Error>(
+        key,
+        () =>
+            api
+                .get<PageResponse<Employee>>('/v1/employees/search-or', {
+                    params: { departmentId, sessionId, firstName, lastName, email, page, size },
                 })
                 .then(res => res.data),
         {
@@ -76,16 +126,31 @@ export function useEmployee(id?: number, enabled: boolean = true) {
     );
 }
 
-/**
- * COUNT
- */
-export function useCountEmployees(enabled: boolean = true) {
+export function useCountEmployees(options: UseEmployeesOptions = {}) {
+    const {
+        departmentId,
+        trainingId,
+        page = 0,
+        size = 10,
+        enabled = true,
+    } = options;
+    const key = employeesCountKey({ departmentId, trainingId, page, size });
+
     return useQuery<number, Error>(
-        employeeKey(),
-        () => api.get<number>(`/v1/employees/count`).then(res => res.data),
+        key,
+        () =>
+            api
+                .get<number>('/v1/employees/count', {
+                    params: { departmentId, trainingId, page, size },
+                })
+                .then(res => res.data),
         {
-            enabled: enabled,
+            enabled,
             staleTime: 0,
+            cacheTime: 0,
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
         }
     );
 }

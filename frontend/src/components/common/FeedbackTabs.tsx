@@ -11,8 +11,6 @@ import { Feedback } from '@/types/Feedback';
 import { SessionEnrollment } from '@/types/SessionEnrollment';
 import { PageResponse } from '@/types/PageResponse';
 
-type EnrichedFeedback = Feedback & { sessionEnrollment: SessionEnrollment };
-
 interface FeedbackTabsProps {
     trainingId?: number;
     sessionId?: number;
@@ -24,70 +22,17 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
     sessionId,
     pageSize = 10,
 }) => {
-    // pagination
     const [page, setPage] = useState(0);
 
-    // reset to first page when filters change
-    useEffect(() => {
-        setPage(0);
-    }, [trainingId, sessionId]);
-
-    // 1️⃣ get raw feedbacks via your custom hook
     const {
-        data: feedbackPage,
+        data: feedbacks,
         isLoading: loadingFeedback,
         error: feedbackError,
     } = useFeedback({
+        trainingId: trainingId,
         page,
         size: pageSize
     });
-
-    // 2️⃣ local state for the enriched page
-    const [enrichedPage, setEnrichedPage] = useState<PageResponse<EnrichedFeedback> | null>(null);
-    const [loadingEnroll, setLoadingEnroll] = useState(false);
-    const [errorEnroll, setErrorEnroll] = useState<string | null>(null);
-
-    // 3️⃣ whenever we get a new feedbackPage, fetch all enrollments
-    useEffect(() => {
-        if (!feedbackPage) {
-            setEnrichedPage(null);
-            return;
-        }
-
-        setLoadingEnroll(true);
-        setErrorEnroll(null);
-
-        const loadEnrollments = async () => {
-            try {
-                const enrichedContent = await Promise.all(
-                    feedbackPage.content.map(async (fb) => {
-                        const se = await api
-                            .get<SessionEnrollment>(`/v1/sessions-enrollment/${fb.sessionEnrollmentId}`)
-                            .then(res => res.data);
-                        return { ...fb, sessionEnrollment: se };
-                    })
-                );
-
-                setEnrichedPage({
-                    ...feedbackPage,
-                    content: enrichedContent,
-                });
-            } catch (err) {
-                console.error('Error loading enrollments', err);
-                setErrorEnroll('Failed to load session details.');
-            } finally {
-                setLoadingEnroll(false);
-            }
-        };
-
-        loadEnrollments();
-    }, [feedbackPage]);
-
-    // aggregate loading & error
-    const isLoading = loadingFeedback || loadingEnroll;
-    const error = feedbackError || errorEnroll;
-
-    const feedbacks = enrichedPage?.content ?? [];
 
     const getInitials = (name: string) =>
         name
@@ -111,30 +56,33 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
         </div>
     );
 
+    if (loadingFeedback)
+        return (
+            <div className="p-4 text-center text-gray-500">Chargement…</div>
+        );
+
+    // In case some other error happened (not a 204), you can still show an error
+    if (feedbackError)
+        return (
+            <div className="p-4 text-center text-red-500">
+                Une erreur est survenue.
+            </div>
+        );
+
+    console.log(feedbacks)
+
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Tous les avis reçus</CardTitle>
                 <CardDescription>
-                    {feedbacks.length} avis reçu(s) au total
+                    {feedbacks.number} avis reçu(s) au total
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {isLoading && (
-                    <div className="p-4 text-center text-gray-500">Loading…</div>
-                )}
-                {error && (
-                    <div className="p-4 text-center text-red-500">{String(error)}</div>
-                )}
-                {!isLoading && !error && feedbacks.length === 0 && (
-                    <div className="p-4 text-center text-gray-500">
-                        No feedback available.
-                    </div>
-                )}
-
-                {!isLoading && !error && feedbacks.length > 0 && (
+                {feedbacks.totalElements > 0 && (
                     <div className="space-y-4">
-                        {feedbacks.map(fb => (
+                        {feedbacks.content.map(fb => (
                             <div key={fb.id} className="border rounded-lg p-4">
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-3">
@@ -171,7 +119,7 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
                 )}
 
                 {/* Pagination */}
-                {!isLoading && !error && enrichedPage && enrichedPage.totalPages > 1 && (
+                {feedbacks.totalPages > 1 && (
                     <div className="flex justify-between items-center p-4">
                         <Button
                             disabled={page <= 0}
@@ -180,12 +128,12 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
                             Previous
                         </Button>
                         <span>
-                            Page {page + 1} of {enrichedPage.totalPages}
+                            Page {page + 1} of {feedbacks.totalPages}
                         </span>
                         <Button
-                            disabled={page + 1 >= enrichedPage.totalPages}
+                            disabled={page + 1 >= feedbacks.totalPages}
                             onClick={() =>
-                                setPage(p => Math.min(p + 1, enrichedPage.totalPages - 1))
+                                setPage(p => Math.min(p + 1, feedbacks.totalPages - 1))
                             }
                         >
                             Next

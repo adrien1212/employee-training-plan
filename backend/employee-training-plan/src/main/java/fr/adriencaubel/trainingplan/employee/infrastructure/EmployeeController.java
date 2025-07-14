@@ -28,19 +28,41 @@ public class EmployeeController {
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "sessionId", required = false) Long sessionId,
             @RequestParam(name = "isSubscribeToSession", required = false) Boolean isSubscribeToSession,
+            @RequestParam(name = "trainingId", required = false) Long trainingId,
             @RequestParam(name = "departmentId", required = false) Long departmentId,
             Pageable pageable
     ) {
         Page<EmployeeResponseModel> employeePage = employeeService
-                .getAllEmployees(firstName, lastName, email, sessionId, isSubscribeToSession, departmentId, pageable)
+                .getAllEmployees(firstName, lastName, email, sessionId, isSubscribeToSession, departmentId, trainingId, pageable)
+                .map(EmployeeResponseModel::toDto); // Map each entity to DTO
+
+        return ResponseEntity.ok(employeePage);
+    }
+
+    /**
+     * OR-search for firstName/LastName/email, AND in department/session/etc
+     */
+    @GetMapping("/search-or")
+    public ResponseEntity<Page<EmployeeResponseModel>> getAllEmployeesSearchOr(
+            @RequestParam(name = "firstName", required = false) String firstName,
+            @RequestParam(name = "lastName", required = false) String lastName,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "sessionId", required = false) Long sessionId,
+            @RequestParam(name = "isSubscribeToSession", required = false) Boolean isSubscribeToSession,
+            @RequestParam(name = "trainingId", required = false) Long trainingId,
+            @RequestParam(name = "departmentId", required = false) Long departmentId,
+            Pageable pageable
+    ) {
+        Page<EmployeeResponseModel> employeePage = employeeService
+                .getAllEmployeesSearchOr(firstName, lastName, email, sessionId, isSubscribeToSession, departmentId, trainingId, pageable)
                 .map(EmployeeResponseModel::toDto); // Map each entity to DTO
 
         return ResponseEntity.ok(employeePage);
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Long> countEmployees() {
-        Long employeesNumber = employeeService.count();
+    public ResponseEntity<Long> countEmployees(@RequestParam(name = "departmentId", required = false) Long departmentId, @RequestParam(required = false) Long trainingId) {
+        Long employeesNumber = employeeService.count(departmentId, trainingId);
         return ResponseEntity.ok(employeesNumber);
     }
 

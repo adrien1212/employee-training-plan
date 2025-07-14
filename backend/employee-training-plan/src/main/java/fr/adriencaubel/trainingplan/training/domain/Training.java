@@ -26,7 +26,6 @@ public class Training {
     private String title;
     private String description;
     private String provider;
-    private TrainingStatus status = TrainingStatus.NOT_STARTED;
 
     @OneToMany(mappedBy = "training", cascade = CascadeType.ALL)
     private List<Session> sessions = new ArrayList<>();
@@ -38,6 +37,8 @@ public class Training {
     private Set<Department> departments = new HashSet<>();
 
     private Integer duration; // in hours
+
+    private boolean active;
 
     public Training() {
     }
@@ -51,6 +52,7 @@ public class Training {
         for (Department department : departments) {
             this.addDepartment(department); // sync both sides
         }
+        active = true;
     }
 
     /**

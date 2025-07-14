@@ -27,6 +27,8 @@ import {
     DialogFooter,
 } from '../ui/dialog';
 import { useTrainers } from '@/hooks/useTrainer';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from '@radix-ui/react-label';
 
 interface SessionsTabsProps {
     trainingId?: string;
@@ -54,7 +56,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
     const [sessionToRun, setSessionToRun] = useState<SessionDetail | null>(null);
 
     // DATA
-    const { data: response, isLoading, isError, error } =
+    const { data: response, isLoading, isError, error, refetch } =
         useSessions({ trainingId: tid, page, size: pageSize });
     const { mutate: deleteSession, isLoading: isDeleting } =
         useDeleteSession({ trainingId: tid, page, size: pageSize });
@@ -124,6 +126,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
 
     const onSuccess = () => {
         toast({ title: 'Session lancée' });
+        refetch();
     };
 
     if (isLoading || isTrainersLoading) return <div className="p-4 text-center text-gray-500">Chargement…</div>;
@@ -143,6 +146,9 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
 
     const renderTable = (list: SessionDetail[]) => (
         <>
+            <Button onClick={() => { setCreateSession(null); setIsDialogOpen(true); }}>
+                <Plus className="h-4 w-4 mr-2" />Nouvelle Session
+            </Button>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -172,7 +178,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                                         variant="ghost"
                                         size="sm"
                                         onClick={e => { e.stopPropagation(); handlePlayClick(session); }}
-                                        disabled={busy}
+                                        disabled={busy || session.status == SessionStatus.Active || session.status == SessionStatus.Cancelled || session.status == SessionStatus.Completed}
                                     >
                                         <Play className="h-4 w-4" />
                                     </Button>
@@ -198,38 +204,38 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                     ))}
                 </TableBody>
             </Table>
-            {/* Pagination Controls */}
-            <div className="flex justify-between items-center py-4">
-                <div className="flex items-center space-x-2">
-                    <span>Afficher par page:</span>
-                    <select
-                        className="border rounded p-1"
-                        value={pageSize}
-                        onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }}
-                    >
-                        {[10, 20, 50].map(size => (
-                            <option key={size} value={size}>{size}</option>
-                        ))}
-                    </select>
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-4 p-4">
+                <div className="text-gray-600">
+                    Page {page + 1} sur {totalPages}
                 </div>
-                <div className="flex items-center space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => Math.max(p - 1, 0))}
-                        disabled={page === 0}
-                    >
+                <div className="flex gap-2">
+                    <Button disabled={page === 0} onClick={() => setPage(p => Math.max(p - 1, 0))}>
                         Précédent
                     </Button>
-                    <span>Page {page + 1} sur {totalPages}</span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => Math.min(p + 1, totalPages - 1))}
-                        disabled={page + 1 >= totalPages}
-                    >
+                    <Button disabled={page + 1 >= totalPages} onClick={() => setPage(p => p + 1)}>
                         Suivant
                     </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Label htmlFor="pageSizeSelect">Taille :</Label>
+                    <Select
+                        id="pageSizeSelect"
+                        value={pageSize.toString()}
+                        onValueChange={value => { setPageSize(Number(value)); setPage(0) }}
+                        disabled={busy}
+                    >
+                        <SelectTrigger className="w-24">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {[5, 10, 20, 50].map(s => (
+                                <SelectItem key={s} value={s.toString()}>
+                                    {s} / page
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
         </>
@@ -270,10 +276,6 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
-            <Button onClick={() => { setCreateSession(null); setIsDialogOpen(true); }}>
-                <Plus className="h-4 w-4 mr-2" />Nouvelle Session
-            </Button>
 
             <Tabs defaultValue="toutes" className="w-full">
                 <TabsList>

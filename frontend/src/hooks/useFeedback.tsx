@@ -22,11 +22,6 @@ const sessionsKeys = ({
 }: Options) =>
     ['sessions', trainingId, sessionId, page, size] as const;
 
-/**
- * Query key for single session
- */
-const sessionKey = (id?: number) => ['session', id] as const;
-
 function useFeedback(options: Options) {
     const {
         trainingId,

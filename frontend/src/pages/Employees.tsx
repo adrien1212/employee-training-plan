@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import EmployeeDialog from "@/components/common/EmployeeDialog";
 import EmployeeTable from "@/components/common/EmployeesTable";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useToast } from "@/components/ui/use-toast";
 import { useDepartments } from "@/hooks/useDepartments";
@@ -53,8 +54,11 @@ const Employees = () => {
           </header>
 
           <div className="p-6">
-            <EmployeeTable
-            />
+            <Card>
+              <CardContent>
+                <EmployeeTable />
+              </CardContent>
+            </Card>
           </div>
 
           <EmployeeDialog

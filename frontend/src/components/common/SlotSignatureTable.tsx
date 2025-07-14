@@ -4,27 +4,17 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Edit, Mail, Play, Trash2, ChevronDown, ChevronUp, Copy } from 'lucide-react'
+import { Edit, Mail, Play, Trash2, ChevronDown, ChevronUp, Copy, Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from '@/components/ui/use-toast'
 import { Employee } from '@/types/Employee'
-import EmployeeDialog from './EmployeeDialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Label } from '../ui/label'
-import { PageResponse } from '@/types/PageResponse'
-import { Department } from '@/types/Department'
-import { useDepartments } from '@/hooks/useDepartments'
-import {
-    useEmployees,
-    useDeleteEmployee,
-} from '@/hooks/useEmployees'
-import useSlotsSignature, { useOpenSignature } from '@/hooks/useSlotSignature'
+import useSlotsSignature, { useCloseSignature, useOpenSignature } from '@/hooks/useSlotSignature'
 import { SlotSignature } from '@/types/SlotSignature'
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
-import { DialogFooter, DialogHeader } from '../ui/dialog'
 import MissingSignature from './MissingSignature'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { SlotSignatureStatus } from '@/types/SlotSignatureStatus'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
 
 interface Props {
     sessionId: number
@@ -42,10 +32,12 @@ export default function EmployeeTable({ sessionId }: Props) {
     const [pageSize, setPageSize] = useState(10)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
-    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [confirmOpenSignature, setConfirmOpenSignature] = useState(false)
+    const [confirmCloseSignature, setConfirmCloseSignature] = useState(false)
     const [slotToRun, setSlotToRun] = useState<SlotSignature | null>(null)
     const [expandedSlot, setExpandedSlot] = useState<number | null>(null)
     const { mutate: openSignature, isLoading, error } = useOpenSignature()
+    const { mutate: closeSignature, isLoading: isLoadingClose, error: isErrorClose } = useCloseSignature()
     const [copying, setCopying] = useState(false)
     // — READ
     const {
@@ -57,13 +49,14 @@ export default function EmployeeTable({ sessionId }: Props) {
     const items: SlotSignature[] = empResponse?.content ?? []
     const totalPages: number = empResponse?.totalPages ?? 0
 
-    const handlePlayClick = (slotSignature: SlotSignature) => {
+    const handleOpenSignatureClick = (slotSignature: SlotSignature) => {
         setSlotToRun(slotSignature)
-        setConfirmOpen(true)
+        setConfirmOpenSignature(true)
     }
 
-    const activeSignature = (slotSignature: SlotSignature | null) => {
-        if (slotSignature) openSignature(slotSignature.id)
+    const handleCloseSignatureClick = (slotSignature: SlotSignature) => {
+        setSlotToRun(slotSignature)
+        setConfirmCloseSignature(true)
     }
 
     const toggleExpand = (id: number) => {
@@ -103,7 +96,7 @@ export default function EmployeeTable({ sessionId }: Props) {
     return (
         <>
             {/* Confirmation Dialog */}
-            <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <Dialog open={confirmOpenSignature} onOpenChange={setConfirmOpenSignature}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Confirmer le démarrage</DialogTitle>
@@ -112,14 +105,39 @@ export default function EmployeeTable({ sessionId }: Props) {
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="space-x-2">
-                        <Button variant="secondary" onClick={() => setConfirmOpen(false)}>
+                        <Button variant="secondary" onClick={() => setConfirmOpenSignature(false)}>
                             Annuler
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={() => {
-                                activeSignature(slotToRun)
-                                setConfirmOpen(false)
+                                openSignature(slotToRun.id)
+                                setConfirmOpenSignature(false)
+                            }}
+                        >
+                            Confirmer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={confirmCloseSignature} onOpenChange={setConfirmCloseSignature}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Confirmer la fermeture</DialogTitle>
+                        <DialogDescription>
+                            {'Êtes-vous sûr·e de vouloir fermer le créneau, ceci bloque les signatures ?'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="space-x-2">
+                        <Button variant="secondary" onClick={() => setConfirmCloseSignature(false)}>
+                            Annuler
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => {
+                                closeSignature(slotToRun.id)
+                                setConfirmCloseSignature(false)
                             }}
                         >
                             Confirmer
@@ -201,11 +219,25 @@ export default function EmployeeTable({ sessionId }: Props) {
                                                         size="sm"
                                                         onClick={e => {
                                                             e.stopPropagation()
-                                                            handlePlayClick(slot)
+                                                            handleOpenSignatureClick(slot)
                                                         }}
                                                         className="p-0 h-8 w-8"
+                                                        disabled={slot.status == SlotSignatureStatus.OPEN || slot.status == SlotSignatureStatus.COMPLETED}
                                                     >
                                                         <Play className="h-4 w-4" />
+                                                    </Button>
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={e => {
+                                                            e.stopPropagation()
+                                                            handleCloseSignatureClick(slot)
+                                                        }}
+                                                        className="p-0 h-8 w-8"
+                                                        disabled={slot.status == SlotSignatureStatus.NOT_STARTED || slot.status == SlotSignatureStatus.COMPLETED}
+                                                    >
+                                                        <Lock className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             </TableCell>

@@ -13,7 +13,7 @@ public class FeedbackResponseModel {
     private int rating;
     private String comment;
     private LocalDate submittedAt;
-    private Long sessionEnrollmentId;
+    private SessionEnrollmentResponseModel sessionEnrollment;
 
     public static FeedbackResponseModel toDto(Feedback feedback) {
         FeedbackResponseModel feedbackResponseModel = new FeedbackResponseModel();
@@ -21,7 +21,7 @@ public class FeedbackResponseModel {
         feedbackResponseModel.setRating(feedback.getRating());
         feedbackResponseModel.setSubmittedAt(feedback.getCreatedAt());
         feedbackResponseModel.setComment(feedback.getComment());
-        feedbackResponseModel.setSessionEnrollmentId(feedback.getSessionEnrollment().getId());
+        feedbackResponseModel.setSessionEnrollment(SessionEnrollmentResponseModel.toDto(feedback.getSessionEnrollment()));
         return feedbackResponseModel;
     }
 }

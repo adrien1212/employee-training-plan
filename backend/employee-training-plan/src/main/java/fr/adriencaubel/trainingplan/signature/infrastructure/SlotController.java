@@ -30,11 +30,18 @@ public class SlotController {
         return ResponseEntity.ok(slotSignatures.map(SlotSignatureResponseModel::toDto));
     }
 
-    @PostMapping("/open-signature/{id}")
+    @PostMapping("{id}/open-signature")
     public ResponseEntity<SlotSignatureResponseModel> ouvrirSignature(@PathVariable Long id) {
         SlotSignature slotSignature = slotManagementService.ouvrirSignature(id);
         return ResponseEntity.ok(SlotSignatureResponseModel.toDto(slotSignature));
     }
+
+    @PostMapping("{id}/close-signature")
+    public ResponseEntity<SlotSignatureResponseModel> fermerSignature(@PathVariable Long id) {
+        SlotSignature slotSignature = slotManagementService.fermerSignature(id);
+        return ResponseEntity.ok(SlotSignatureResponseModel.toDto(slotSignature));
+    }
+
 
     @GetMapping("/{id}/missing-signatures")
     public ResponseEntity<Page<SessionEnrollmentResponseModel>> getMissingSignature(@PathVariable Long id, Pageable pageable) {

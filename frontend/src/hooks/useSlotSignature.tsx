@@ -46,7 +46,24 @@ export function useOpenSignature() {
     return useMutation(
         (id: number) =>
             api
-                .post<SlotSignature>(`/v1/slots-signature/open-signature/${id}`)
+                .post<SlotSignature>(`/v1/slots-signature/${id}/open-signature`)
+                .then(res => res.data),
+        {
+            // After opening a signature, invalidate the slots list so it refetches
+            onSuccess: () => {
+                queryClient.invalidateQueries('slots');
+            },
+        }
+    );
+}
+
+export function useCloseSignature() {
+    const queryClient = useQueryClient();
+
+    return useMutation(
+        (id: number) =>
+            api
+                .post<SlotSignature>(`/v1/slots-signature/${id}/close-signature`)
                 .then(res => res.data),
         {
             // After opening a signature, invalidate the slots list so it refetches

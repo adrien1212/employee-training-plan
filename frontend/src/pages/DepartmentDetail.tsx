@@ -7,11 +7,13 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import EmployeeTable from "@/components/common/EmployeesTable";
 import TrainingsTable from "@/components/common/TrainingsTable";
 import { Training } from "@/types/Training";
-import useTrainings from "@/hooks/useTrainings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     useDepartment,
 } from '@/hooks/useDepartments';
+import { useCountEmployees } from "@/hooks/useEmployees";
+import { Badge } from "@/components/ui/badge";
+import { useTrainings } from "@/hooks/useTrainings";
 
 const DepartmentDetail = () => {
     const { id } = useParams();
@@ -27,10 +29,18 @@ const DepartmentDetail = () => {
         data: trainings,
         isLoading: isTrainingLoading,
         error: trainingError,
-    } = useTrainings({})
+    } = useTrainings({ departmentId: Number(id) })
 
-    if (isDeptLoading || isTrainingLoading) return <div className="p-4 text-center text-gray-500">Chargement…</div>
-    if (deptError || trainingError) return <div className="p-4 text-center text-red-500">Erreur de chargement</div>
+    const {
+        data: employeeNumberData,
+        isLoading: isEmployeeNumberLoading,
+        isError: isEmployeeNumberError
+    } = useCountEmployees({ departmentId: Number(id) })
+
+    if (isDeptLoading || isTrainingLoading || isEmployeeNumberLoading) return <div className="p-4 text-center text-gray-500">Chargement…</div>
+    if (deptError || trainingError || isEmployeeNumberError) return <div className="p-4 text-center text-red-500">Erreur de chargement</div>
+
+    console.log(employeeNumberData)
 
     return (
         <SidebarProvider>
@@ -66,12 +76,11 @@ const DepartmentDetail = () => {
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-sm text-gray-600">Responsable</label>
-                                        <p className="font-medium">{department.name}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm text-gray-600">Nombre d'employés</label>
-                                        <p className="font-medium">{department.name}</p>
+                                        <span className="text-sm text-gray-600">Nombre d'employés</span>
+                                        <Badge variant="secondary" className="flex items-center gap-1">
+                                            <Users className="h-3 w-3" />
+                                            {employeeNumberData}
+                                        </Badge>
                                     </div>
                                 </div>
                             </CardContent>

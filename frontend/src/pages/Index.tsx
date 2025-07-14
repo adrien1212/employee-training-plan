@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,6 @@ import { Users, Building2, GraduationCap, Calendar } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import api from "@/services/api";
-import axios from "axios";
-import { useToast } from "@/hooks/use-toast";
 import { SessionDetail } from "@/types/SessionDetail";
 import { useCountEmployees } from "@/hooks/useEmployees";
 import { useCountDepartments } from "@/hooks/useDepartments";
@@ -16,9 +13,11 @@ import { useCountSessions } from "@/hooks/useSessions";
 import { SessionStatus } from "@/types/SessionStatus";
 import { useCurrentPlan } from "@/hooks/usePlan";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   // 1) Set up state to hold the array of stat-objects
+  const navigate = useNavigate();
   const [recentSessions, setRecentSessions] = useState<SessionDetail[]>([]);
 
   const {
@@ -51,22 +50,6 @@ const Index = () => {
     isError: isSessionNumberError
   } = useCountSessions(SessionStatus.NotStarted)
 
-  // 4) The rest of your component stays the same; it just maps over `stats`
-  //    (which now comes from the API instead of being hard-coded).
-  useEffect(() => {
-    const fetchRecentSessions = async () => {
-      try {
-        const response = await api.get("/v1/sessions?sessionStatus=COMPLETED");
-        setRecentSessions(response.data.content);
-        console.log(recentSessions)
-      } catch {
-
-      }
-    };
-
-    fetchRecentSessions();
-  }, []);
-
   if (isEmployeeNumberLoading || isDepartmentNumberLoading || isTrainingNumberLoading || isSessionNumberLoading || isPlanLoading) {
     return <div>Chargement</div>
   }
@@ -96,7 +79,7 @@ const Index = () => {
           <div className="p-6 space-y-6">
             {/* Statistics Cards (dynamically from `stats`) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="transition-all hover:shadow-lg hover:-translate-y-1">
+              <Card className="transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/employees`)}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">
                     Total Employés
@@ -108,7 +91,7 @@ const Index = () => {
                   <p className="text-xs text-gray-500 mt-1">Actifs dans l'entreprise</p>
                 </CardContent>
               </Card>
-              <Card className="transition-all hover:shadow-lg hover:-translate-y-1">
+              <Card className="transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/departments`)}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">
                     Départements
@@ -120,7 +103,7 @@ const Index = () => {
                   <p className="text-xs text-gray-500 mt-1">Départements actifs</p>
                 </CardContent>
               </Card>
-              <Card className="transition-all hover:shadow-lg hover:-translate-y-1">
+              <Card className="transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/trainings`)}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">
                     Formations
@@ -132,7 +115,7 @@ const Index = () => {
                   <p className="text-xs text-gray-500 mt-1">Formations disponibles</p>
                 </CardContent>
               </Card>
-              <Card className="transition-all hover:shadow-lg hover:-translate-y-1">
+              <Card className="transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/sessions`)}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">
                     Sessions
@@ -146,44 +129,8 @@ const Index = () => {
               </Card>
             </div>
 
-            {/* Recent Trainings (unchanged) */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <GraduationCap className="h-5 w-5 text-blue-600" />
-                  Formations Récentes
-                </CardTitle>
-                <CardDescription>
-                  Dernières formations programmées dans votre organisation
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {recentSessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{session.startDate}</h3>
-                        <p className="text-sm text-gray-600">{session.startDate}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm font-medium text-gray-900">{session.startDate}</p>
-                        <p className="text-xs text-gray-600">{session.startDate} participants</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 pt-4 border-t">
-                  <Button variant="outline" className="w-full">
-                    Voir toutes les formations
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Quick Actions (unchanged) */}
+            {/* Quick Actions (unchanged) 
             <Card>
               <CardHeader>
                 <CardTitle>Actions Rapides</CardTitle>
@@ -207,7 +154,7 @@ const Index = () => {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </Card>*/}
           </div>
         </main>
       </div>
