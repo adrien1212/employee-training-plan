@@ -26,7 +26,7 @@ const statusMap: Record<SlotSignatureStatus, { label: string; style: string }> =
     COMPLETED: { label: 'Complété', style: 'bg-red-100 text-red-800' },
 };
 
-export default function EmployeeTable({ sessionId }: Props) {
+export default function SlotSignatureTable({ sessionId }: Props) {
     const navigate = useNavigate()
     const [page, setPage] = useState(0)
     const [pageSize, setPageSize] = useState(10)

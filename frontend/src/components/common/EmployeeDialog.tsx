@@ -55,7 +55,6 @@ export default function EmployeeDialog({
         firstName: '',
         lastName: '',
         email: '',
-        phone: '',
         departmentId: 0,
     })
 
@@ -66,7 +65,6 @@ export default function EmployeeDialog({
                 firstName: editingEmployee.firstName,
                 lastName: editingEmployee.lastName,
                 email: editingEmployee.email,
-                phone: editingEmployee.phone,
                 departmentId: editingEmployee.department.id,
             })
         } else {
@@ -74,7 +72,6 @@ export default function EmployeeDialog({
                 firstName: '',
                 lastName: '',
                 email: '',
-                phone: '',
                 departmentId: 0,
             })
         }
@@ -155,19 +152,6 @@ export default function EmployeeDialog({
                             value={formData.email}
                             onChange={e =>
                                 setFormData(prev => ({ ...prev, email: e.target.value }))
-                            }
-                            required
-                            disabled={isBusy}
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="phone">Téléphone</Label>
-                        <Input
-                            id="phone"
-                            value={formData.phone}
-                            onChange={e =>
-                                setFormData(prev => ({ ...prev, phone: e.target.value }))
                             }
                             required
                             disabled={isBusy}
