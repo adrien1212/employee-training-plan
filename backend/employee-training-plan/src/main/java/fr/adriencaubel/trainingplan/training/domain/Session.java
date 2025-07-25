@@ -106,11 +106,16 @@ public class Session {
         if (getLastStatus() != SessionStatus.ACTIVE) {
             throw new IllegalArgumentException("Can only complete active trainings");
         }
+        changeStatus(SessionStatus.COMPLETED);
+    }
+
+    public void open() {
+        if (getLastStatus() != SessionStatus.NOT_STARTED) {
+            throw new IllegalArgumentException("Can only open not started trainings");
+        }
 
         sessionEnrollments.forEach(SessionEnrollment::openFeedback);
-        changeStatus(SessionStatus.COMPLETED);
-
-        // Envoyer un mail a chacun des participants +
+        changeStatus(SessionStatus.ACTIVE);
     }
 
     public boolean isSessionComplete() {

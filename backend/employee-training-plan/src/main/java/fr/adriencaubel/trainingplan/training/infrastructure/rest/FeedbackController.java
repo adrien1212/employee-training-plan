@@ -23,11 +23,26 @@ public class FeedbackController {
 
     @GetMapping
     public ResponseEntity<Page<FeedbackResponseModel>> getFeedbacks(@RequestParam(value = "trainingId", required = false) Long trainingId, @RequestParam(value = "sessionId", required = false) Long sessionId, Pageable pageable) {
-        Page<Feedback> feedbacks = feedbackService.getFeedbacksBy(trainingId, sessionId, pageable);
+        Page<Feedback> feedbacks = feedbackService.findAll(trainingId, sessionId, pageable);
 
         Page<FeedbackResponseModel> feedbackResponseModels = feedbacks.map(FeedbackResponseModel::toDto);
 
         return ResponseEntity.ok(feedbackResponseModels);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<FeedbackResponseModel> getBYId(@PathVariable Long id) {
+        Feedback feedback = feedbackService.findById(id);
+
+        FeedbackResponseModel feedbackResponseModel = FeedbackResponseModel.toDto(feedback);
+
+        return ResponseEntity.ok(feedbackResponseModel);
+    }
+
+    @PostMapping("{id}/relance")
+    public ResponseEntity<Void> relanceDemandeFeedback(@PathVariable Long id) {
+        feedbackService.relanceDemandeFeedback(id);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("{feedbackToken}")

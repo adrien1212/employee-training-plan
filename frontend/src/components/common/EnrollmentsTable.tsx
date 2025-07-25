@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Trash2 } from 'lucide-react';
+import Pagination from '../pagination/Pagination';
 
 type Enrollment = {
     id: number;
@@ -164,24 +165,6 @@ export default function EnrollmentsTable({
                     })}
                 </TableBody>
             </Table>
-
-            <div className="flex justify-between items-center p-4">
-                <Button
-                    disabled={loading || page <= 0}
-                    onClick={() => onPageChange(page - 1)}
-                >
-                    Précédent
-                </Button>
-                <span>
-                    Page {page + 1} sur {totalPages}
-                </span>
-                <Button
-                    disabled={loading || page + 1 >= totalPages}
-                    onClick={() => onPageChange(page + 1)}
-                >
-                    Suivant
-                </Button>
-            </div>
         </>
     );
 }

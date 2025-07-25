@@ -23,7 +23,11 @@ public class SessionEnrollmentResponseModel {
         sessionEnrollmentResponseModel.setId(sessionEnrollment.getId());
         sessionEnrollmentResponseModel.setHasFeedback(sessionEnrollment.getFeedback() != null && sessionEnrollment.getFeedback().getRating() != 0);
         sessionEnrollmentResponseModel.setSession(SessionResponseModel.toDto(sessionEnrollment.getSession()));
-        sessionEnrollmentResponseModel.setFeedbackToken(sessionEnrollment.getFeedback().getFeedbackToken());
+
+        if (sessionEnrollment.getFeedback() != null) {
+            sessionEnrollmentResponseModel.setFeedbackToken(sessionEnrollment.getFeedback().getFeedbackToken());
+        }
+
         sessionEnrollmentResponseModel.setEmployee(EmployeeResponseModel.toDto(sessionEnrollment.getEmployee()));
         //sessionEnrollmentResponseModel.setHasSigned(sessionEnrollment.getSignature().getSignature() != null);
         sessionEnrollmentResponseModel.setSessionEnrollmentToken(sessionEnrollment.getAccessToken());

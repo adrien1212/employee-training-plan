@@ -6,6 +6,7 @@ import { PageResponse } from '@/types/PageResponse';
 import { SessionDetail } from '@/types/SessionDetail';
 import { SessionStatus } from '@/types/SessionStatus';
 import { NewSession } from '@/types/NewSession';
+import { Newspaper } from 'lucide-react';
 
 export interface UseSessionsOptions {
     trainingId?: number; // quand on crée une session
@@ -118,6 +119,37 @@ export function useCreateSession(options: UseSessionsOptions = {}) {
         }
     );
 }
+
+/**
+ * OPEN
+ */
+export function useOpenSession() {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: number) =>
+            api.post<SessionDetail>(`/v1/sessions/${id}/open`).then(res => res.data),
+        onSuccess: (_data, id) => {
+            qc.invalidateQueries(['session', id]);
+        },
+    });
+}
+
+/**
+ * COMPLETE 
+ */
+export function useCompleteSession() {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: number) =>
+            api.post<SessionDetail>(`/v1/sessions/${id}/complete`).then(res => res.data),
+        onSuccess: (_data, id) => {
+            qc.invalidateQueries(['session', id]);
+        },
+    });
+}
+
 
 /**
  * UPDATE: modify existing session

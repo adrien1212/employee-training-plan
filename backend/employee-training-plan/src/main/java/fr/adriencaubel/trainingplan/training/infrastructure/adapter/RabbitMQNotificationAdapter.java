@@ -2,7 +2,9 @@ package fr.adriencaubel.trainingplan.training.infrastructure.adapter;
 
 import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
 import fr.adriencaubel.trainingplan.training.application.NotificationPort;
+import fr.adriencaubel.trainingplan.training.domain.Feedback;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
+import fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto.NotificationFeedbackRequestModel;
 import fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto.NotificationSessionEnrollmentRequestModel;
 import fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto.NotificationSlotSignatureRequestModel;
 import fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto.NotificationType;
@@ -26,6 +28,9 @@ public class RabbitMQNotificationAdapter implements NotificationPort {
 
     @Value("${rabbitmq.routing-keys.slot-signature}")
     private String slotSignatureKey;
+
+    @Value("${rabbitmq.routing-keys.feedback}")
+    private String feedbackKey;
 
     @Override
     public void sendSubscribeNotification(SessionEnrollment sessionEnrollment) {
@@ -69,4 +74,22 @@ public class RabbitMQNotificationAdapter implements NotificationPort {
         );
     }
 
+    @Override
+    public void sendSessionCompletedNotification(SessionEnrollment sessionEnrollment) {
+        NotificationSessionEnrollmentRequestModel notificationSessionEnrollmentRequestModel = new NotificationSessionEnrollmentRequestModel(NotificationType.FEEDBACK_OPEN, null, sessionEnrollment.getId());
+        rabbitTemplate.convertAndSend(
+                commandsExchange,
+                slotSignatureKey,
+                notificationSessionEnrollmentRequestModel
+        );
+    }
+
+    public void sendRelanceDemandeFeedbackNotification(Feedback feedback) {
+        NotificationFeedbackRequestModel notificationFeedbackRequestModel = new NotificationFeedbackRequestModel(NotificationType.FEEDBACK_RELANCE, feedback.getId());
+        rabbitTemplate.convertAndSend(
+                commandsExchange,
+                feedbackKey,
+                notificationFeedbackRequestModel
+        );
+    }
 }

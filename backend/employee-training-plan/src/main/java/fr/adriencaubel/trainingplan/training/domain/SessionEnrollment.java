@@ -43,13 +43,13 @@ public class SessionEnrollment {
         this.employee = employee;
         this.session = session;
         this.accessToken = UUID.randomUUID().toString();
-        this.feedback = Feedback.create(session.getTraining().getCompany());
-        feedback.setSessionEnrollment(this);
+        //this.feedback = Feedback.create(session.getTraining().getCompany());
+        //feedback.setSessionEnrollment(this);
     }
 
     public void openFeedback() {
-        //feedbackToken = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
-        //tokenExpiration = LocalDateTime.now().plusDays(7);
+        this.feedback = Feedback.create(session.getTraining().getCompany());
+        feedback.setSessionEnrollment(this);
     }
 
     public void addFeedback(String comment, int rating) {

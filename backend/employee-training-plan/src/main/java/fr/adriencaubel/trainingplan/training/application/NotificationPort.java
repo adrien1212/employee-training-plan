@@ -13,4 +13,6 @@ public interface NotificationPort {
     void sendSessionReminderNotification(SessionEnrollment sessionEnrollment, LocalDateTime scheduledTime);
 
     void sendSlotOpenNotification(SlotSignature slotSignature);
+
+    void sendSessionCompletedNotification(SessionEnrollment sessionEnrollment);
 }

@@ -1,8 +1,9 @@
-package fr.adriencaubel.etp.notification.config;
+package fr.adriencaubel.etp.notification.config.feign;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import fr.adriencaubel.etp.notification.config.ExceptionMessage;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 

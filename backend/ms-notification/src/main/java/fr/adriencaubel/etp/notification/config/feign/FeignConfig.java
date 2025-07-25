@@ -1,4 +1,4 @@
-package fr.adriencaubel.etp.notification.config;
+package fr.adriencaubel.etp.notification.config.feign;
 
 import feign.RequestInterceptor;
 import feign.codec.ErrorDecoder;

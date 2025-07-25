@@ -32,9 +32,11 @@ public interface SessionRepository extends JpaRepository<Session, Long>, JpaSpec
     @Query("SELECT s FROM Session s LEFT JOIN FETCH s.sessionEnrollments LEFT JOIN FETCH s.slotSignatures WHERE s.trainerAccessToken = :accessToken")
     Optional<Session> findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(String accessToken);
 
+    @Query("SELECT s FROM Session s LEFT JOIN FETCH s.sessionEnrollments LEFT JOIN FETCH s.slotSignatures WHERE s.id = :id")
+    Optional<Session> findByIdWithSessionEnrollmentAndSlotSignatures(Long id);
+
     Optional<Session> findByTrainerAccessToken(@NotNull String trainerAccessToken);
-
-
+    
     @Query("""
             SELECT COUNT(s)
               FROM Session s
@@ -48,4 +50,5 @@ public interface SessionRepository extends JpaRepository<Session, Long>, JpaSpec
                AND (:sessionStatus IS NULL OR h.status = :sessionStatus)
             """)
     Long countByStatus(SessionStatus sessionStatus);
+
 }

@@ -11,6 +11,7 @@ import TrainerDialog from './TrainerDialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { useNavigate } from 'react-router-dom'
+import Pagination from '../pagination/Pagination'
 
 export default function TrainerTable() {
     const navigate = useNavigate()
@@ -101,38 +102,13 @@ export default function TrainerTable() {
             )}
 
             {/* Pagination */}
-            <div className="flex items-center justify-between mt-4 p-4">
-                <div className="text-gray-600">
-                    Page {page + 1} sur {totalPages}
-                </div>
-                <div className="flex gap-2">
-                    <Button disabled={page === 0} onClick={() => setPage(p => Math.max(p - 1, 0))}>
-                        Précédent
-                    </Button>
-                    <Button disabled={page + 1 >= totalPages} onClick={() => setPage(p => p + 1)}>
-                        Suivant
-                    </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Label htmlFor="pageSizeSelect">Taille :</Label>
-                    <Select
-                        id="pageSizeSelect"
-                        value={pageSize.toString()}
-                        onValueChange={value => { setPageSize(Number(value)); setPage(0) }}
-                    >
-                        <SelectTrigger className="w-24">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {[5, 10, 20, 50].map(size => (
-                                <SelectItem key={size} value={size.toString()}>
-                                    {size} / page
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+            <Pagination
+                page={page}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
 
             {/* Create / Edit Dialog */}
             <TrainerDialog

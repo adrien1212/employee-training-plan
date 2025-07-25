@@ -1,6 +1,5 @@
 package fr.adriencaubel.etp.notification.slotsignature.listener;
 
-import fr.adriencaubel.etp.notification.listener.requestmodel.NotificationSlotSignatureRequestModel;
 import fr.adriencaubel.etp.notification.slotsignature.service.NotificationSlotSignatureService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

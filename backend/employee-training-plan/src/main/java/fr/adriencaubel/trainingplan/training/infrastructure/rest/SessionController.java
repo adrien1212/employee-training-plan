@@ -80,9 +80,26 @@ public class SessionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("{id}/open")
+    public ResponseEntity<Session> openSession(
+            @PathVariable Long id) {
+        // Set the trainingId from the path variable to ensure consistency
+        Session session = sessionService.openSession(id);
+        return ResponseEntity.ok(session);
+    }
+
+    @PostMapping("{id}/complete")
+    public ResponseEntity<Session> completeSession(
+            @PathVariable Long id) {
+        // Set the trainingId from the path variable to ensure consistency
+        Session session = sessionService.completeSession(id);
+        return ResponseEntity.ok(session);
+    }
+
+    // revoir pour le rendre publique
     // Permet au formateur avec un lien de cloturer la session -- trainerTocken
     @PostMapping("/complete/{token}")
-    public ResponseEntity<Session> completeSession(
+    public ResponseEntity<Session> completeSessionBis(
             @PathVariable String token) {
         // Set the trainingId from the path variable to ensure consistency
         Session session = sessionService.completeSession(token);

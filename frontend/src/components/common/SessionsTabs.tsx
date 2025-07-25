@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Plus, Trash2, Play } from 'lucide-react';
+import { Edit, Plus, Trash2, Play, BookmarkCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { SessionDetail } from '@/types/SessionDetail';
@@ -15,6 +15,8 @@ import {
     useSessions,
     useDeleteSession,
     useUpdateSession,
+    useOpenSession,
+    useCompleteSession,
 } from '@/hooks/useSessions';
 import SessionDialog from './SessionDialog';
 import {
@@ -29,6 +31,7 @@ import {
 import { useTrainers } from '@/hooks/useTrainer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '@radix-ui/react-label';
+import Pagination from '../pagination/Pagination';
 
 interface SessionsTabsProps {
     trainingId?: string;
@@ -48,16 +51,39 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+
     const [editingSession, setEditingSession] = useState<SessionDetail | null>(null);
     const [createSession, setCreateSession] = useState<SessionDetail | null>(null);
+    const [tab, setTab] = useState<'toutes' | 'active' | 'completed' | 'not_started'>('toutes');
 
     // Confirmation dialog state
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [sessionToRun, setSessionToRun] = useState<SessionDetail | null>(null);
+    const [sessionToComplete, setSessionToFinish] = useState<SessionDetail | null>(null);
+    const [confirmSessionFinishOpen, setConfirmSessionFinishOpen] = useState(false);
+
+    const openSession = useOpenSession();
+    const completeSession = useCompleteSession();
+
+
+    // FILTERS
+    const statusFilter = useMemo(() => {
+        switch (tab) {
+            case 'active':
+                return SessionStatus.Active;
+            case 'completed':
+                return SessionStatus.Completed;
+            case 'not_started':
+                return SessionStatus.NotStarted;
+            default:
+                return undefined; // No filtering for "toutes"
+        }
+    }, [tab]);
 
     // DATA
     const { data: response, isLoading, isError, error, refetch } =
-        useSessions({ trainingId: tid, page, size: pageSize });
+        useSessions({ trainingId: tid, sessionStatus: statusFilter, page, size: pageSize });
     const { mutate: deleteSession, isLoading: isDeleting } =
         useDeleteSession({ trainingId: tid, page, size: pageSize });
     const updateSession = useUpdateSession({});
@@ -71,17 +97,6 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
     const busy = isDeleting;
     const sessions = response?.content ?? [];
     const totalPages = response?.totalPages ?? 0;
-
-    // FILTERS
-    const filtered = useMemo(
-        () => ({
-            all: sessions,
-            active: sessions.filter(s => s.status === SessionStatus.Active),
-            completed: sessions.filter(s => s.status === SessionStatus.Completed),
-            notStarted: sessions.filter(s => s.status === SessionStatus.NotStarted || s.status === SessionStatus.Draft),
-        }),
-        [sessions]
-    );
 
     const getStatusBadge = (status: SessionDetail['status']) => {
         const cfg = statusMap[status];
@@ -104,24 +119,23 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
 
     // Actual mutation call
     const executeRunSession = (session: SessionDetail) => {
-        updateSession.mutate(
-            {
-                id: session.id,
-                data: {
-                    status: SessionStatus.Active,
-                    startDate: session.startDate,
-                    endDate: session.endDate,
-                    location: session.location,
-                },
-            },
-            { onSuccess }
-        );
+        openSession.mutate(session.id, { onSuccess });
     };
+
+    const executeFinishSession = (session: SessionDetail) => {
+        console.log(session)
+        completeSession.mutate(session.id, { onSuccess });
+    }
 
     // Trigger to open confirm dialog
     const handlePlayClick = (session: SessionDetail) => {
         setSessionToRun(session);
         setConfirmOpen(true);
+    };
+
+    const handleFinishSessionClick = (session: SessionDetail) => {
+        setSessionToFinish(session);
+        setConfirmSessionFinishOpen(true);
     };
 
     const onSuccess = () => {
@@ -185,6 +199,14 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                                     <Button
                                         variant="ghost"
                                         size="sm"
+                                        onClick={e => { e.stopPropagation(); handleFinishSessionClick(session); }}
+                                        disabled={busy || session.status == SessionStatus.NotStarted || session.status == SessionStatus.Cancelled || session.status == SessionStatus.Completed}
+                                    >
+                                        <BookmarkCheck className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
                                         onClick={e => { e.stopPropagation(); openDialog(session); }}
                                         disabled={busy}
                                     >
@@ -205,39 +227,14 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                 </TableBody>
             </Table>
             {/* Pagination */}
-            <div className="flex items-center justify-between mt-4 p-4">
-                <div className="text-gray-600">
-                    Page {page + 1} sur {totalPages}
-                </div>
-                <div className="flex gap-2">
-                    <Button disabled={page === 0} onClick={() => setPage(p => Math.max(p - 1, 0))}>
-                        Précédent
-                    </Button>
-                    <Button disabled={page + 1 >= totalPages} onClick={() => setPage(p => p + 1)}>
-                        Suivant
-                    </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Label htmlFor="pageSizeSelect">Taille :</Label>
-                    <Select
-                        id="pageSizeSelect"
-                        value={pageSize.toString()}
-                        onValueChange={value => { setPageSize(Number(value)); setPage(0) }}
-                        disabled={busy}
-                    >
-                        <SelectTrigger className="w-24">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {[5, 10, 20, 50].map(s => (
-                                <SelectItem key={s} value={s.toString()}>
-                                    {s} / page
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+            <Pagination
+                page={page}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                busy={busy}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
         </>
     );
 
@@ -255,7 +252,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Confirmer le démarrage</DialogTitle>
+                        <DialogTitle>Confirmer le démarrage de la session</DialogTitle>
                         <DialogDescription>
                             {warningMessage ?? 'Êtes-vous sûr·e de vouloir démarrer cette session ?'}
                         </DialogDescription>
@@ -277,7 +274,33 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                 </DialogContent>
             </Dialog>
 
-            <Tabs defaultValue="toutes" className="w-full">
+            <Dialog open={confirmSessionFinishOpen} onOpenChange={setConfirmSessionFinishOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Confirmer la fin de la session</DialogTitle>
+                        <DialogDescription>
+                            {warningMessage ?? 'Êtes-vous sûr·e de vouloir clôturer cette session ?'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="space-x-2">
+                        <Button variant="secondary" onClick={() => setConfirmSessionFinishOpen(false)}>
+                            Annuler
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => {
+                                if (sessionToComplete) executeFinishSession(sessionToComplete);
+                                setConfirmSessionFinishOpen(false);
+                            }}
+                        >
+                            Confirmer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+
+            <Tabs value={tab} onValueChange={(val) => { setTab(val); setPage(0); }} className="w-full">
                 <TabsList>
                     <TabsTrigger value="toutes">Toutes</TabsTrigger>
                     <TabsTrigger value="active">Actives</TabsTrigger>
@@ -290,7 +313,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                         <CardHeader>
                             <CardTitle>Toutes les sessions</CardTitle>
                         </CardHeader>
-                        <CardContent>{renderTable(filtered.all)}</CardContent>
+                        <CardContent>{renderTable(sessions)}</CardContent>
                     </Card>
                 </TabsContent>
                 <TabsContent value="active">
@@ -298,7 +321,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                         <CardHeader>
                             <CardTitle>Sessions actives</CardTitle>
                         </CardHeader>
-                        <CardContent>{renderTable(filtered.active)}</CardContent>
+                        <CardContent>{renderTable(sessions)}</CardContent>
                     </Card>
                 </TabsContent>
 
@@ -307,7 +330,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                         <CardHeader>
                             <CardTitle>Sessions terminées</CardTitle>
                         </CardHeader>
-                        <CardContent>{renderTable(filtered.completed)}</CardContent>
+                        <CardContent>{renderTable(sessions)}</CardContent>
                     </Card>
                 </TabsContent>
 
@@ -316,7 +339,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                         <CardHeader>
                             <CardTitle>Sessions non commencées</CardTitle>
                         </CardHeader>
-                        <CardContent>{renderTable(filtered.notStarted)}</CardContent>
+                        <CardContent>{renderTable(sessions)}</CardContent>
                     </Card>
                 </TabsContent>
             </Tabs>

@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import api from '@/services/api';
 import { PageResponse } from '@/types/PageResponse';
 import { Feedback } from '@/types/Feedback';
@@ -22,7 +22,7 @@ const sessionsKeys = ({
 }: Options) =>
     ['sessions', trainingId, sessionId, page, size] as const;
 
-function useFeedback(options: Options) {
+export function useFeedback(options: Options) {
     const {
         trainingId,
         sessionId,
@@ -54,4 +54,18 @@ function useFeedback(options: Options) {
     };
 }
 
-export default useFeedback
+
+/**
+ * OPEN
+ */
+export function useFeebackRelance() {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: number) =>
+            api.post<Feedback>(`/v1/feedbacks/${id}/relance`).then(res => res.data),
+        onSuccess: (_data, id) => {
+            qc.invalidateQueries(['feedback', id]);
+        },
+    });
+}

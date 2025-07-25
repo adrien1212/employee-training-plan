@@ -26,8 +26,8 @@ services:
     environment:
        - EUREKA_SERVER=http://discovery:8761/eureka
        - KEYCLOAK_ISSUER=http://keycloak:7980/realms/employee-training-plan
-       - NOTIFICATION_SERVICE_URL=http://notification:8010
-       - CORE_SERVICE_URL=http://backend:8081
+       - NOTIFICATION_SERVICE_URL=http://host.docker.internal:8010
+       - CORE_SERVICE_URL=http://host.docker.internal:8081
     networks:
       - app-network
   notification:

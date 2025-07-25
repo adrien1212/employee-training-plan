@@ -20,6 +20,7 @@ import {
     useEmployeesSearch,
 } from '@/hooks/useEmployees'
 import { useCurrentPlan } from '@/hooks/usePlan'
+import Pagination from '../pagination/Pagination'
 
 interface Props {
     departmentId?: number
@@ -200,39 +201,14 @@ export default function EmployeeTable({ departmentId, sessionId }: Props) {
             )}
 
             {/* Pagination */}
-            <div className="flex items-center justify-between mt-4 p-4">
-                <div className="text-gray-600">
-                    Page {page + 1} sur {totalPages}
-                </div>
-                <div className="flex gap-2">
-                    <Button disabled={page === 0} onClick={() => setPage(p => Math.max(p - 1, 0))}>
-                        Précédent
-                    </Button>
-                    <Button disabled={page + 1 >= totalPages} onClick={() => setPage(p => p + 1)}>
-                        Suivant
-                    </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Label htmlFor="pageSizeSelect">Taille :</Label>
-                    <Select
-                        id="pageSizeSelect"
-                        value={pageSize.toString()}
-                        onValueChange={value => { setPageSize(Number(value)); setPage(0) }}
-                        disabled={busy}
-                    >
-                        <SelectTrigger className="w-24">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {[5, 10, 20, 50].map(s => (
-                                <SelectItem key={s} value={s.toString()}>
-                                    {s} / page
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+            <Pagination
+                page={page}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                busy={busy}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
 
             {/* Create / Edit Dialog */}
             <EmployeeDialog

@@ -21,6 +21,10 @@ import {
 } from '../ui/card';
 import { SessionStatus } from '@/types/SessionStatus';
 import { useSessionsEnrollment } from '@/hooks/useSessionEnrollments';
+import Pagination from '../pagination/Pagination';
+import { useFeebackRelance } from '@/hooks/useFeedback';
+import { SessionEnrollment } from '@/types/SessionEnrollment';
+import { toast } from '../ui/use-toast';
 
 interface PendingFeedbackTableProps {
     pageSize?: number;
@@ -33,11 +37,9 @@ const getInitials = (name: string) =>
         .join('')
         .toUpperCase();
 
-const FeedbackPending: React.FC<PendingFeedbackTableProps> = ({
-    pageSize = 10,
-}) => {
+const FeedbackPending: React.FC<PendingFeedbackTableProps> = () => {
     const [page, setPage] = useState(0);
-
+    const [pageSize, setPageSize] = useState(10)
     const {
         data,
         isLoading,
@@ -49,14 +51,20 @@ const FeedbackPending: React.FC<PendingFeedbackTableProps> = ({
         size: pageSize,
     });
 
+    const feedbackRelance = useFeebackRelance();
+
     // normalize into safe defaults
     const sessionsEnrollment = data?.content ?? [];
     const totalPages = data?.totalPages ?? 0;
 
-    function onSendReminder(employeeId: number) {
-        console.log('Envoyer relance pour employeeId:', employeeId);
-        // TODO: call backend to resend email reminder
+    function onSendReminder(sessionEnrollment: SessionEnrollment) {
+        console.log('Envoyer relance pour employeeId:', sessionEnrollment);
+        feedbackRelance.mutate(sessionEnrollment.feedback.id, { onSuccess });
     }
+
+    const onSuccess = () => {
+        toast({ title: 'Relancé effectuée' });
+    };
 
     if (isLoading)
         return (
@@ -124,7 +132,7 @@ const FeedbackPending: React.FC<PendingFeedbackTableProps> = ({
                                             size="sm"
                                             variant="outline"
                                             onClick={() =>
-                                                onSendReminder(pending.employee.id)
+                                                onSendReminder(pending)
                                             }
                                             className="flex items-center gap-1"
                                         >
@@ -145,29 +153,13 @@ const FeedbackPending: React.FC<PendingFeedbackTableProps> = ({
                 </Table>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="flex justify-between items-center p-4">
-                        <Button
-                            disabled={page <= 0}
-                            onClick={() => setPage(p => Math.max(p - 1, 0))}
-                        >
-                            Previous
-                        </Button>
-                        <span>
-                            Page {page + 1} of {totalPages}
-                        </span>
-                        <Button
-                            disabled={page + 1 >= totalPages}
-                            onClick={() =>
-                                setPage(p =>
-                                    Math.min(p + 1, totalPages - 1)
-                                )
-                            }
-                        >
-                            Next
-                        </Button>
-                    </div>
-                )}
+                <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onPageSizeChange={setPageSize}
+                />
             </CardContent>
         </Card>
     );

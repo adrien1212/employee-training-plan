@@ -81,6 +81,7 @@ const TrainingSessionEnrollmentTabs: React.FC<Props> = ({ trainingId }) => {
                 );
             })}
         </Tabs>
+
     );
 };
 

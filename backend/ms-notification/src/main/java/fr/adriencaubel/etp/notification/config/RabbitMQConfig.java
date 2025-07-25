@@ -39,6 +39,12 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.routing-keys.slot-signature}")
     private String slotSignatureKey;
 
+    @Value("${rabbitmq.queues.feedback}")
+    private String feedbackQueue;
+
+    @Value("${rabbitmq.routing-keys.feedback}")
+    private String feedbackKey;
+
     @Bean
     public TopicExchange commandsExchange() {
         return new TopicExchange(commandsExchange);
@@ -56,6 +62,9 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue slotSignatureQueue() { return QueueBuilder.durable(slotSignatureQueue).build(); }
+
+    @Bean
+    public Queue feedbackQueue() { return QueueBuilder.durable(feedbackQueue).build(); }
 
     @Bean
     public Binding sessionEnrollmentBinding() {
@@ -79,6 +88,14 @@ public class RabbitMQConfig {
                 .bind(slotSignatureQueue())
                 .to(commandsExchange())
                 .with(slotSignatureKey);
+    }
+
+    @Bean
+    public Binding feedbackBinding() {
+        return BindingBuilder
+                .bind(feedbackQueue())
+                .to(commandsExchange())
+                .with(feedbackKey);
     }
 
     @Bean

@@ -35,6 +35,9 @@ public class NotificationSessionEnrollmentListener {
                     case UNSUBSCRIBE_TO_SESSION -> {
                         notificationService.createUnsubscribeNotification(notificationRequestModel);
                     }
+                    case FEEDBACK_OPEN -> {
+                        notificationService.createSessionCompletedNotification(notificationRequestModel);
+                    }
                 }
             } else {
                 if(notificationRequestModel.getScheduledAt().minusMinutes(10).isBefore(LocalDateTime.now())) {

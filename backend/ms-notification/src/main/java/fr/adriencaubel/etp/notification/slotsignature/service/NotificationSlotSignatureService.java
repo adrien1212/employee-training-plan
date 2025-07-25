@@ -4,7 +4,7 @@ import fr.adriencaubel.etp.notification.config.feign.CoreAppFeign;
 import fr.adriencaubel.etp.notification.config.feign.dto.SessionEnrollmentFeignResponse;
 import fr.adriencaubel.etp.notification.config.feign.dto.SlotSignatureFeignResponse;
 import fr.adriencaubel.etp.notification.infrastructure.adapter.RabbitMqEmailPublisher;
-import fr.adriencaubel.etp.notification.listener.requestmodel.NotificationSlotSignatureRequestModel;
+import fr.adriencaubel.etp.notification.slotsignature.listener.NotificationSlotSignatureRequestModel;
 import fr.adriencaubel.etp.notification.parameters.domain.email.EmailMessage;
 import fr.adriencaubel.etp.notification.slotsignature.domain.NotificationSlotSignature;
 import fr.adriencaubel.etp.notification.slotsignature.repository.NotificationSlotSignatureRepository;

@@ -45,4 +45,10 @@ public class SessionEnrollmentController {
         SessionEnrollment sessionEnrollment = sessionEnrollmentService.findById(id);
         return new ResponseEntity<>(SessionEnrollmentResponseModel.toDto(sessionEnrollment), HttpStatus.OK);
     }
+
+    @GetMapping("{id}/feedback-token")
+    public ResponseEntity<String> getFeedbackToken(@PathVariable Long id) {
+        String feedbackToken = sessionEnrollmentService.getFeedbackToken(id);
+        return new ResponseEntity<>(feedbackToken, HttpStatus.OK);
+    }
 }

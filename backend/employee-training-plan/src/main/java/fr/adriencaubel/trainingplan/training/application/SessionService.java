@@ -54,10 +54,10 @@ public class SessionService {
     }
 
     @Transactional
-    public Session completeSession(String accessToken) {
+    public Session completeSession(Long id) {
         // Fetch training with proper error handling
-        Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(accessToken)
-                .orElseThrow(() -> new EntityNotFoundException("Session not found with access token: " + accessToken));
+        Session session = sessionRepository.findByIdWithSessionEnrollmentAndSlotSignatures((id))
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with access token: " + id));
 
         // Check if training can be completed
         session.complete();
@@ -71,6 +71,30 @@ public class SessionService {
 
         // Publish domain event for training completion
         eventPublisher.publishEvent(new SessionCompletedEvent(session, sessionEnrollments));
+        return session;
+    }
+
+    @Transactional
+    public Session completeSession(String accessToken) {
+        Session session = sessionRepository.findByTrainerAccessToken(accessToken)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found with access token: " + accessToken));
+
+        return completeSession(session.getId());
+    }
+
+
+    @Transactional
+    public Session openSession(Long sessionId) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new DomainException("Session not found: " + sessionId));
+
+        if (sessionEnrollmentRepository.countBySessionId(sessionId) == 0) {
+            throw new DomainException("Session " + sessionId + " has no active enrollments");
+        }
+
+        session.open();
+        slotManagementService.createSlotsFor(session);
+
         return session;
     }
 
@@ -177,32 +201,6 @@ public class SessionService {
         return sessionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Session " + id + " not found"));
     }
 
-    @Transactional
-    public Session updateStatus(Long sessionId, SessionStatus newSessionStatus) {
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new DomainException("Session not found: " + sessionId));
-
-        SessionStatus current = session.getLastStatus();
-        // If the newStatus is the same as current, you can choose to treat it as no-op:
-        if (current == newSessionStatus) {
-            return session;
-        }
-
-        // Check allowed transitions:
-        session.changeStatus(newSessionStatus);
-
-        if (newSessionStatus == SessionStatus.ACTIVE) {
-            // Verifier qu'il y ait des sessionEnrollment
-            if (sessionEnrollmentRepository.countBySessionId(sessionId) == 0) {
-                throw new DomainException("Session " + sessionId + " has no active enrollments");
-            }
-
-            slotManagementService.createSlotsFor(session);
-        }
-
-        return sessionRepository.save(session);
-    }
-
     public Long count(SessionStatus sessionStatus) {
         //Company company = userService.getCompanyOfAuthenticatedUser();
 
@@ -227,7 +225,7 @@ public class SessionService {
             session.setLocation(updateSessionRequestModel.getLocation());
         }
         if (updateSessionRequestModel.getStatus() != null) {
-            updateStatus(id, updateSessionRequestModel.getStatus());
+            throw new DomainException("Impossible to update session status");
         }
 
         return sessionRepository.save(session);
@@ -248,6 +246,4 @@ public class SessionService {
         Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(accessToken).orElseThrow(() -> new DomainException("Session not found: " + accessToken));
         return session;
     }
-
-
 }

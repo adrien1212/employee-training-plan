@@ -70,6 +70,28 @@ public class NotificationSessionEnrollmentService {
         notificationSessionEnrollmentRepository.save(notification);
     }
 
+    public void createSessionCompletedNotification(NotificationSessionEnrollmentRequestModel notificationSessionEnrollmentRequestModel) {
+        ResponseEntity<SessionEnrollmentFeignResponse> response =
+                sessionEnrollmentFeign.getSessionEnrollment(notificationSessionEnrollmentRequestModel.getSessionEnrollmentId());
+
+        ResponseEntity<String> feedbackTokenResponse = sessionEnrollmentFeign.getFeedbackToken(notificationSessionEnrollmentRequestModel.getSessionEnrollmentId());
+
+        NotificationSessionEnrollment notification = NotificationSessionEnrollment.create(notificationSessionEnrollmentRequestModel.getNotificationType(), null, notificationSessionEnrollmentRequestModel);
+        notification.markSend();
+        notificationSessionEnrollmentRepository.save(notification);
+
+        EmailMessage emailMessage = buildFeedbackEmail(response.getBody(), feedbackTokenResponse.getBody());
+        rabbitMqEmailPublisher.publish(emailMessage);
+    }
+
+    private EmailMessage buildFeedbackEmail(SessionEnrollmentFeignResponse enrollment, String feedbackToken) {
+        return EmailMessage.builder()
+                .to(enrollment.getEmployee().getEmail())
+                .subject("Session terminé, donnez votre feedback")
+                .body("Veuillez donner votre feedback via le lien : " + feedbackToken)
+                .build();
+    }
+
     public EmailMessage buildSubscriptionEmail(
             SessionEnrollmentFeignResponse enrollment
     ) {

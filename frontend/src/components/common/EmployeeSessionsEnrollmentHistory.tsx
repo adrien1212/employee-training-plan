@@ -1,7 +1,6 @@
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { SessionEnrollment } from '@/types/SessionEnrollment';
-import useFeedback from '@/hooks/useFeedback';
 import { SessionStatus } from '@/types/SessionStatus';
 import { SessionDetail } from '@/types/SessionDetail';
 import { Badge } from '../ui/badge';

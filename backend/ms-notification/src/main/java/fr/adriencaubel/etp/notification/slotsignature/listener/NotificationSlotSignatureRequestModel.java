@@ -1,16 +1,15 @@
-package fr.adriencaubel.trainingplan.training.infrastructure.adapter.dto;
+package fr.adriencaubel.etp.notification.slotsignature.listener;
 
+import fr.adriencaubel.etp.notification.parameters.domain.NotificationType;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class NotificationSlotSignatureRequestModel implements Serializable {
+public class NotificationSlotSignatureRequestModel {
     @NonNull
     private NotificationType notificationType;
 

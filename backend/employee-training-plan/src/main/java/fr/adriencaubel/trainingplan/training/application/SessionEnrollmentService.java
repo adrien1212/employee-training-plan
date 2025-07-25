@@ -61,4 +61,9 @@ public class SessionEnrollmentService {
     public SessionEnrollment findById(Long id) {
         return sessionEnrollmentRepository.findById(id).orElseThrow(() -> new NotFoundException("SessionEnrollment Invalid id"));
     }
+
+    public String getFeedbackToken(Long sessionEnrollmentId) {
+        SessionEnrollment sessionEnrollment = findById(sessionEnrollmentId);
+        return sessionEnrollment.getFeedback().getFeedbackToken();
+    }
 }

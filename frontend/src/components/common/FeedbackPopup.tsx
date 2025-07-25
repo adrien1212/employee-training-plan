@@ -1,4 +1,3 @@
-import useFeedback from "@/hooks/useFeedback"
 import { SessionDetail } from "@/types/SessionDetail"
 import {
     Dialog,
@@ -8,6 +7,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from "../ui/button"
+import { useFeedback } from "@/hooks/useFeedback"
 
 interface FeedbackModalProps {
     open: boolean

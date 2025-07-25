@@ -1,6 +1,6 @@
 package fr.adriencaubel.etp.notification.config.feign;
 
-import fr.adriencaubel.etp.notification.config.FeignConfig;
+import fr.adriencaubel.etp.notification.config.feign.dto.FeedbackFeignResponse;
 import fr.adriencaubel.etp.notification.config.feign.dto.SessionEnrollmentFeignResponse;
 import fr.adriencaubel.etp.notification.config.feign.dto.SlotSignatureFeignResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -21,4 +21,10 @@ public interface CoreAppFeign {
 
     @GetMapping("api/v1/slots-signature/{id}/missing-signatures")
     ResponseEntity<Page<SessionEnrollmentFeignResponse>> getMissingSignatures(@PathVariable("id") Long id);
+
+    @GetMapping("api/v1/sessions-enrollment/{id}/feedback-token")
+    ResponseEntity<String> getFeedbackToken(@PathVariable Long id);
+
+    @GetMapping("api/v1/feedbacks/{id}")
+    ResponseEntity<FeedbackFeignResponse> getFeedbackById(@PathVariable Long id);
 }

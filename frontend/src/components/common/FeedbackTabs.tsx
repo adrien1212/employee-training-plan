@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Star } from 'lucide-react';
 import api from '@/services/api';
 
-import useFeedback from '@/hooks/useFeedback'; // ← your hook
 import { Feedback } from '@/types/Feedback';
 import { SessionEnrollment } from '@/types/SessionEnrollment';
 import { PageResponse } from '@/types/PageResponse';
+import Pagination from '../pagination/Pagination';
+import { useFeedback } from '@/hooks/useFeedback';
 
 interface FeedbackTabsProps {
     trainingId?: number;
@@ -20,9 +21,10 @@ interface FeedbackTabsProps {
 const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
     trainingId,
     sessionId,
-    pageSize = 10,
 }) => {
     const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+
 
     const {
         data: feedbacks,
@@ -33,6 +35,9 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
         page,
         size: pageSize
     });
+
+    const totalPages = feedbacks?.totalPages ?? 0;
+
 
     const getInitials = (name: string) =>
         name
@@ -119,27 +124,13 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
                 )}
 
                 {/* Pagination */}
-                {feedbacks.totalPages > 1 && (
-                    <div className="flex justify-between items-center p-4">
-                        <Button
-                            disabled={page <= 0}
-                            onClick={() => setPage(p => Math.max(p - 1, 0))}
-                        >
-                            Previous
-                        </Button>
-                        <span>
-                            Page {page + 1} of {feedbacks.totalPages}
-                        </span>
-                        <Button
-                            disabled={page + 1 >= feedbacks.totalPages}
-                            onClick={() =>
-                                setPage(p => Math.min(p + 1, feedbacks.totalPages - 1))
-                            }
-                        >
-                            Next
-                        </Button>
-                    </div>
-                )}
+                <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onPageSizeChange={setPageSize}
+                />
             </CardContent>
         </Card>
     );
