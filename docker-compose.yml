@@ -35,7 +35,7 @@ services:
       context: ./backend/ms-notification
       dockerfile: Dockerfile
     container_name: ms-notification
-    restart: always
+    restart: unless-stopped
     depends_on:
       - mysql
       - rabbitmq
@@ -54,7 +54,7 @@ services:
       context: ./backend/email-service
       dockerfile: Dockerfile
     container_name: email-service
-    restart: always
+    restart: unless-stopped
     depends_on:
       - rabbitmq
     ports:
@@ -76,7 +76,7 @@ services:
       - discovery
     environment:
       - EUREKA_SERVER=http://discovery:8761/eureka
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan_notification
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan
       - RABBIT_HOST=rabbitmq
       - KEYCLOAK_ISSUER=http://keycloak:7980/realms/employee-training-plan
       - SK_STRIPE_API_KEY=${SK_STRIPE_API_KEY}
@@ -94,6 +94,7 @@ services:
       - "80:80"  # You can change to 443 or use a reverse proxy like Nginx
     environment:
       - VITE_KEYCLOACK_API_URL=http://keycloak:7980
+      - VITE_BACKEND_API_URL=http://gateway:8080
     networks:  
       - app-network
     depends_on:
@@ -138,7 +139,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
-    restart: always
+    restart: unless-stopped
     ports:
       - "5672:5672"    # AMQP protocol port
       - "15672:15672"  # Management UI port
@@ -147,7 +148,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - "1025:1025"
       - "8025:8025"
