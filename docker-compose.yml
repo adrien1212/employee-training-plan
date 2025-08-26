@@ -25,7 +25,7 @@ services:
       - keycloak
     environment:
        - EUREKA_SERVER=http://discovery:8761/eureka
-       - KEYCLOAK_ISSUER=http://keycloak:7980/realms/employee-training-plan
+       - KEYCLOAK_ISSUER=https://auth.traino.cloud/realms/employee-training-plan
        - NOTIFICATION_SERVICE_URL=http://notification:8010
        - CORE_SERVICE_URL=http://backend:8081
     networks:
@@ -35,7 +35,7 @@ services:
       context: ./backend/ms-notification
       dockerfile: Dockerfile
     container_name: ms-notification
-    restart: unless-stopped
+    restart: always
     depends_on:
       - mysql
       - rabbitmq
@@ -46,7 +46,7 @@ services:
        - EUREKA_SERVER=http://discovery:8761/eureka
        - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan_notification
        - RABBIT_HOST=rabbitmq
-       - KEYCLOAK_ISSUER=http://keycloak:7980/realms/employee-training-plan
+       - KEYCLOAK_ISSUER=http://auth.traino.cloud/realms/employee-training-plan
     networks:
       - app-network
   email:
@@ -54,7 +54,7 @@ services:
       context: ./backend/email-service
       dockerfile: Dockerfile
     container_name: email-service
-    restart: unless-stopped
+    restart: always
     depends_on:
       - rabbitmq
     ports:
@@ -78,9 +78,10 @@ services:
       - EUREKA_SERVER=http://discovery:8761/eureka
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan
       - RABBIT_HOST=rabbitmq
-      - KEYCLOAK_ISSUER=http://keycloak:7980/realms/employee-training-plan
+      - KEYCLOAK_ISSUER=https://auth.traino.cloud/realms/employee-training-plan
       - SK_STRIPE_API_KEY=${SK_STRIPE_API_KEY}
       - WHSEC_STRIPE_WEBHOOK=${WHSEC_STRIPE_WEBHOOK}
+      - MONGODB_HOST=mongo
     networks:
       - app-network
 
@@ -91,11 +92,10 @@ services:
     container_name: frontend
     restart: always
     ports:
-      - "80:80"  # You can change to 443 or use a reverse proxy like Nginx
-    environment:
-      - VITE_KEYCLOACK_API_URL=http://keycloak:7980
-      - VITE_BACKEND_API_URL=http://gateway:8080
-    networks:  
+      - "81:80"  # You can change to 443 or use a reverse proxy like Nginx
+        # environment:
+      # - VITE_KEYCLOACK_API_URL=http://keycloak:7980
+    networks:
       - app-network
     depends_on:
       - backend
@@ -139,7 +139,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
-    restart: unless-stopped
+    restart: always
     ports:
       - "5672:5672"    # AMQP protocol port
       - "15672:15672"  # Management UI port
@@ -148,7 +148,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
-    restart: unless-stopped
+    restart: always
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -159,26 +159,28 @@ services:
     container_name: keycloak.openid-provider
     image: quay.io/keycloak/keycloak:25.0.1
     command:
-      - start-dev
+      - start
       - --import-realm
     ports:
-      - 7980:7980
+      - 7980:8080
     volumes:
       - keycloak-data:/opt/keycloak/data     # persist everything under /opt/keycloak/data
     environment:
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HTTP_PORT: 7980
-      KC_HOSTNAME: keycloak           
-      KC_HOSTNAME_PORT: 8080                      
-      KC_HOSTNAME_URL: http://keycloak:7980                # register 127.0.0.1 keycloak in /etc/hosts
-      KC_HOSTNAME_ADMIN_URL: http://keycloak:7980
-      KC_HOSTNAME_STRICT: false                           
-      KC_HOSTNAME_STRICT_BACKCHANNEL: false  
-      KC_HTTP_RELATIVE_PATH: /
-      KC_HTTP_ENABLED: true
+      KEYCLOAK_ADMIN_PASSWORD: brUSeprECtonTONANIghTWo
+      KEYCLOAK_LOGLEVEL: true
+      KC_HTTP_PORT: 8080
+      KC_HOSTNAME: auth.traino.cloud
+      KC_HOSTNAME_URL: https://auth.traino.cloud                # register 127.0.0.1 keycloak in /etc/hosts
+      KC_HOSTNAME_ADMIN_URL: https://auth.traino.cloud
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
+      KEYCLOAK_PROXY: edge
+      # KC_PROXY_ADDRESS_FORWARDING: true
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_DEBUG: true
+      KC_PROXY_HEADERS: "xforwarded"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -187,6 +189,7 @@ services:
       timeout: 5s
       retries: 20
     networks:
+      - reverse-proxy
       - app-network
 
 volumes:
@@ -195,6 +198,7 @@ volumes:
   keycloak-data:
 
 networks:
+  reverse-proxy:
+    external: true
   app-network:
     driver: bridge
-
