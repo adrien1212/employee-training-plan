@@ -240,3 +240,43 @@ export function useTodaySessions(options: UseTodaySessionsOptions) {
         }
     );
 }
+
+/**
+ * SUBSCRIBE employee to a session
+ */
+export function useSubscribeEmployeeToSession(sessionId: number) {
+    const qc = useQueryClient();
+
+    return useMutation(
+        (empId: number) =>
+            api
+                .post(`/v1/sessions/${sessionId}/subscribe/${empId}`)
+                .then(res => res.data),
+        {
+            onSuccess: () => {
+                // Invalidate enrollment list for this session
+                qc.invalidateQueries(['session-enrollments', sessionId]);
+            },
+        }
+    );
+}
+
+/**
+ * UNSUBSCRIBE employee from a session
+ */
+export function useUnsubscribeEmployeeFromSession(sessionId: number) {
+    const qc = useQueryClient();
+
+    return useMutation(
+        (empId: number) =>
+            api
+                .delete(`/v1/sessions/${sessionId}/subscribe/${empId}`)
+                .then(res => res.data),
+        {
+            onSuccess: () => {
+                // Invalidate enrollment list for this session
+                qc.invalidateQueries(['session-enrollments', sessionId]);
+            },
+        }
+    );
+}

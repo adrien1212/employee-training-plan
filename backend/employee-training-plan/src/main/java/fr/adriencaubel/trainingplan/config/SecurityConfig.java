@@ -1,7 +1,5 @@
 package fr.adriencaubel.trainingplan.config;
 
-import fr.adriencaubel.trainingplan.common.filter.KeycloakUserFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,9 +13,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Autowired
-    private KeycloakUserFilter keycloakUserFilter;
-
     /**
      * Configures the security filter chain for handling HTTP requests, OAuth2 login, and logout.
      *

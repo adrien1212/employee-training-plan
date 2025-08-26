@@ -9,19 +9,22 @@ import java.util.List;
 
 @Component
 public class CustomCorsConfiguration implements CorsConfigurationSource {
+
     @Override
     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:8080",
-                "http://127.0.0.1:8080",
-                "http://localhost",
-                "http://127.0.0.1"
+
+        // Use allowed origin patterns instead of fixed origins
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "http://*.traino.cloud",
+                "https://*.traino.cloud"
         ));
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
+
         return config;
     }
 }

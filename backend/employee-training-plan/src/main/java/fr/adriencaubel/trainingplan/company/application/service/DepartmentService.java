@@ -1,7 +1,9 @@
 package fr.adriencaubel.trainingplan.company.application.service;
 
+import fr.adriencaubel.trainingplan.company.application.dto.CreateDepartementRequestModel;
 import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.company.domain.model.Department;
+import fr.adriencaubel.trainingplan.company.infrastructure.repository.CompanyRepository;
 import fr.adriencaubel.trainingplan.company.infrastructure.repository.DepartmentRepository;
 import fr.adriencaubel.trainingplan.company.infrastructure.repository.DepartmentSpecifications;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,11 +13,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class DepartmentService {
     private final DepartmentRepository departmentRepository;
+
+    private final CompanyRepository companyRepository;
 
     private final UserService userService;
 
@@ -34,6 +39,17 @@ public class DepartmentService {
         Specification<Department> specification = DepartmentSpecifications.filter(company.getId(), trainingId);
 
         return departmentRepository.findAll(specification, pageable);
+    }
+
+    @Transactional
+    public Department addDepartment(CreateDepartementRequestModel command) {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        Department department = new Department(command.getDepartmentName());
+        company.addDepartment(department);
+
+        companyRepository.save(company);
+        return department;
     }
 
     public Long count() {

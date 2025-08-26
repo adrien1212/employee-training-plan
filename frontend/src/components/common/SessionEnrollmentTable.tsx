@@ -5,8 +5,8 @@ import EnrollmentsTable from './EnrollmentsTable';
 import { Users } from 'lucide-react';
 import { useSessionsEnrollment } from '@/hooks/useSessionEnrollments';
 import { useEmployeesSearch } from '@/hooks/useEmployees';
-import api from '@/services/api';
 import { toast } from '@/hooks/use-toast';
+import { useSubscribeEmployeeToSession, useUnsubscribeEmployeeFromSession } from '@/hooks/useSessions';
 
 const PAGE_SIZE = 10;
 
@@ -16,6 +16,7 @@ interface SessionEnrollmentCardProps {
 
 const SessionEnrollmentCard: React.FC<SessionEnrollmentCardProps> = ({ sessionId }) => {
     const [page, setPage] = useState<number>(0);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { data, isLoading, error, refetch } = useSessionsEnrollment({
         sessionId,
@@ -23,11 +24,6 @@ const SessionEnrollmentCard: React.FC<SessionEnrollmentCardProps> = ({ sessionId
         size: PAGE_SIZE,
     });
 
-    const [items, setItems] = useState<any[]>([]);
-    const [totalPages, setTotal] = useState(1);
-    const [loading, setLoading] = useState(false);
-
-    const [searchTerm, setSearchTerm] = useState('');
     const {
         data: searchResp,
         isLoading: searchLoading,
@@ -38,36 +34,34 @@ const SessionEnrollmentCard: React.FC<SessionEnrollmentCardProps> = ({ sessionId
         email: searchTerm.length >= 3 ? searchTerm : undefined,
     });
 
+    // New hooks
+    const { mutate: subscribeEmployee } = useSubscribeEmployeeToSession(sessionId);
+    const { mutate: unsubscribeEmployee } = useUnsubscribeEmployeeFromSession(sessionId);
+
     const handleAdd = (empId: number) => {
-        api.post(`/v1/sessions/${sessionId}/subscribe/${empId}`)
-            .then(() => {
+        subscribeEmployee(empId, {
+            onSuccess: () => {
                 toast({ title: 'Employé ajouté', description: 'Inscription OK.' });
                 setSearchTerm('');
-                // refresh list
-                return api.get(`/v1/sessions/${sessionId}/enrollments`, { params: { page } });
-            })
-            .then(res => setItems(res.data.content))
-            .catch(() => toast({ title: 'Erreur', description: 'Échec ajout.', variant: 'destructive' }));
+                refetch();
+            },
+            onError: () => {
+                toast({ title: 'Erreur', description: 'Échec ajout.', variant: 'destructive' });
+            },
+        });
     };
 
     const handleRemove = (empId: number) => {
-        api.delete(`/v1/sessions/${sessionId}/subscribe/${empId}`)
-            .then(() => {
+        unsubscribeEmployee(empId, {
+            onSuccess: () => {
                 toast({ title: 'Succès', description: 'Employé retiré.' });
-                setItems(items.filter(i => i.id !== empId));
-            })
-            .catch(() => toast({ title: 'Erreur', description: 'Échec supp.', variant: 'destructive' }));
+                refetch();
+            },
+            onError: () => {
+                toast({ title: 'Erreur', description: 'Échec supp.', variant: 'destructive' });
+            },
+        });
     };
-
-    useEffect(() => {
-        setLoading(true);
-        api.get(`/v1/sessions/${sessionId}/enrollments`, { params: { page } })
-            .then(res => {
-                setItems(res.data.content);
-                setTotal(res.data.totalPages);
-            })
-            .finally(() => setLoading(false));
-    }, [sessionId, page]);
 
     if (error) {
         return (

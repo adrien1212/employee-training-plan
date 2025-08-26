@@ -51,7 +51,6 @@ const Departments: React.FC = () => {
                 <DepartmentFormDialog
                   open={dialogOpen}
                   onOpenChange={setDialogOpen}
-                  initialData={editingDept}
                   onSubmit={handleSubmit}
                 />
               </div>

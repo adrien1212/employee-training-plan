@@ -4,8 +4,10 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import api from '@/services/api';
 import { PageResponse } from '@/types/PageResponse';
 import { Department } from '@/types/Department';
+import { NewDepartment } from '@/types/NewDepartment';
 
 export interface UseDepartmentOptions {
+    companyId?: number
     trainingId?: number,
     page?: number;
     size?: number;
@@ -20,13 +22,13 @@ export interface UseDepartmentOptions {
  */
 const departmentKey = (id?: number) => ['department', id] as const;
 
-
+const departmentsBaseKey = ['departments'] as const;
 const departmentsKey = ({
     trainingId,
     page = 0,
     size = 10,
 }: UseDepartmentOptions) =>
-    ['departments', trainingId, page, size] as const;
+    [...departmentsBaseKey, { trainingId, page, size }] as const;
 
 export function useDepartments(options: UseDepartmentOptions = {}) {
     const {
@@ -52,6 +54,24 @@ export function useDepartment(id?: number) {
         { enabled: !!id }
     );
 }
+
+export function useCreateDepartment() {
+    const qc = useQueryClient();
+
+    return useMutation(
+        (payload: NewDepartment) =>
+            api.post<Department>(`/v1/departments`, payload)
+                .then(res => res.data),
+        {
+            onSuccess: () => {
+                // Invalidate ALL department lists (any page/size/filter)
+                qc.invalidateQueries({ queryKey: departmentsBaseKey });
+            },
+        }
+    );
+}
+
+
 
 /**
  * COUNT

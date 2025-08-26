@@ -22,7 +22,7 @@ public class GatewaySecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(c -> c.configurationSource(customCorsConfiguration))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/signup").permitAll()
                         .requestMatchers("/actuator/**").permitAll()

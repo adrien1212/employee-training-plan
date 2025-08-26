@@ -1,13 +1,10 @@
 package fr.adriencaubel.trainingplan.company.application.service;
 
 
-import fr.adriencaubel.trainingplan.company.application.dto.CreateDepartementRequestModel;
 import fr.adriencaubel.trainingplan.company.domain.model.Company;
-import fr.adriencaubel.trainingplan.company.domain.model.Department;
 import fr.adriencaubel.trainingplan.company.infrastructure.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,17 +49,6 @@ public class CompanyService {
 //            throw new RuntimeException("Failed to create Stripe customer", e);
 //        }
 //    }
-
-    @Transactional
-    public Department addDepartment(CreateDepartementRequestModel command) {
-        Company company = userService.getCompanyOfAuthenticatedUser();
-
-        Department department = new Department(command.getDepartmentName());
-        company.addDepartment(department);
-
-        companyRepository.save(company);
-        return department;
-    }
 
     public Company getCurrentCompany() {
         Company company = userService.getCompanyOfAuthenticatedUser();
