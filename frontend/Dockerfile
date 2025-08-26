@@ -9,5 +9,6 @@ RUN echo ${PWD} && ls /app -l
 FROM nginx:alpine
 COPY --from=build /app/nginx /etc/nginx/conf.d
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY env.sh /docker-entrypoint.d/env.sh
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
