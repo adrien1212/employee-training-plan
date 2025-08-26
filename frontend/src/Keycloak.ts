@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-js';
 
 const keycloak = new Keycloak({
-  url:   "http://keycloak:7980",
+  url:   import.meta.env.VITE_KEYCLOAK_URL,
   realm: 'employee-training-plan',
   clientId: 'employee-training-plan-frontend-client',
 });
