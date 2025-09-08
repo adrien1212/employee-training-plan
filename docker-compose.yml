@@ -130,16 +130,6 @@ services:
     networks:
       - app-network
 
-  mongo-express:
-    image: mongo-express
-    ports:
-      - "27016:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: root
-      ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/
-      ME_CONFIG_BASICAUTH: false
-
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
@@ -149,20 +139,6 @@ services:
       - "15672:15672"  # Management UI port
     networks:
     - app-network
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    restart: always
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    environment:
-      - MAIL_HOST=ssl0.ovh.net
-      - MAIL_PORT=587
-      - MAIL_USERNAME=noreply@traino.cloud
-      - MAIL_PASSWORD=HNvyNqS4vL2TIvDj
-    networks:
-      - app-network
 
   keycloak:
     container_name: keycloak.openid-provider
