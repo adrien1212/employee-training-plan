@@ -28,7 +28,7 @@ public class SessionEnrollment {
     @JoinColumn(name = "session_id")
     private Session session;
 
-    @OneToOne(mappedBy = "sessionEnrollment", cascade = CascadeType.ALL, optional = false)
+    @OneToOne(mappedBy = "sessionEnrollment", cascade = CascadeType.ALL, optional = true)
     private Feedback feedback;
 
     @OneToMany(mappedBy = "sessionEnrollment", cascade = CascadeType.ALL)

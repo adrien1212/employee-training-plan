@@ -36,7 +36,7 @@ public interface SessionRepository extends JpaRepository<Session, Long>, JpaSpec
     Optional<Session> findByIdWithSessionEnrollmentAndSlotSignatures(Long id);
 
     Optional<Session> findByTrainerAccessToken(@NotNull String trainerAccessToken);
-    
+
     @Query("""
             SELECT COUNT(s)
               FROM Session s
@@ -51,4 +51,18 @@ public interface SessionRepository extends JpaRepository<Session, Long>, JpaSpec
             """)
     Long countByStatus(SessionStatus sessionStatus);
 
+    @Query("""
+            SELECT COUNT(s)
+              FROM Session s
+              JOIN SessionStatusHistory h
+                ON h.session = s
+             WHERE h.changedAt = (
+                     SELECT MAX(h2.changedAt)
+                       FROM SessionStatusHistory h2
+                      WHERE h2.session = s
+                   )
+               AND (:sessionStatus IS NULL OR h.status = :sessionStatus)
+               AND (s.company = :company)
+            """)
+    Long countByStatusAndCompany(SessionStatus sessionStatus, Company company);
 }

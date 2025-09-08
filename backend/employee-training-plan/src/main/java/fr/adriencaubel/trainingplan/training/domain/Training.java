@@ -1,5 +1,6 @@
 package fr.adriencaubel.trainingplan.training.domain;
 
+import fr.adriencaubel.trainingplan.common.exception.DomainException;
 import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.company.domain.model.Department;
 import fr.adriencaubel.trainingplan.signature.domain.ModeSignature;
@@ -71,6 +72,10 @@ public class Training {
     }
 
     public Session createSession(Company company, LocalDate startDate, LocalDate endDate, String location, Trainer trainer, ModeSignature modeSignature) {
+        if (!trainer.getCompany().getId().equals(company.getId())) {
+            throw new DomainException("Le trainer n'appartient pas à la company");
+        }
+
         Session session = new Session();
         session.setCompany(company);
         session.setStartDate(startDate);

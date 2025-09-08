@@ -8,7 +8,8 @@ export interface SessionDetail {
   endDate: string; 
   location: string;
   status: SessionStatus;
-  accessToken: string;
+  employeeAccessToken: string;
+  trainerAccessToken: string
   training : {
     id: number;
     title: string;

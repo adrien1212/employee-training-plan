@@ -1,5 +1,6 @@
 package fr.adriencaubel.trainingplan.training.infrastructure;
 
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.training.domain.Training;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,4 +26,6 @@ public interface TrainingRepository extends JpaRepository<Training, Long>, JpaSp
     Optional<Training> findByIdWithSessionEnrollment(Long trainingId);
 
     Long countByActive(boolean active);
+
+    Long countByActiveAndCompany(boolean active, Company company);
 }

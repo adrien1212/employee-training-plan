@@ -75,7 +75,7 @@ export default function EnrollmentsTable({
                 <div className="p-4">
                     <input
                         type="text"
-                        placeholder="Rechercher un employé…"
+                        placeholder="Rechercher un employé pour l'ajouter …"
                         value={searchTerm}
                         onChange={e => onSearchChange(e.target.value)}
                         className="w-full border rounded px-3 py-2"

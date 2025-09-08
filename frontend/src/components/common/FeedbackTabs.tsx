@@ -36,7 +36,7 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
         size: pageSize
     });
 
-    const totalPages = feedbacks?.totalPages ?? 0;
+    const totalPages = feedbacks?.page.totalPages ?? 0;
 
 
     const getInitials = (name: string) =>
@@ -81,11 +81,11 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
             <CardHeader>
                 <CardTitle>Tous les avis reçus</CardTitle>
                 <CardDescription>
-                    {feedbacks.number} avis reçu(s) au total
+                    {feedbacks.page.number} avis reçu(s) au total
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {feedbacks.totalElements > 0 && (
+                {feedbacks.page.totalElements > 0 && (
                     <div className="space-y-4">
                         {feedbacks.content.map(fb => (
                             <div key={fb.id} className="border rounded-lg p-4">

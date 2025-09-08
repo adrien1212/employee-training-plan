@@ -33,85 +33,9 @@ interface PendingFeedback {
 const Feedbacks = () => {
   const { toast } = useToast();
 
-  const feedbacks: FeedbackItem[] = [
-    {
-      id: 1,
-      sessionId: 1,
-      sessionName: "Sécurité au travail",
-      sessionDate: "2024-06-15",
-      participantName: "Jean Martin",
-      participantEmail: "jean.martin@company.com",
-      rating: 4,
-      comment: "Formation très utile, les exemples concrets sont appréciables. Le formateur était compétent.",
-      submittedAt: "2024-06-15 17:30"
-    },
-    {
-      id: 2,
-      sessionId: 1,
-      sessionName: "Sécurité au travail",
-      sessionDate: "2024-06-15",
-      participantName: "Paul Durand",
-      participantEmail: "paul.durand@company.com",
-      rating: 5,
-      comment: "Excellente formation ! J'ai beaucoup appris sur les nouvelles procédures de sécurité.",
-      submittedAt: "2024-06-15 18:00"
-    },
-    {
-      id: 3,
-      sessionId: 2,
-      sessionName: "Formation Excel",
-      sessionDate: "2024-06-10",
-      participantName: "Sophie Leroy",
-      participantEmail: "sophie.leroy@company.com",
-      rating: 5,
-      comment: "Formation excellente, très pratique et bien organisée.",
-      submittedAt: "2024-06-10 16:45"
-    },
-    {
-      id: 4,
-      sessionId: 2,
-      sessionName: "Formation Excel",
-      sessionDate: "2024-06-10",
-      participantName: "Marie Dubois",
-      participantEmail: "marie.dubois@company.com",
-      rating: 3,
-      comment: "Formation correcte mais trop rapide pour les débutants.",
-      submittedAt: "2024-06-11 09:20"
-    }
-  ];
+  const feedbacks: FeedbackItem[] = []
+  const pendingFeedbacks: FeedbackItem[] = []
 
-  const pendingFeedbacks: PendingFeedback[] = [
-    {
-      id: 1,
-      sessionId: 1,
-      sessionName: "Sécurité au travail",
-      sessionDate: "2024-06-15",
-      participantName: "Pierre Moreau",
-      participantEmail: "pierre.moreau@company.com",
-      department: "Commercial",
-      completedAt: "2024-06-15 16:00"
-    },
-    {
-      id: 2,
-      sessionId: 3,
-      sessionName: "Management d'équipe",
-      sessionDate: "2024-06-12",
-      participantName: "Julie Bernard",
-      participantEmail: "julie.bernard@company.com",
-      department: "Production",
-      completedAt: "2024-06-12 17:30"
-    },
-    {
-      id: 3,
-      sessionId: 3,
-      sessionName: "Management d'équipe",
-      sessionDate: "2024-06-12",
-      participantName: "Marc Petit",
-      participantEmail: "marc.petit@company.com",
-      department: "IT",
-      completedAt: "2024-06-12 17:30"
-    }
-  ];
 
   const getInitials = (name: string) => {
     const parts = name.split(' ');

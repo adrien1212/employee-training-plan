@@ -1,6 +1,8 @@
 package fr.adriencaubel.trainingplan.training.application;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
+import fr.adriencaubel.trainingplan.company.application.service.UserService;
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.training.application.dto.CreateTrainerRequestModel;
 import fr.adriencaubel.trainingplan.training.domain.Trainer;
 import fr.adriencaubel.trainingplan.training.infrastructure.TrainerRepository;
@@ -14,16 +16,25 @@ import org.springframework.stereotype.Service;
 public class TrainerService {
     private final TrainerRepository trainerRepository;
 
+    private final UserService userService;
+
     public Trainer getTrainerById(Long trainerId) {
-        return trainerRepository.findById(trainerId).orElseThrow(() -> new DomainException("trainer not found"));
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        return trainerRepository.findByIdAndCompany(trainerId, company).orElseThrow(() -> new DomainException("trainer not found for the company"));
     }
 
     public Page<Trainer> getAll(Pageable pageable) {
-        return trainerRepository.findAll(pageable);
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        return trainerRepository.findAllByCompany(company, pageable);
     }
 
     public Trainer createTrainer(CreateTrainerRequestModel trainerRequestModel) {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
         Trainer trainer = new Trainer();
+        trainer.setCompany(company);
         trainer.setEmail(trainerRequestModel.getEmail());
         trainer.setFirstName(trainerRequestModel.getFirstName());
         trainer.setLastName(trainerRequestModel.getLastName());

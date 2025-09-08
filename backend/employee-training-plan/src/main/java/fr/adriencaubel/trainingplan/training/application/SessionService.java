@@ -137,12 +137,16 @@ public class SessionService {
     }
 
     public Page<Session> getSessions(Long trainingId, Long trainerId, SessionStatus sessionStatus, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        Specification<Session> specification = SessionSpecification.filter(trainingId, trainerId, sessionStatus, startDate, endDate);
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        Specification<Session> specification = SessionSpecification.filter(company.getId(), trainingId, trainerId, sessionStatus, startDate, endDate);
         return sessionRepository.findAll(specification, pageable);
     }
 
     public Page<Session> getSessionOfDay(LocalDate ofTheDay, Long trainingId, Long trainerId, SessionStatus sessionStatus, Pageable pageable) {
-        Specification<Session> specification = SessionSpecification.filter(trainingId, trainerId, sessionStatus, null, null);
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
+        Specification<Session> specification = SessionSpecification.filter(company.getId(), trainingId, trainerId, sessionStatus, null, null);
         specification = specification.and(SessionSpecification.isToday(ofTheDay));
         return sessionRepository.findAll(specification, pageable);
     }
@@ -184,11 +188,6 @@ public class SessionService {
         return sessionRepository.findAllByDate(start, end);
     }
 
-    public List<Session> findAllByTrainingIdAndSessionDate(Long trainingId, LocalDate startDate, LocalDate endDate) {
-        Specification<Session> specification = SessionSpecification.filter(trainingId, null, null, startDate, endDate);
-        return sessionRepository.findAll(specification);
-    }
-
     public List<Session> findAllByTrainingIdWithEnrollments(Long trainingId, LocalDate startDate, LocalDate endDate) {
         return sessionRepository.findAllByTrainingIdWithEnrollments(trainingId, startDate, endDate);
     }
@@ -202,9 +201,9 @@ public class SessionService {
     }
 
     public Long count(SessionStatus sessionStatus) {
-        //Company company = userService.getCompanyOfAuthenticatedUser();
+        Company company = userService.getCompanyOfAuthenticatedUser();
 
-        return sessionRepository.countByStatus(sessionStatus);
+        return sessionRepository.countByStatusAndCompany(sessionStatus, company);
     }
 
     @Transactional

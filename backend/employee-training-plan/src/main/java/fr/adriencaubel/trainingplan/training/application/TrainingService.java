@@ -124,6 +124,7 @@ public class TrainingService {
     }
 
     public Long count() {
-        return trainingRepository.countByActive(true);
+        Company currentCompany = userService.getCompanyOfAuthenticatedUser();
+        return trainingRepository.countByActiveAndCompany(true, currentCompany);
     }
 }

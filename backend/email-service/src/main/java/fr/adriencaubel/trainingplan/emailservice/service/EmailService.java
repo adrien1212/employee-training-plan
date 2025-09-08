@@ -42,7 +42,7 @@ public class EmailService {
 
     private void sendSimpleEmail(EmailMessageDto emailMessage) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("formationrh@gmail.com");
+        message.setFrom("noreply@traino.cloud");
         message.setTo(emailMessage.to());
         message.setSubject(emailMessage.subject());
         message.setText(emailMessage.body());
@@ -53,7 +53,7 @@ public class EmailService {
     private void sendMimeEmail(EmailMessageDto emailMessage) throws Exception {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-        helper.setFrom("formationrh@gmail.com");
+        helper.setFrom("noreply@traino.cloud");
         helper.setTo(emailMessage.to());
         helper.setSubject(emailMessage.subject());
         helper.setText(emailMessage.body(), emailMessage.isHtml());

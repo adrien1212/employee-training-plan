@@ -126,8 +126,12 @@ const SessionDetailPage = () => {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4 text-gray-500" />
-                                        <label className="text-sm text-gray-600">Formateur</label>
-                                        <p className="font-medium">{trainer.firstName} {trainer.lastName}</p>
+                                        <div>
+                                            <label className="text-sm text-gray-600">Formateur</label>
+                                            <p className="font-medium">{trainer.firstName} {trainer.lastName}</p>
+                                            <p>URL public : /public/signature/{session.trainerAccessToken} </p>
+                                        </div>
+
                                     </div>
                                 </div>
                                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">

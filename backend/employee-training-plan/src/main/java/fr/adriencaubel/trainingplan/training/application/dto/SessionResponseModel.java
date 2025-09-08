@@ -18,7 +18,8 @@ public class SessionResponseModel {
     private LocalDate endDate;
     private String location;
     private SessionStatus status = SessionStatus.NOT_STARTED;
-    private String accessToken;
+    private String employeeAccessToken;
+    private String trainerAccessToken;
     private TrainingMini training;
     private List<SessionStatusHistoryResponseModel> sessionStatusHistory;
     private Long trainerId;
@@ -30,7 +31,8 @@ public class SessionResponseModel {
         sessionResponseModel.setEndDate(session.getEndDate());
         sessionResponseModel.setLocation(session.getLocation());
         sessionResponseModel.setStatus(session.getLastStatus());
-        sessionResponseModel.setAccessToken(session.getEmployeeAccessToken());
+        sessionResponseModel.setEmployeeAccessToken(session.getEmployeeAccessToken());
+        sessionResponseModel.setTrainerAccessToken(session.getTrainerAccessToken());
         sessionResponseModel.setTraining(new TrainingMini(session.getTraining().getId(), session.getTraining().getTitle()));
         sessionResponseModel.setTrainerId(session.getTrainer().getId());
         sessionResponseModel.setSessionStatusHistory(session.getSessionStatusHistories().stream().map(SessionStatusHistoryResponseModel::toDto).collect(Collectors.toList()));

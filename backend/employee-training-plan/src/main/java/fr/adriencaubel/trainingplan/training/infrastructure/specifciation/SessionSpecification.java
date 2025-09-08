@@ -11,8 +11,14 @@ import java.time.LocalDateTime;
 
 public class SessionSpecification {
 
-    public static Specification<Session> filter(Long trainingId, Long trainerId, SessionStatus status, LocalDate startDate, LocalDate endDate) {
+    public static Specification<Session> filter(Long companyId, Long trainingId, Long trainerId, SessionStatus status, LocalDate startDate, LocalDate endDate) {
         Specification<Session> specification = Specification.where(null);
+
+        if (companyId == null) {
+            throw new IllegalArgumentException("companyId is null");
+        } else {
+            specification = specification.and(hasCompany(companyId));
+        }
 
         if (trainingId != null) {
             specification = specification.and(hasTraining(trainingId));
@@ -35,6 +41,10 @@ public class SessionSpecification {
         }
 
         return specification;
+    }
+
+    public static Specification<Session> hasCompany(Long companyId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), companyId);
     }
 
     public static Specification<Session> hasTraining(Long trainingId) {

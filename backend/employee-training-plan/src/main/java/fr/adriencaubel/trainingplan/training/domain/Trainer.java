@@ -1,5 +1,6 @@
 package fr.adriencaubel.trainingplan.training.domain;
 
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,9 @@ public class Trainer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    private Company company;
 
     private String firstName;
     private String lastName;

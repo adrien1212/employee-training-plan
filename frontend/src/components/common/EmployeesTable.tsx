@@ -83,7 +83,7 @@ export default function EmployeeTable({ departmentId, sessionId }: Props) {
 
     const items = empResponse?.content ?? []
     const departments = deptResponse?.content ?? []
-    const totalPages: number = empResponse?.totalPages ?? 0
+    const totalPages: number = empResponse?.page.totalPages ?? 0
 
     const busy = isDeleting || isDeptLoading
 
