@@ -78,6 +78,9 @@ services:
       - EUREKA_SERVER=http://discovery:8761/eureka
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan
       - RABBIT_HOST=rabbitmq
+      - KEYCLOAK_SERVER_URL=https://auth.traino.cloud
+      - KEYCLOAK_SERVER_USERNAME=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_SERVER_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KEYCLOAK_ISSUER=https://auth.traino.cloud/realms/employee-training-plan
       - SK_STRIPE_API_KEY=${SK_STRIPE_API_KEY}
       - WHSEC_STRIPE_WEBHOOK=${WHSEC_STRIPE_WEBHOOK}
@@ -93,8 +96,9 @@ services:
     restart: always
     ports:
       - "81:80"  # You can change to 443 or use a reverse proxy like Nginx
-        # environment:
-      # - VITE_KEYCLOACK_API_URL=http://keycloak:7980
+    environment:
+      - VITE_KEYCLOACK_URL=https://auth.traino.cloud:7980
+      - VITE_BACKEND_API_URL=https://api.traino.cloud
     networks:
       - app-network
     depends_on:
@@ -152,6 +156,11 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+    environment:
+      - MAIL_HOST=ssl0.ovh.net
+      - MAIL_PORT=587
+      - MAIL_USERNAME=noreply@traino.cloud
+      - MAIL_PASSWORD=HNvyNqS4vL2TIvDj
     networks:
       - app-network
 
@@ -166,8 +175,8 @@ services:
     volumes:
       - keycloak-data:/opt/keycloak/data     # persist everything under /opt/keycloak/data
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: brUSeprECtonTONANIghTWo
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KEYCLOAK_LOGLEVEL: true
       KC_HTTP_PORT: 8080
       KC_HOSTNAME: auth.traino.cloud
