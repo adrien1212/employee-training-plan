@@ -1,11 +1,14 @@
 package fr.adriencaubel.trainingplan.training.application;
 
 import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
+import fr.adriencaubel.trainingplan.testing.TestEmailRequestModel;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 
 import java.time.LocalDateTime;
 
 public interface NotificationPort {
+    void sendTestNotification(TestEmailRequestModel testEmailRequestModel);
+
     void sendSubscribeNotification(SessionEnrollment sessionEnrollment);
 
     void sendUnsubscribeNotification(SessionEnrollment sessionEnrollment);

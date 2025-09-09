@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { useCreateEmailTest } from "@/hooks/useTest";
 
 const faqs = [
     {
@@ -20,6 +21,15 @@ const faqs = [
 ];
 
 export default function Support() {
+
+    const [destinationEmail, setDestinationEmail] = useState("")
+
+    const { mutate: sendTestEmail, isLoading, isSuccess, isError, error } = useCreateEmailTest();
+
+    const handleSend = () => {
+        sendTestEmail({ toEmail: destinationEmail });
+    };
+
     return (
         <SidebarProvider>
             <div className="min-h-screen flex w-full bg-gray-50">
@@ -38,6 +48,40 @@ export default function Support() {
                     <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
+                                <div className="p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            {/* Champ email */}
+                                            <input
+                                                type="email"
+                                                placeholder="Entrez l'email du destinataire"
+                                                value={destinationEmail}
+                                                onChange={(e) => setDestinationEmail(e.target.value)}
+                                                className="w-full px-4 py-2 border rounded-md"
+                                            />
+
+                                            {/* Bouton d'envoi */}
+                                            <button
+                                                onClick={handleSend}
+                                                disabled={isLoading || !destinationEmail}
+                                                className="px-4 py-2 rounded bg-black text-white disabled:opacity-50"
+                                            >
+                                                {isLoading ? "Envoi..." : "Send email"}
+                                            </button>
+
+                                            {/* Messages d'état */}
+                                            {isSuccess && (
+                                                <p className="text-green-700">✅ Email envoyé à {destinationEmail}</p>
+                                            )}
+                                            {isError && (
+                                                <p className="text-red-700">❌ Erreur: {String(error)}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
                                 <Card className="mb-4">
                                     <CardHeader>
                                         <CardTitle>FAQ</CardTitle>

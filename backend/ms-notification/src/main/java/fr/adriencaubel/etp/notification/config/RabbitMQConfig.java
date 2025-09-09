@@ -45,6 +45,12 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.routing-keys.feedback}")
     private String feedbackKey;
 
+    @Value("${rabbitmq.queues.test}")
+    private String testQueue;
+
+    @Value("${rabbitmq.routing-keys.test}")
+    private String testKey;
+
     @Bean
     public TopicExchange commandsExchange() {
         return new TopicExchange(commandsExchange);
@@ -65,6 +71,9 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue feedbackQueue() { return QueueBuilder.durable(feedbackQueue).build(); }
+
+    @Bean
+    public Queue testQueue() { return QueueBuilder.durable(testQueue).build(); }
 
     @Bean
     public Binding sessionEnrollmentBinding() {
@@ -96,6 +105,14 @@ public class RabbitMQConfig {
                 .bind(feedbackQueue())
                 .to(commandsExchange())
                 .with(feedbackKey);
+    }
+
+    @Bean
+    public Binding testBinding() {
+        return BindingBuilder
+                .bind(testQueue())
+                .to(commandsExchange())
+                .with(testKey);
     }
 
     @Bean

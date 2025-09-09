@@ -1,6 +1,7 @@
 package fr.adriencaubel.trainingplan.training.infrastructure.adapter;
 
 import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
+import fr.adriencaubel.trainingplan.testing.TestEmailRequestModel;
 import fr.adriencaubel.trainingplan.training.application.NotificationPort;
 import fr.adriencaubel.trainingplan.training.domain.Feedback;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
@@ -23,6 +24,9 @@ public class RabbitMQNotificationAdapter implements NotificationPort {
     @Value("${rabbitmq.exchange.commands}")
     private String commandsExchange;
 
+    @Value("${rabbitmq.routing-keys.test}")
+    private String testKey;
+
     @Value("${rabbitmq.routing-keys.session-enrollment}")
     private String sessionEnrollmentKey;
 
@@ -31,6 +35,15 @@ public class RabbitMQNotificationAdapter implements NotificationPort {
 
     @Value("${rabbitmq.routing-keys.feedback}")
     private String feedbackKey;
+
+    @Override
+    public void sendTestNotification(TestEmailRequestModel testEmailRequestModel) {
+        rabbitTemplate.convertAndSend(
+                commandsExchange,
+                testKey,
+                testEmailRequestModel
+        );
+    }
 
     @Override
     public void sendSubscribeNotification(SessionEnrollment sessionEnrollment) {
