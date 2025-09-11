@@ -59,7 +59,10 @@ services:
     ports:
       - "8078:8078"
     environment:
-       - MAIL_HOST=mailhog
+       - MAIL_HOST=${MAIL_HOST}
+       - MAIL_PORT=${MAIL_PORT}
+       - MAIL_USERNAME=${MAIL_USERNAME}
+       - MAIL_PASSWORD=${MAIL_PASSWORD}
        - RABBIT_HOST=rabbitmq
     networks:
       - app-network
