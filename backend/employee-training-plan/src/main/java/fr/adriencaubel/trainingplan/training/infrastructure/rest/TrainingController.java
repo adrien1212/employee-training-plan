@@ -75,6 +75,12 @@ public class TrainingController {
         return ResponseEntity.ok(employees);
     }
 
+    // Poster le contenu de la formation en mardowk
+    @PostMapping("/{trainingId}/content")
+    public void writeTrainingContent(@PathVariable Long trainingId, @RequestBody TrainingAddContentRequestModel trainingAddContentRequestModel) {
+        trainingService.writeTrainingContent(trainingId, trainingAddContentRequestModel.getContent());
+    }
+
     @PostMapping("/{trainingId}/documents")
     public ResponseEntity<?> uploadTrainingPdf(
             @PathVariable Long trainingId,

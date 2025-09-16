@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSpecificationExecutor<Employee> {
     List<Employee> findAllByDepartmentCompany(Company company);
@@ -51,4 +52,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
     Long countByActive(boolean isActive);
 
     Integer countByCompany(Company company);
+
+    Optional<Employee> findByEmail(String email);
 }

@@ -21,6 +21,7 @@ public class PublicSessionEnrollmentResponseModel {
     private SessionStatus sessionStatus;
     private boolean hasSigned;
     private String sessionEnrollmentToken;
+    private PublicSessionResponseModel publicSessionResponseModel;
 
     public static PublicSessionEnrollmentResponseModel toDto(SessionEnrollment sessionEnrollment) {
         PublicSessionEnrollmentResponseModel sessionResponseModel = new PublicSessionEnrollmentResponseModel();
@@ -35,6 +36,7 @@ public class PublicSessionEnrollmentResponseModel {
         sessionResponseModel.setSessionStatus(sessionEnrollment.getSession().getLastStatus());
         //sessionResponseModel.setHasSigned(sessionEnrollment.getSignature().getSignature() != null);
         sessionResponseModel.setSessionEnrollmentToken(sessionEnrollment.getAccessToken());
+        sessionResponseModel.setPublicSessionResponseModel(PublicSessionResponseModel.toDto(sessionEnrollment.getSession()));
         return sessionResponseModel;
     }
 }

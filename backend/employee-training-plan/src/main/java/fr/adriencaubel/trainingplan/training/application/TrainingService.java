@@ -84,6 +84,14 @@ public class TrainingService {
         return trainingRepository.save(training);
     }
 
+    public void writeTrainingContent(Long trainingId, String content) {
+        Training training = this.getTrainingById(trainingId);
+
+        training.setContent(content);
+
+        trainingRepository.save(training);
+    }
+
     public TrainingDocument uploadTrainingPdf(MultipartFile file, Long trainingId) throws IOException {
         // check if training exist
         Training training = this.getTrainingById(trainingId);
@@ -127,4 +135,6 @@ public class TrainingService {
         Company currentCompany = userService.getCompanyOfAuthenticatedUser();
         return trainingRepository.countByActiveAndCompany(true, currentCompany);
     }
+
+
 }

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     Card,
@@ -16,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import api from "@/services/api";
 import { useListTrainingDocuments, useUploadTrainingDocument, useDownloadTrainingDocument, useDeleteTrainingDocument } from "@/hooks/useTrainingAttachment";
+import { useAddContentToTraining } from "@/hooks/useTrainings";
 
 const TrainingDetailBody = () => {
     const { id } = useParams<{ id: string }>();
@@ -23,6 +26,8 @@ const TrainingDetailBody = () => {
     const { toast } = useToast();
     const [content, setContent] = useState("");
     const [trainingName, setTrainingName] = useState<string>("");
+
+    const addContent = useAddContentToTraining(Number(id));
 
     // Fetch training metadata
     useEffect(() => {
@@ -55,22 +60,13 @@ const TrainingDetailBody = () => {
 
 
     const handleSaveContent = () => {
-        // Save content via API
-        api
-            .put(`/v1/trainings/${id}`, { content })
-            .then(() => {
-                toast({
-                    title: "Contenu sauvegardé",
-                    description: "Les informations de la formation ont été mises à jour.",
-                });
-            })
-            .catch(() => {
-                toast({
-                    title: "Erreur de sauvegarde",
-                    description: "Échec de la mise à jour du contenu.",
-                    variant: "destructive",
-                });
-            });
+        addContent.mutate(content, {
+            onSuccess: () => {
+                toast({ title: 'Contenu ajouté' });
+                // Next.js App Router ? => router.refresh(); (mieux que reload)
+                // Dernier recours : window.location.reload(); (à éviter)
+            },
+        });
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,27 +167,41 @@ const TrainingDetailBody = () => {
                                 Rédigez et organisez le contenu de votre formation
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
+
+                        <CardContent className="grid grid-cols-2 gap-6">
+                            {/* Colonne gauche : Textarea */}
+                            <div className="flex flex-col">
                                 <Label htmlFor="content">Contenu de la formation</Label>
                                 <Textarea
                                     id="content"
                                     value={content}
-                                    onChange={e => setContent(e.target.value)}
+                                    onChange={(e) => setContent(e.target.value)}
                                     placeholder="Rédigez ici..."
-                                    className="min-h-[400px] mt-2"
+                                    className="min-h-[400px] mt-2 flex-1"
                                 />
                                 <p className="text-sm text-gray-500 mt-2">
                                     {content.length} caractères
                                 </p>
                             </div>
 
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline">Aperçu</Button>
-                                <Button onClick={handleSaveContent} className="bg-blue-600 hover:bg-blue-700">
-                                    <Save className="h-4 w-4 mr-2" /> Sauvegarder
-                                </Button>
+                            {/* Colonne droite : Preview Markdown */}
+                            <div className="border rounded-md p-4 bg-gray-50 overflow-y-auto min-h-[400px]">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {content && content.trim().length > 0
+                                        ? content
+                                        : "_Aucun contenu pour cette formation._"}
+                                </ReactMarkdown>
                             </div>
+                        </CardContent>
+
+                        <CardContent className="flex justify-end gap-2">
+                            <Button variant="outline">Aperçu</Button>
+                            <Button
+                                onClick={handleSaveContent}
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                <Save className="h-4 w-4 mr-2" /> Sauvegarder
+                            </Button>
                         </CardContent>
                     </Card>
                 </TabsContent>

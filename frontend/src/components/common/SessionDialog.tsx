@@ -35,6 +35,7 @@ interface SessionDialogProps {
 }
 
 type FormState = {
+    alias: string;
     trainingId: number | null;
     trainerId: number | null;
     startDate: string;
@@ -54,6 +55,7 @@ export default function SessionDialog({
     const isEdit = Boolean(session);
     const initialTrainingId = defaultTrainingId ? defaultTrainingId : null;
     const [formData, setFormData] = useState<FormState>({
+        alias: null,
         trainingId: null,
         trainerId: null,
         startDate: '',
@@ -67,6 +69,7 @@ export default function SessionDialog({
     useEffect(() => {
         if (session) {
             setFormData({
+                alias: null,
                 trainingId: session.training.id,
                 trainerId: session.trainerId,
                 startDate: session.startDate,
@@ -77,6 +80,7 @@ export default function SessionDialog({
             });
         } else {
             setFormData({
+                alias: null,
                 trainingId: initialTrainingId,
                 trainerId: null,
                 startDate: '',
@@ -147,6 +151,21 @@ export default function SessionDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="alias">Alias</Label>
+                        <Input
+                            id="alias"
+                            placeholder="Alias"
+                            value={formData.alias}
+                            onChange={(e) =>
+                                setFormData({ ...formData, alias: e.target.value })
+                            }
+                            required
+                            disabled={busy}
+                        />
+                    </div>
+
+
                     <div>
                         <Label htmlFor="training">Formation</Label>
                         <Select

@@ -24,7 +24,9 @@ public class GatewaySecurityConfig {
         http
                 .cors(c -> c.configurationSource(customCorsConfiguration))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/v1/signup").permitAll()
                         .requestMatchers("/api/v1/signup").permitAll()
+                        .requestMatchers("/api/v1/public/**").permitAll() // Il faut préciser API, mais a voir si c'est pas la gateway qui tiendra le /api plutot
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/menu").authenticated()
                         .anyRequest().authenticated()

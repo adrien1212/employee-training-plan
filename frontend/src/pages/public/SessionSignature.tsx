@@ -35,7 +35,7 @@ import React from "react";
 import { SlotSignatureStatus } from "@/types/SlotSignatureStatus";
 import { Badge } from "@/components/ui/badge";
 import { usePublicOpenSignature } from "@/hooks/public/usePublicSlotSignature";
-import { usePublicSession } from "@/hooks/public/usePublicSessions";
+import { useTrainerPublicSession, useTrainerPublicSessionEnrollment, useTrainerPublicSlotSignature } from "@/hooks/public/usePublicSessions";
 import { useExistSignature } from "@/hooks/useSignatures";
 
 
@@ -57,7 +57,19 @@ const SessionSignature = () => {
         data: session,
         isLoading: sessionLoading,
         isError: sessionError
-    } = usePublicSession(trainerAccessToken)
+    } = useTrainerPublicSession(trainerAccessToken)
+
+    const {
+        data: sessionsEnrollment,
+        isLoading: sessionEnrollmentLoading,
+        isError: sessionEnrollmentError,
+    } = useTrainerPublicSessionEnrollment(trainerAccessToken)
+
+    const {
+        data: slotsSignature,
+        isLoading: slotsSignatureLoading,
+        isError: slotsSignatureError,
+    } = useTrainerPublicSlotSignature(trainerAccessToken)
 
     const getInitials = (firstName: string, lastName: string) =>
         `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -77,8 +89,8 @@ const SessionSignature = () => {
         if (slotSignature) openSignature(slotSignature.token)
     }
 
-    if (sessionLoading) return <div>Chargement...</div>;
-    if (sessionError) return <div>Session non trouvée</div>;
+    if (sessionLoading || sessionEnrollmentLoading || slotsSignatureLoading) return <div>Chargement...</div>;
+    if (sessionError || sessionEnrollmentError || slotsSignatureError) return <div>Session non trouvée</div>;
 
     return (
         <>
@@ -124,7 +136,7 @@ const SessionSignature = () => {
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
                                     <Users className="h-5 w-5 text-gray-600" />
-                                    <span className="font-medium">{session && session.sessionsEnrollment.length} participants</span>
+                                    <span className="font-medium">{session && sessionsEnrollment.page.number} participants</span>
                                 </div>
                             </div>
                         </CardContent>
@@ -144,7 +156,7 @@ const SessionSignature = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {session && session.sessionsEnrollment.map(participant => (
+                                    {session && sessionsEnrollment.content.map(participant => (
                                         <TableRow key={participant.id}>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
@@ -167,7 +179,7 @@ const SessionSignature = () => {
                     </Card>
 
                     {/* Slot Signature */}
-                    {session && session.slotsSignature.length === 0 ? (
+                    {session && slotsSignature.page.size === 0 ? (
                         <div className="text-center py-8 text-gray-500">Aucun créneau trouvé</div>
                     ) : (
                         <Card>
@@ -189,7 +201,7 @@ const SessionSignature = () => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {session.slotsSignature.map(slot => (
+                                        {slotsSignature.content.map(slot => (
                                             <TableRow key={slot.id}>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
@@ -206,7 +218,7 @@ const SessionSignature = () => {
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
                                                         <Mail className="h-4 w-4" />
-                                                        {slot.token}
+                                                        public/slot/{slot.token}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>

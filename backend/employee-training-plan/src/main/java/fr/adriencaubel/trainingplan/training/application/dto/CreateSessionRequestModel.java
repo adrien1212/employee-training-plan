@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class CreateSessionRequestModel {
+    private String alias;
     private LocalDate startDate;
     private LocalDate endDate;
     private SessionStatus sessionStatus;

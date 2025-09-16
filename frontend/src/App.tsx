@@ -15,7 +15,7 @@ import TrainingDetail from "./pages/TrainingDetail";
 import DepartmentDetail from "./pages/DepartmentDetail";
 import Statistics from "./pages/Statistics";
 import Feedbacks from "./pages/Feedbacks";
-import GiveFeedback from "./pages/GiveFeedback";
+import GiveFeedback from "./pages/public/GiveFeedback";
 import EmployeeDetail from "./pages/EmployeeDetail";
 import AddEmployeeToSession from "./pages/AddEmployeeToSession";
 import SessionDetailPage from "./pages/SessionDetailPage";
@@ -34,6 +34,7 @@ import Support from "./pages/Support";
 import SlotSessionSignature from "./pages/public/SlotSessionSignature";
 import SessionSignatureMatrix from "./pages/SessionSignatureMatrix";
 import Signup from "./pages/Signup";
+import StudentSpaceRequest from "./pages/StudentSpaceRequest";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,12 @@ const App = () => (
 
           {/* Public Routes */}
           <Route path="/sign-up" element={<Signup />} />
+          <Route path="/espace-etudiants" element={<StudentSpaceRequest />} />
+          <Route path="/espace-etudiants/:accessToken" element={<StudentSpace />} />
+
+          <Route path="/public/signature/:trainerAccessToken" element={<SessionSignature />} />
+          <Route path="/public/slot/:slotAccessToken" element={<SlotSessionSignature />} />
+          <Route path="/public/give-feedback" element={<GiveFeedback />} />
 
 
           {/* Private Routes */}
@@ -69,18 +76,13 @@ const App = () => (
             <Route path="/notifications" element={<NotificationsManagement />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/budget" element={<BudgetManagement />} />
-            <Route path="/give-feedback" element={<GiveFeedback />} />
             <Route path="/espace-formateur/:trainingAccessToken" element={<TrainerSpace />} />
-            <Route path="/espace-etudiants" element={<StudentSpace />} />
+
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/support" element={<Support />} />
             <Route path="/signatures" element={<SessionSignatureMatrix />} />
-
-
-            <Route path="/public/signature/:trainerAccessToken" element={<SessionSignature />} />
-            <Route path="/public/slot/:slotAccessToken" element={<SlotSessionSignature />} />
           </Route>
         </Routes>
       </BrowserRouter>

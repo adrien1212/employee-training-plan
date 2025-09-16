@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Setter
 @Getter
@@ -27,8 +26,6 @@ public class Feedback {
     private String comment;
     private LocalDate createdAt;
 
-    private String feedbackToken;
-
     @OneToOne
     private SessionEnrollment sessionEnrollment;
 
@@ -39,11 +36,11 @@ public class Feedback {
     public Feedback(int rating, String comment) {
         this.rating = rating;
         this.comment = comment;
+        this.createdAt = LocalDate.now();
     }
 
     public static Feedback create(Company company) {
         Feedback feedback = new Feedback();
-        feedback.setFeedbackToken(UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20));
         feedback.setCompany(company);
         return feedback;
     }

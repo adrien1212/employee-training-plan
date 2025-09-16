@@ -20,17 +20,6 @@ import { SessionStatus } from "@/types/SessionStatus";
 import SessionsToday from "@/components/common/SessionsToday";
 import Planning from "@/components/common/Planning";
 
-interface Session {
-  id: number;
-  trainingName: string;
-  date: string;
-  time: string;
-  location: string;
-  instructor: string;
-  maxParticipants: number;
-  registeredParticipants: number;
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
-}
 
 const Sessions = () => {
   return (

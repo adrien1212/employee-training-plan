@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -23,7 +22,7 @@ public class PublicEmployeeResponseModel {
         publicEmployeeResponseModel.setFirstName(employee.getFirstName());
         publicEmployeeResponseModel.setLastName(employee.getLastName());
         publicEmployeeResponseModel.setEmail(employee.getEmail());
-        publicEmployeeResponseModel.setSessionEnrollments(employee.getSessionEnrollments().stream().map(PublicSessionEnrollmentResponseModel::toDto).collect(Collectors.toList()));
+        //publicEmployeeResponseModel.setSessionEnrollments(employee.getSessionEnrollments().stream().map(PublicSessionEnrollmentResponseModel::toDto).collect(Collectors.toList()));
         return publicEmployeeResponseModel;
     }
 }

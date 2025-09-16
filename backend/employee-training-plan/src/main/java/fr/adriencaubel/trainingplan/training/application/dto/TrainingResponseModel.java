@@ -13,14 +13,16 @@ public class TrainingResponseModel {
     private String provider;
     private Integer duration;
     private boolean active;
+    private String content;
 
-    public TrainingResponseModel(Long id, String title, String description, String provider, Integer duration) {
+    public TrainingResponseModel(Long id, String title, String description, String provider, Integer duration, String content) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.provider = provider;
         this.duration = duration;
         active = true;
+        this.content = content;
     }
 
     public static TrainingResponseModel toDto(Training training) {
@@ -29,7 +31,8 @@ public class TrainingResponseModel {
                 training.getTitle(),
                 training.getDescription(),
                 training.getProvider(),
-                training.getDuration()
+                training.getDuration(),
+                training.getContent()
         );
     }
 }

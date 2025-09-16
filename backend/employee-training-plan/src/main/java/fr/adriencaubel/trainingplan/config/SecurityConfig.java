@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/v1/signup").permitAll()
                         .requestMatchers("/api/actuator/**").permitAll()
                         .requestMatchers("/webhook").permitAll()
+                        .requestMatchers("/v1/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/**").permitAll() // http://localhost:8080/api/swagger-ui/index.html#/ et  http://localhost:8080/api/v3/api-docs
                         .requestMatchers("/menu").authenticated() // Requires authentication to access "/menu"
                         .anyRequest().authenticated() // Requires authentication for any other request

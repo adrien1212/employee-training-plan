@@ -8,5 +8,6 @@ export interface Training {
   departments: Department[];
   duration: number; // in hours
   maxParticipants: number;
-  active: boolean
+  active: boolean;
+  content: string
 }

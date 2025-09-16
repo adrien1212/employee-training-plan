@@ -31,7 +31,7 @@ public class SessionEnrollmentService {
     }
 
     public SessionEnrollment findByAccessToken(String accessToken) {
-        return sessionEnrollmentRepository.findByAccessToken(accessToken).orElseThrow();
+        return sessionEnrollmentRepository.findByAccessToken(accessToken).orElseThrow(() -> new NotFoundException("AccessToken not found"));
     }
 
     public SessionEnrollment validateToken(String token) {
@@ -63,7 +63,8 @@ public class SessionEnrollmentService {
     }
 
     public String getFeedbackToken(Long sessionEnrollmentId) {
+        // le feedback token et le meme que le accessToken
         SessionEnrollment sessionEnrollment = findById(sessionEnrollmentId);
-        return sessionEnrollment.getFeedback().getFeedbackToken();
+        return sessionEnrollment.getAccessToken();
     }
 }

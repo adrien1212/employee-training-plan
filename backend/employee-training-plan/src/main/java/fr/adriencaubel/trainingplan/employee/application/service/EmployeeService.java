@@ -102,8 +102,13 @@ public class EmployeeService {
         employeeRepository.save(employee);
     }
 
+    @Deprecated
     public Employee getEmployeeByEmailAndCodeEmployee(String email, String codeEmployee) {
         return employeeRepository.findByEmailAndCodeEmployee(email, codeEmployee);
+    }
+
+    public Employee getEmployeeByEmail(String email) {
+        return employeeRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Employee not found with email " + email));
     }
 
     public Long count(Long departmentId, Long trainingId) {

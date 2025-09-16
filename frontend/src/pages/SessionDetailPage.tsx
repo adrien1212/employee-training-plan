@@ -98,7 +98,7 @@ const SessionDetailPage = () => {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Calendar className="h-5 w-5" />
-                                    Informations de la session
+                                    Informations de la session #{session.alias}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -143,8 +143,8 @@ const SessionDetailPage = () => {
                                             <ul className="list-disc list-inside">
                                                 {session.sessionStatusHistory.map((h) => (
                                                     <li key={h.id}>
-                                                        <Badge className={getStatusColor(session.status)}>
-                                                            {getStatusLabel(session.status)}
+                                                        <Badge className={getStatusColor(h.status)}>
+                                                            {getStatusLabel(h.status)}
                                                         </Badge> - {new Date(h.changedAt).toLocaleDateString()}
                                                     </li>
                                                 ))}

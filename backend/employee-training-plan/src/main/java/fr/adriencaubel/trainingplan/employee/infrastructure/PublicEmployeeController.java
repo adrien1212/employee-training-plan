@@ -17,6 +17,8 @@ public class PublicEmployeeController {
 
     private final EmployeeService employeeService;
 
+    // NO LONGER USE VOIR ESPACEETUDIANTCONTROLLER
+    @Deprecated
     @GetMapping
     public ResponseEntity<PublicEmployeeResponseModel> getEmployee(@RequestParam String email, @RequestParam String codeEmployee) {
         Employee employee = employeeService.getEmployeeByEmailAndCodeEmployee(email, codeEmployee);

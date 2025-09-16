@@ -32,6 +32,7 @@ const FeedbackTabs: React.FC<FeedbackTabsProps> = ({
         error: feedbackError,
     } = useFeedback({
         trainingId: trainingId,
+        sessionId: sessionId,
         page,
         size: pageSize
     });

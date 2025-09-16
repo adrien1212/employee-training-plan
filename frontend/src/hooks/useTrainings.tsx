@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import api from '@/services/api';
 import { PageResponse } from '@/types/PageResponse';
 import { Training } from '@/types/Training';
@@ -68,4 +68,25 @@ export function useCountTrainings(enabled: boolean = true) {
             staleTime: 0,
         }
     );
+}
+
+/**
+ * CREATE: add content to training
+ */
+
+export function useAddContentToTraining(trainingId: number) {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['training', 'content', 'add', { trainingId }],
+        mutationFn: (content: string) =>
+            api
+                .post<string>(`/v1/trainings/${trainingId}/content`, { content })
+                .then(res => res.data),
+
+        onSuccess: () => {
+            // Recharger les données pertinentes, pas toute la page
+            qc.invalidateQueries({ queryKey: trainingKey(trainingId) });
+        },
+    });
 }

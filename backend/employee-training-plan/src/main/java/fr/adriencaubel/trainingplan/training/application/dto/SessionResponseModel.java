@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Setter
 public class SessionResponseModel {
     private Long id;
+    private String alias;
     private LocalDate startDate;
     private LocalDate endDate;
     private String location;
@@ -27,6 +28,7 @@ public class SessionResponseModel {
     public static SessionResponseModel toDto(Session session) {
         SessionResponseModel sessionResponseModel = new SessionResponseModel();
         sessionResponseModel.setId(session.getId());
+        sessionResponseModel.setAlias(session.getAlias());
         sessionResponseModel.setStartDate(session.getStartDate());
         sessionResponseModel.setEndDate(session.getEndDate());
         sessionResponseModel.setLocation(session.getLocation());

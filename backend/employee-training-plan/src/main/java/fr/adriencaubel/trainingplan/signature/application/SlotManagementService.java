@@ -177,6 +177,10 @@ public class SlotManagementService {
         return slotRepository.findByToken(slotAccessToken).orElseThrow(() -> new IllegalArgumentException("Slot not found"));
     }
 
+    public Page<SlotSignature> findBySession(Session session, Pageable pageable) {
+        return slotRepository.findBySessionId(session.getId(), pageable);
+    }
+
     public SlotSignature ouvrirSignature(Long slotSignatureId) {
         SlotSignature slotSignature = findById(slotSignatureId);
         slotSignature.ouvrirSignature();

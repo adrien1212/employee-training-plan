@@ -45,6 +45,7 @@ function EmployeeSessionsEnrollmentHistory({ items, page, totalPages, loading, o
                 <TableHeader>
                     <TableRow>
                         <TableHead>Formation</TableHead>
+                        <TableHead>AccessToken</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Statut</TableHead>
                         <TableHead>Évaluation</TableHead>
@@ -56,6 +57,9 @@ function EmployeeSessionsEnrollmentHistory({ items, page, totalPages, loading, o
                         <TableRow key={sessionEnrollment.id}>
                             <TableCell>
                                 <div className="font-medium">{sessionEnrollment.session.training.title}</div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="font-medium">{sessionEnrollment.sessionEnrollmentToken}</div>
                             </TableCell>
                             <TableCell>{sessionEnrollment.session.startDate}</TableCell>
                             <TableCell>{getStatusBadge(sessionEnrollment.session.status)}</TableCell>

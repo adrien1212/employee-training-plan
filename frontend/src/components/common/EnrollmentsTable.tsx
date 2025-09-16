@@ -8,17 +8,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Trash2 } from 'lucide-react';
 import Pagination from '../pagination/Pagination';
+import { SessionEnrollment } from '@/types/SessionEnrollment';
 
-type Enrollment = {
-    id: number;
-    employee: { id: number; firstName: string; lastName: string; email: string };
-    session: { id: number; startDate: string; status: string };
-    hasFeedback: boolean;
-    hasSigned: boolean;
-};
 
 interface Props {
-    items: Enrollment[];
+    items: SessionEnrollment[];
     loading: boolean;
     page: number;
     totalPages: number;
@@ -130,9 +124,15 @@ export default function EnrollmentsTable({
                                                 )}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <span>
-                                            {item.employee.firstName} {item.employee.lastName}
-                                        </span>
+                                        <div>
+                                            <div className="font-medium">
+                                                {item.employee.firstName}{' '}
+                                                {item.employee.lastName}
+                                            </div>
+                                            <div className="text-sm text-gray-600">
+                                                AccesToken : {item.sessionEnrollmentToken}
+                                            </div>
+                                        </div>
                                     </div>
                                 </TableCell>
 
@@ -147,7 +147,7 @@ export default function EnrollmentsTable({
 
                                 {showSessionStatus && (
                                     <TableCell>
-                                        {getStatusBadge(item.session.status)}
+                                        #{item.session.alias} {getStatusBadge(item.session.status)}
                                     </TableCell>
                                 )}
 

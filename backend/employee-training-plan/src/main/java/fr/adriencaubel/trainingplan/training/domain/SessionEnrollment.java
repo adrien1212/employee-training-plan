@@ -59,6 +59,10 @@ public class SessionEnrollment {
 
         if (rating < 0 || rating > 5) throw new DomainException("Rating must be between 0 and 5");
 
+        if (!session.isSessionComplete()) {
+            throw new DomainException("Session not completed");
+        }
+
         Feedback feedback = new Feedback(rating, comment);
         feedback.setCompany(session.getTraining().getCompany());
         feedback.setComment(comment);

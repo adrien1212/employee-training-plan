@@ -37,8 +37,8 @@ public class FeedbackService {
     }
 
     @Transactional
-    public void giveFeedback(String feedbackToken, FeedbackRequestModel feedbackRequestModel) {
-        SessionEnrollment sessionEnrollment = sessionEnrollmentRepository.findByFeedbackToken(feedbackToken).orElseThrow(() -> new DomainException("Invalid feedback token"));
+    public void giveFeedback(FeedbackRequestModel feedbackRequestModel) {
+        SessionEnrollment sessionEnrollment = sessionEnrollmentRepository.findByFeedbackToken(feedbackRequestModel.getAccessToken()).orElseThrow(() -> new DomainException("Invalid feedback token"));
 
         sessionEnrollment.addFeedback(feedbackRequestModel.getComment(), feedbackRequestModel.getRating());
 

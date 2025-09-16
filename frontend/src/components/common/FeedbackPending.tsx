@@ -26,7 +26,11 @@ import { useFeebackRelance } from '@/hooks/useFeedback';
 import { SessionEnrollment } from '@/types/SessionEnrollment';
 import { toast } from '../ui/use-toast';
 
+
+
 interface PendingFeedbackTableProps {
+    trainingId?: number
+    sessionId?: number,
     pageSize?: number;
 }
 
@@ -37,7 +41,9 @@ const getInitials = (name: string) =>
         .join('')
         .toUpperCase();
 
-const FeedbackPending: React.FC<PendingFeedbackTableProps> = () => {
+const FeedbackPending: React.FC<PendingFeedbackTableProps> = ({
+    trainingId, sessionId
+}) => {
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(10)
     const {
@@ -46,6 +52,8 @@ const FeedbackPending: React.FC<PendingFeedbackTableProps> = () => {
         error,
     } = useSessionsEnrollment({
         status: SessionStatus.Completed,
+        sessionId: sessionId,
+        trainingId: trainingId,
         isFeedbackGiven: false,
         page,
         size: pageSize,
@@ -93,6 +101,7 @@ const FeedbackPending: React.FC<PendingFeedbackTableProps> = () => {
                         <TableRow>
                             <TableHead>Participant</TableHead>
                             <TableHead>Formation</TableHead>
+                            <TableHead>Session alias</TableHead>
                             <TableHead>Date de session</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
@@ -125,6 +134,9 @@ const FeedbackPending: React.FC<PendingFeedbackTableProps> = () => {
                                         <Badge variant="outline">
                                             {pending.session.training.title}
                                         </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        #{pending.session.alias}
                                     </TableCell>
                                     <TableCell>{pending.session.startDate}</TableCell>
                                     <TableCell>

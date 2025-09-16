@@ -7,6 +7,7 @@ import fr.adriencaubel.trainingplan.training.application.dto.FeedbackResponseMod
 import fr.adriencaubel.trainingplan.training.application.dto.TokenValidationResponse;
 import fr.adriencaubel.trainingplan.training.domain.Feedback;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,9 +46,9 @@ public class FeedbackController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("{feedbackToken}")
-    public ResponseEntity<?> giveFeedback(@PathVariable String feedbackToken, @RequestBody FeedbackRequestModel feedbackRequestModel) {
-        feedbackService.giveFeedback(feedbackToken, feedbackRequestModel);
+    @PostMapping()
+    public ResponseEntity<?> giveFeedback(@Valid @RequestBody FeedbackRequestModel feedbackRequestModel) {
+        feedbackService.giveFeedback(feedbackRequestModel);
         return ResponseEntity.ok().build();
     }
 

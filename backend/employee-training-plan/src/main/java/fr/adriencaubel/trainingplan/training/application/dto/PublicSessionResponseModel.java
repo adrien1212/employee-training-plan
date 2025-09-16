@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -20,8 +18,8 @@ public class PublicSessionResponseModel {
     private SessionStatus status = SessionStatus.NOT_STARTED;
     private String employeeAccessToken;
     private TrainingMini training;
-    private List<PublicSessionEnrollmentResponseModel> sessionsEnrollment;
-    private List<PublicSlotSignatureResponseModel> slotsSignature;
+    //private List<PublicSessionEnrollmentResponseModel> sessionsEnrollment; REF CIRCILAIRE
+    //private List<PublicSlotSignatureResponseModel> slotsSignature; // LAzy init dans ke DTO PublicSessionEnrollmentResponseModel
 
     public static PublicSessionResponseModel toDto(Session session) {
         PublicSessionResponseModel sessionResponseModel = new PublicSessionResponseModel();
@@ -32,8 +30,8 @@ public class PublicSessionResponseModel {
         sessionResponseModel.setStatus(session.getLastStatus());
         sessionResponseModel.setEmployeeAccessToken(session.getEmployeeAccessToken());
         sessionResponseModel.setTraining(new TrainingMini(session.getTraining().getId(), session.getTraining().getTitle()));
-        sessionResponseModel.setSessionsEnrollment(session.getSessionEnrollments().stream().map(PublicSessionEnrollmentResponseModel::toDto).collect(Collectors.toList()));
-        sessionResponseModel.setSlotsSignature(session.getSlotSignatures().stream().map(PublicSlotSignatureResponseModel::toDto).collect(Collectors.toList()));
+        //sessionResponseModel.setSessionsEnrollment(session.getSessionEnrollments().stream().map(PublicSessionEnrollmentResponseModel::toDto).collect(Collectors.toList()));
+        //sessionResponseModel.setSlotsSignature(session.getSlotSignatures().stream().map(PublicSlotSignatureResponseModel::toDto).collect(Collectors.toList()));
         return sessionResponseModel;
     }
 

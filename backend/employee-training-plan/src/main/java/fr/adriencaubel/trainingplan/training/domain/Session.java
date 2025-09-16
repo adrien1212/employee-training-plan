@@ -6,6 +6,7 @@ import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.signature.domain.ModeSignature;
 import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +25,9 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    @Column(unique = true)
+    private String alias;
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
     private Company company;

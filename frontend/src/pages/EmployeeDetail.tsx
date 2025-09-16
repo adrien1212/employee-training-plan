@@ -149,7 +149,7 @@ const EmployeeDetail = () => {
                                 <CardContent className="p-6">
                                     <div className="text-center">
                                         <div className="text-2xl font-bold text-blue-600">
-                                            {sessionsEnrollment.totalElements}
+                                            {sessionsEnrollment.page.totalElements}
                                         </div>
                                         <div className="text-sm text-gray-600">Total formations</div>
                                     </div>

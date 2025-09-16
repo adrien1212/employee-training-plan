@@ -41,6 +41,8 @@ public class Training {
 
     private boolean active;
 
+    private String content;
+
     public Training() {
     }
 
@@ -71,12 +73,13 @@ public class Training {
         return token.substring(0, Math.min(token.length(), 30));
     }
 
-    public Session createSession(Company company, LocalDate startDate, LocalDate endDate, String location, Trainer trainer, ModeSignature modeSignature) {
+    public Session createSession(Company company, String alias, LocalDate startDate, LocalDate endDate, String location, Trainer trainer, ModeSignature modeSignature) {
         if (!trainer.getCompany().getId().equals(company.getId())) {
             throw new DomainException("Le trainer n'appartient pas à la company");
         }
 
         Session session = new Session();
+        session.setAlias(alias);
         session.setCompany(company);
         session.setStartDate(startDate);
         session.setEndDate(endDate);

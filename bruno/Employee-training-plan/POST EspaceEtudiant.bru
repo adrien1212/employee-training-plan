@@ -1,0 +1,21 @@
+meta {
+  name: POST EspaceEtudiant
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8081/api/v1/public/espace-etudiant/request-link
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "adrien.caubel.pro@gmail.com"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

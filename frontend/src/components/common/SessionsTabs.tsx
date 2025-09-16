@@ -166,6 +166,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead>Alias</TableHead>
                         <TableHead>Formation</TableHead>
                         <TableHead>Début</TableHead>
                         <TableHead>Fin</TableHead>
@@ -181,6 +182,7 @@ export default function SessionsTabs({ trainingId }: SessionsTabsProps) {
                             className="cursor-pointer hover:text-blue-600"
                             onClick={() => navigate(`/sessions/${session.id}`)}
                         >
+                            <TableCell>#{session.alias}</TableCell>
                             <TableCell>{session.training.title}</TableCell>
                             <TableCell>{new Date(session.startDate).toLocaleDateString()}</TableCell>
                             <TableCell>{session.endDate && new Date(session.endDate).toLocaleDateString()}</TableCell>

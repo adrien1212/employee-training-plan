@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from "@/hooks/use-toast";
 import api from "@/services/api";
 import { SessionStatus } from "@/types/SessionStatus";
+import { useParams } from "react-router";
+import { usePublicEspaceEtudiant } from "@/hooks/public/usePublicEspaceEtudiant";
 
 // Backend models
 interface PublicSessionEnrollmentResponseModel {
@@ -46,8 +48,9 @@ interface Session {
 }
 
 const StudentSpace = () => {
+    const { accessToken } = useParams();
+
     const { toast } = useToast();
-    const [step, setStep] = useState<'login' | 'dashboard'>('login');
     const [email, setEmail] = useState<string>("");
     const [employeeCode, setEmployeeCode] = useState<string>("");
     const [employee, setEmployee] = useState<PublicEmployeeResponseModel | null>(null);
@@ -60,35 +63,12 @@ const StudentSpace = () => {
     const [signature, setSignature] = useState<string>("");
     const [selectedParticipant, setSelectedParticipant] = useState<Session | null>(null);
 
-    const handleLogin = async () => {
-        if (!email.trim() || !employeeCode.trim()) {
-            toast({ title: "Erreur", description: "Veuillez saisir votre email et votre code employé.", variant: "destructive" });
-            return;
-        }
-        setLoading(true);
-        try {
-            const response = await api(`/v1/public/employees`, { params: { email, codeEmployee: employeeCode } });
-            const data = response.data;
-            const mapped: Session[] = data.sessionEnrollments.map(sess => ({
-                id: sess.id,
-                trainingName: sess.trainingTitle,
-                date: new Date(sess.sessionStartDate).toLocaleDateString('fr-FR'),
-                time: `${new Date(sess.sessionStartDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - ${new Date(sess.sessionEndDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`,
-                sessionStatus: sess.sessionStatus,
-                hasSigned: sess.hasSigned ? 'signed' : 'pending',
-                signatureToken: sess.signatureToken
-            }));
-            setEmployee(data);
-            setSessions(mapped);
-            setStep('dashboard');
-            toast({ title: "Connexion réussie", description: "Bienvenue dans votre espace personnel." });
-        } catch (error: any) {
-            console.error(error);
-            toast({ title: "Erreur de connexion", description: error.response?.data?.message || 'Impossible de récupérer les données.', variant: "destructive" });
-        } finally {
-            setLoading(false);
-        }
-    };
+    const {
+        data: espaceEtudiant,
+        isLoading: isLoadingEspaceEtudiant,
+        isError: isErrorEspaceEtudiant,
+    } = usePublicEspaceEtudiant(accessToken)
+
 
     const handleSignature = async () => {
         if (!selectedParticipant || !selectedParticipant.signatureToken || !signature.trim()) return;
@@ -126,30 +106,12 @@ const StudentSpace = () => {
         return <Badge className={config.color}>{config.label}</Badge>;
     };
 
-    if (step === 'login') {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                <Card className="w-full max-w-md">
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-2xl">Connexion</CardTitle>
-                        <CardDescription>Connectez-vous avec votre email et votre code employé</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Adresse email</Label>
-                            <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="votre.email@company.com" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="employeeCode">Code employé</Label>
-                            <Input id="employeeCode" type="text" value={employeeCode} onChange={e => setEmployeeCode(e.target.value)} placeholder="Entrez votre code employé" />
-                        </div>
-                        <Button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                            {loading ? 'Connexion...' : 'Se connecter'}
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-        );
+    if (isLoadingEspaceEtudiant) {
+        return <div>Chargement ...</div>
+    }
+
+    if (isErrorEspaceEtudiant) {
+        return <div>Erreur</div>
     }
 
     return (
@@ -160,12 +122,11 @@ const StudentSpace = () => {
                         <div className="flex items-center gap-4">
                             <Avatar className="h-16 w-16">
                                 <AvatarFallback className="bg-blue-100 text-blue-700 text-lg">
-                                    {getInitials(employee!.firstName, employee!.lastName)}
+                                    {getInitials(espaceEtudiant.employee!.firstName, espaceEtudiant.employee!.lastName)}
                                 </AvatarFallback>
                             </Avatar>
                             <div>
-                                <CardTitle className="text-2xl">Bienvenue, {employee!.firstName} {employee!.lastName}</CardTitle>
-                                <CardDescription className="text-base">{employee!.email}</CardDescription>
+                                <CardTitle className="text-2xl">Bienvenue, {espaceEtudiant.employee!.firstName} {espaceEtudiant.employee!.lastName}</CardTitle>
                             </div>
                         </div>
                     </CardHeader>
@@ -247,7 +208,6 @@ const StudentSpace = () => {
                     <Button
                         variant="outline"
                         onClick={() => {
-                            setStep('login');
                             setEmail('');
                             setEmployeeCode('');
                             setEmployee(null);

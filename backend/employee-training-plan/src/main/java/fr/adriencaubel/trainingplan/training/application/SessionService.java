@@ -6,6 +6,7 @@ import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.employee.domain.Employee;
 import fr.adriencaubel.trainingplan.employee.infrastructure.EmployeeRepository;
 import fr.adriencaubel.trainingplan.signature.application.SlotManagementService;
+import fr.adriencaubel.trainingplan.signature.domain.SlotSignature;
 import fr.adriencaubel.trainingplan.training.application.dto.CreateSessionRequestModel;
 import fr.adriencaubel.trainingplan.training.application.dto.UpdateSessionRequestModel;
 import fr.adriencaubel.trainingplan.training.domain.*;
@@ -16,6 +17,7 @@ import fr.adriencaubel.trainingplan.training.infrastructure.SessionRepository;
 import fr.adriencaubel.trainingplan.training.infrastructure.specifciation.SessionSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -50,7 +52,7 @@ public class SessionService {
         Training training = trainingService.getTrainingById(trainingId);
         Trainer trainer = trainerService.getTrainerById(createSessionRequestModel.getTrainerId());
         Company company = userService.getCompanyOfAuthenticatedUser();
-        return training.createSession(company, createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate(), createSessionRequestModel.getLocation(), trainer, createSessionRequestModel.getModeSignature());
+        return training.createSession(company, createSessionRequestModel.getAlias(), createSessionRequestModel.getStartDate(), createSessionRequestModel.getEndDate(), createSessionRequestModel.getLocation(), trainer, createSessionRequestModel.getModeSignature());
     }
 
     @Transactional
@@ -244,5 +246,15 @@ public class SessionService {
     public Session getSessionByAccessToken(String accessToken) {
         Session session = sessionRepository.findByTrainerAccessTokenWithSessionEnrollmentAndSlotSignatures(accessToken).orElseThrow(() -> new DomainException("Session not found: " + accessToken));
         return session;
+    }
+
+    public Page<SessionEnrollment> getSessionEnrollmentByTrainerAccessToken(String trainerAccessToken, Pageable pageable) {
+        Session session = sessionRepository.findByTrainerAccessToken(trainerAccessToken).orElseThrow(() -> new NotFoundException("Trainer access token not found"));
+        return sessionEnrollmentRepository.findBySession(session, pageable);
+    }
+
+    public Page<SlotSignature> getSlotSignatureByTrainerAccessToken(String trainerAccessToken, Pageable pageable) {
+        Session session = sessionRepository.findByTrainerAccessToken(trainerAccessToken).orElseThrow(() -> new NotFoundException("Trainer access token not found"));
+        return slotManagementService.findBySession(session, pageable);
     }
 }

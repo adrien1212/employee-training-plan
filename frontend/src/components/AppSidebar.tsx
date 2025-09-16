@@ -71,7 +71,7 @@ const navigationItems = [
     },*/
   {
     title: "Give feedback",
-    url: "/give-feedback",
+    url: "/public/give-feedback",
     icon: Pen,
   },
 ];

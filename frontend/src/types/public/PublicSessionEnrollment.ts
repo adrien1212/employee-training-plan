@@ -1,3 +1,5 @@
+import { PublicSession } from "./PublicSession";
+
 export interface PublicSessionEnrollment {
     id: number;
     firstName: string;
@@ -5,4 +7,5 @@ export interface PublicSessionEnrollment {
     email: string;
     hasSigned: boolean;
     sessionEnrollmentToken: string;
+    session: PublicSession
 }

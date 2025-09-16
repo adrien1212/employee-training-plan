@@ -4,7 +4,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Edit, Mail, Play, Trash2, ChevronDown, ChevronUp, Copy, Lock } from 'lucide-react'
+import { Edit, Mail, Play, Trash2, ChevronDown, ChevronUp, Copy, Lock, Unlock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Employee } from '@/types/Employee'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
@@ -225,7 +225,7 @@ export default function SlotSignatureTable({ sessionId }: Props) {
                                                         className="p-0 h-8 w-8"
                                                         disabled={slot.status == SlotSignatureStatus.OPEN || slot.status == SlotSignatureStatus.COMPLETED}
                                                     >
-                                                        <Play className="h-4 w-4" />
+                                                        <Unlock className="h-4 w-4" />
                                                     </Button>
 
                                                     <Button
