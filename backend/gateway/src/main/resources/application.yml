@@ -1,5 +1,7 @@
 server:
   port: 8080
+  servlet:
+    context-path: "/api"
 
 eureka:
   client:
@@ -45,3 +47,6 @@ spring:
                 - Path=/**
               filters:
                 - TokenRelay
+                # le context-apth est ici dans gaetway, dans microservice rien, donc on l'enèle sinon 404
+                # /api/v1/employees -> /v1/employees
+                - StripPrefix=1
