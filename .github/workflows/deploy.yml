@@ -2,8 +2,8 @@ name: Deploy to vps
 
 on:
   push:
-    branches:
-      - github-action
+    branches: [ "main" ]
+    tags: [ "v*" ]          # if you ever tag releases
   workflow_dispatch:   # optional: manual trigger
 
 env:
