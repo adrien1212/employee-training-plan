@@ -15,7 +15,7 @@ jobs:
 
     - name: Copy files to VPS
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY_GITHUB }}
+        SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY_VPS }}
       run: |
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
