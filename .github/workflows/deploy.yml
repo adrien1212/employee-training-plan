@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  APP_DIR: /home/debian/employee-training-plan
+  APP_DIR: /home/debian/employee-training-plan-prod
   VPS_HOST: 57.128.201.144         
   VPS_USER: debian                   
   TAG: ${{ github.ref_name }}        # e.g., v1.2.3
@@ -34,7 +34,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY_VPS }}
         port: 22
         source: "docker-compose.yml"
-        target: "/home/debian/employee-training-plan"
+        target: "/home/debian/employee-training-plan-prod"
 
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
@@ -44,7 +44,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY_VPS }}
         port: 22
         script: |
-          cd /home/debian/employee-training-plan
+          cd /home/debian/employee-training-plan-prod
 
           # Login to GHCR if pulling private images
           printf "%s" "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
