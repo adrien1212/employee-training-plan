@@ -1,0 +1,38 @@
+name: Deploy to vps
+
+on:
+  push:
+    branches:
+      - github-action
+  workflow_dispatch:   # optional: manual trigger
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    name: Deploy to VPS (compose up -d, no .env changes)
+    runs-on: ubuntu-latest
+
+    env:
+      VPS_HOST: 57.128.201.144         
+      VPS_USER: debian                   
+      APP_DIR: /opt/employee-training-plan-app            # where compose & .env live on the VPS
+      TAG: ${{ github.ref_name }}        # e.g., v1.2.3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY_VPS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf "%s" "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
