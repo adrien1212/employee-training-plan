@@ -96,19 +96,16 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Copy files via SSH
-        uses: appleboy/scp-action@v1
-        with:
-          host: 57.128.201.144
-          username: debian
-          key: ${{ secrets.DEPLOY_KEY_VPS }}
-          port: 22
-          source: "docker-compose.yml"
-          target: ${APP_DIR}
+    - name: Copy files via SSH
+      uses: appleboy/scp-action@v1
+      with:
+        host: 57.128.201.144
+        username: debian
+        key: ${{ secrets.DEPLOY_KEY_VPS }}
+        port: 22
+        source: "docker-compose.yml"
+        target: ${APP_DIR}
 
-
-    steps:
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
       with:
