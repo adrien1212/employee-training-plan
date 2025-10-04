@@ -22,12 +22,8 @@ jobs:
   deploy:
     name: Deploy to VPS (compose up -d, no .env changes)
     runs-on: ubuntu-latest
-    needs: publish
-
-    env:
-
-
-
+    #needs: publish
+ 
     steps:
     - uses: actions/checkout@v4
     - name: Copy files via SSH
