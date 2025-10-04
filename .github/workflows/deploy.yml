@@ -39,4 +39,4 @@ jobs:
 
       - name: Test SSH connectivity (verbose)
         run: |
-          ssh -vvv -o BatchMode=yes -o StrictHostKeyChecking=yes ${VPS_USER}@${VPS_HOST}
+          ssh -i ~/.ssh/id_rsa debian@57.128.201.144 "ls -l"
