@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  APP_DIR: /opt/employee-training-plan-app
+  APP_DIR: /home/debian/employee-training-plan
   VPS_HOST: 57.128.201.144         
   VPS_USER: debian                   
   TAG: ${{ github.ref_name }}        # e.g., v1.2.3
@@ -25,10 +25,6 @@ jobs:
     #needs: publish
  
     steps:
-    - name: Fix permissions
-      run: |
-        sudo chown -R $USER:$USER /opt/employee-training-plan-app
-
     - uses: actions/checkout@v4
     - name: Copy files via SSH
       uses: appleboy/scp-action@v1
@@ -38,7 +34,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY_VPS }}
         port: 22
         source: "docker-compose.yml"
-        target: "/opt/employee-training-plan-app"
+        target: "/home/debian/employee-training-plan"
 
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
@@ -48,7 +44,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY_VPS }}
         port: 22
         script: |
-          cd /opt/employee-training-plan-app
+          cd /home/debian/employee-training-plan
 
           # Login to GHCR if pulling private images
           printf "%s" "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
