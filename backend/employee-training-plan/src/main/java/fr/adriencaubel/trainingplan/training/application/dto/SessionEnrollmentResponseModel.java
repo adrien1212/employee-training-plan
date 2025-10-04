@@ -21,15 +21,15 @@ public class SessionEnrollmentResponseModel {
     public static SessionEnrollmentResponseModel toDto(SessionEnrollment sessionEnrollment) {
         SessionEnrollmentResponseModel sessionEnrollmentResponseModel = new SessionEnrollmentResponseModel();
         sessionEnrollmentResponseModel.setId(sessionEnrollment.getId());
-        sessionEnrollmentResponseModel.setHasFeedback(sessionEnrollment.getFeedback() != null && sessionEnrollment.getFeedback().getRating() != 0);
+        //sessionEnrollmentResponseModel.setHasFeedback(sessionEnrollment.getFeedback() != null && sessionEnrollment.getFeedback().getRating() != 0);
         sessionEnrollmentResponseModel.setSession(SessionResponseModel.toDto(sessionEnrollment.getSession()));
 
         sessionEnrollmentResponseModel.setEmployee(EmployeeResponseModel.toDto(sessionEnrollment.getEmployee()));
         //sessionEnrollmentResponseModel.setHasSigned(sessionEnrollment.getSignature().getSignature() != null);
         sessionEnrollmentResponseModel.setSessionEnrollmentToken(sessionEnrollment.getAccessToken());
-        if (sessionEnrollment.getFeedback() != null) {
-            sessionEnrollmentResponseModel.setFeedback(new FeedbackMini(sessionEnrollment.getFeedback().getId(), sessionEnrollment.getFeedback().getComment(), sessionEnrollment.getFeedback().getRating()));
-        }
+        //if (sessionEnrollment.getFeedback() != null) {
+        //    sessionEnrollmentResponseModel.setFeedback(new FeedbackMini(sessionEnrollment.getFeedback().getId(), sessionEnrollment.getFeedback().getComment(), sessionEnrollment.getFeedback().getRating()));
+        //}
         return sessionEnrollmentResponseModel;
     }
 

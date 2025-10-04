@@ -118,7 +118,6 @@ public class Session {
             throw new IllegalArgumentException("Can only open not started trainings");
         }
 
-        sessionEnrollments.forEach(SessionEnrollment::openFeedback);
         changeStatus(SessionStatus.ACTIVE);
     }
 

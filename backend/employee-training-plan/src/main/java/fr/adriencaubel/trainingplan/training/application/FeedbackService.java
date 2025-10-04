@@ -1,6 +1,8 @@
 package fr.adriencaubel.trainingplan.training.application;
 
 import fr.adriencaubel.trainingplan.common.exception.DomainException;
+import fr.adriencaubel.trainingplan.company.application.service.UserService;
+import fr.adriencaubel.trainingplan.company.domain.model.Company;
 import fr.adriencaubel.trainingplan.training.application.dto.FeedbackRequestModel;
 import fr.adriencaubel.trainingplan.training.domain.Feedback;
 import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
@@ -24,6 +26,7 @@ import java.util.List;
 public class FeedbackService {
     private final SessionEnrollmentRepository sessionEnrollmentRepository;
     private final FeedbackRepository feedbackRepository;
+    private final UserService userService;
 
     private final RabbitMQNotificationAdapter rabbitMQNotificationAdapter;
 
@@ -38,11 +41,21 @@ public class FeedbackService {
 
     @Transactional
     public void giveFeedback(FeedbackRequestModel feedbackRequestModel) {
+        Company company = userService.getCompanyOfAuthenticatedUser();
+
         SessionEnrollment sessionEnrollment = sessionEnrollmentRepository.findByFeedbackToken(feedbackRequestModel.getAccessToken()).orElseThrow(() -> new DomainException("Invalid feedback token"));
 
-        sessionEnrollment.addFeedback(feedbackRequestModel.getComment(), feedbackRequestModel.getRating());
+        if (!sessionEnrollment.getSession().isSessionComplete()) {
+            throw new DomainException("Vous ne pouvez pas donner un feedback à une session non finie");
+        }
 
-        sessionEnrollmentRepository.save(sessionEnrollment);
+        if (feedbackRepository.findBySessionEnrollmentId(sessionEnrollment.getId()).isPresent()) {
+            throw new DomainException("Feedback already exists");
+        }
+
+        Feedback feedback = Feedback.create(feedbackRequestModel.getComment(), feedbackRequestModel.getRating(), company.getId(), sessionEnrollment);
+
+        feedbackRepository.save(feedback);
     }
 
     @EventListener
@@ -56,9 +69,7 @@ public class FeedbackService {
 
     public void relanceDemandeFeedback(Long id) {
         Feedback feedback = findById(id);
-        if (!feedback.isTokenExpired()) {
-            throw new DomainException("Feedback token expired");
-        }
+
         if (feedback.getRating() != 0) {
             throw new DomainException("Feedback rating already done");
         }

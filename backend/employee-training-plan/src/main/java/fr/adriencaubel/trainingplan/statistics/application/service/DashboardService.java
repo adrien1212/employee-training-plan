@@ -92,19 +92,7 @@ public class DashboardService {
         betterSessionStatisticsData.setStartDate(session.getStartDate());
         betterSessionStatisticsData.setEndDate(session.getEndDate());
         betterSessionStatisticsData.setTotalParticipants(sessionEnrollments.size());
-        betterSessionStatisticsData.setTotalFeedBackGiven((int) sessionEnrollments.stream().filter(se -> se.getFeedback() != null).count());
-
-        double avgRating = sessionEnrollments.stream()
-                .filter(se -> se.getFeedback() != null)
-                .mapToInt(se -> se.getFeedback().getRating())
-                .average()
-                .orElse(0.0);
-
-        betterSessionStatisticsData.setFeedbackRating(sessionEnrollments.stream()
-                .filter(se -> se.getFeedback() != null)
-                .mapToInt(se -> se.getFeedback().getRating()).toArray());
-
-        betterSessionStatisticsData.setAvgFeedbackRating(avgRating);
+       
 
         return betterSessionStatisticsData;
     }

@@ -1,6 +1,7 @@
 package fr.adriencaubel.trainingplan.training.application.dto;
 
 import fr.adriencaubel.trainingplan.training.domain.Feedback;
+import fr.adriencaubel.trainingplan.training.domain.SessionEnrollment;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +14,7 @@ public class FeedbackResponseModel {
     private int rating;
     private String comment;
     private LocalDate submittedAt;
-    private SessionEnrollmentResponseModel sessionEnrollment;
+    private SessionEnrollment sessionEnrollment;
 
     public static FeedbackResponseModel toDto(Feedback feedback) {
         FeedbackResponseModel feedbackResponseModel = new FeedbackResponseModel();
@@ -21,7 +22,7 @@ public class FeedbackResponseModel {
         feedbackResponseModel.setRating(feedback.getRating());
         feedbackResponseModel.setSubmittedAt(feedback.getCreatedAt());
         feedbackResponseModel.setComment(feedback.getComment());
-        feedbackResponseModel.setSessionEnrollment(SessionEnrollmentResponseModel.toDto(feedback.getSessionEnrollment()));
+        feedbackResponseModel.setSessionEnrollment(feedback.getSessionEnrollment());
         return feedbackResponseModel;
     }
 }

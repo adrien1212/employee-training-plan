@@ -39,17 +39,9 @@ public class SessionEnrollmentService {
             throw new DomainException("Token must not be blank");
         }
 
-
         SessionEnrollment enroll = sessionEnrollmentRepository.findByFeedbackToken(token)
                 .orElseThrow(() -> new DomainException("Invalid feedback token"));
 
-        if (enroll.getFeedback().getComment() != null) {
-            throw new DomainException("Vous avez déjà donné votre avis");
-        }
-
-        if (enroll.getFeedback().isTokenExpired()) {
-            throw new DomainException("Token has expired");
-        }
 
         if (!SessionStatus.COMPLETED.equals(enroll.getSession().getLastStatus())) {
             throw new DomainException("Session is not complete");
