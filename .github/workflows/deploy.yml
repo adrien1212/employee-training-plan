@@ -25,12 +25,16 @@ jobs:
       TAG: ${{ github.ref_name }}        # e.g., v1.2.3
 
     steps:
-    - name: Deploy using ssh
-      uses: appleboy/ssh-action@master
-      with:
-        host: 57.128.201.144
-        username: debian
-        key: ${{ secrets.DEPLOY_KEY_VPS }}
-        port: 22
-        script: |
-          ls -l
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+            mkdir -p ~/.ssh
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            ssh-keyscan -H 57.128.201.144 >> ~/.ssh/known_hosts
+        
+      - name: Deploy to VPS
+        run: |
+          ssh -i ~/.ssh/id_rsa debian@57.128.201.144 "ls -l"
