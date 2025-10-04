@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   discovery:
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}}/employee-training-plan/discovery:${TAG}
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/employee-training-plan/discovery:${TAG}
     container_name: discovery
     restart: always
     ports:
