@@ -87,7 +87,7 @@ jobs:
   deploy:
     name: Deploy to VPS (compose up -d, no .env changes)
     runs-on: ubuntu-latest
-    depends: publish
+    needs: publish
 
     env:
       VPS_HOST: 57.128.201.144         
