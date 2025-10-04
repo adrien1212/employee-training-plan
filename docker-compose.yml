@@ -1,20 +1,17 @@
-version: '3.8'
+version: "3.8"
 
 services:
   discovery:
-    build:
-      context: ./backend/discovery
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}}/employee-training-plan/discovery:${TAG}
     container_name: discovery
     restart: always
     ports:
       - "8761:8761"
     networks:
       - app-network
+
   gateway:
-    build:
-      context: ./backend/gateway
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/employee-training-plan/gateway:${TAG}
     container_name: gateway
     restart: always
     ports:
@@ -24,16 +21,15 @@ services:
       - notification
       - keycloak
     environment:
-       - EUREKA_SERVER=http://discovery:8761/eureka
-       - KEYCLOAK_ISSUER=https://auth.traino.cloud/realms/employee-training-plan
-       - NOTIFICATION_SERVICE_URL=http://notification:8010
-       - CORE_SERVICE_URL=http://backend:8081
+      - EUREKA_SERVER=http://discovery:8761/eureka
+      - KEYCLOAK_ISSUER=https://auth.traino.cloud/realms/employee-training-plan
+      - NOTIFICATION_SERVICE_URL=http://notification:8010
+      - CORE_SERVICE_URL=http://backend:8081
     networks:
       - app-network
+
   notification:
-    build:
-      context: ./backend/ms-notification
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/employee-training-plan/ms-notification:${TAG}
     container_name: ms-notification
     restart: always
     depends_on:
@@ -43,16 +39,15 @@ services:
     ports:
       - "8010:8010"
     environment:
-       - EUREKA_SERVER=http://discovery:8761/eureka
-       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan_notification
-       - RABBIT_HOST=rabbitmq
-       - KEYCLOAK_ISSUER=https://auth.traino.cloud/realms/employee-training-plan
+      - EUREKA_SERVER=http://discovery:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan_notification
+      - RABBIT_HOST=rabbitmq
+      - KEYCLOAK_ISSUER=https://auth.traino.cloud/realms/employee-training-plan
     networks:
       - app-network
+
   email:
-    build:
-      context: ./backend/email-service
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/employee-training-plan/email-service:${TAG}
     container_name: email-service
     restart: always
     depends_on:
@@ -60,23 +55,24 @@ services:
     ports:
       - "8078:8078"
     environment:
-       - MAIL_HOST=${MAIL_HOST}
-       - MAIL_PORT=${MAIL_PORT}
-       - MAIL_USERNAME=${MAIL_USERNAME}
-       - MAIL_PASSWORD=${MAIL_PASSWORD}
-       - RABBIT_HOST=rabbitmq
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - RABBIT_HOST=rabbitmq
     networks:
       - app-network
+
   backend:
-    build:
-      context: ./backend/employee-training-plan
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/employee-training-plan/employee-training-plan:${TAG}
     container_name: backend
     restart: always
     depends_on:
       - mysql
       - rabbitmq
       - discovery
+    ports:
+      - "8081:8081"
     environment:
       - EUREKA_SERVER=http://discovery:8761/eureka
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db_training_plan
@@ -92,20 +88,20 @@ services:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/employee-training-plan/frontend:${TAG}
     container_name: frontend
     restart: always
     ports:
-      - "81:80"  # You can change to 443 or use a reverse proxy like Nginx
+      - "81:80"
     environment:
       - VITE_KEYCLOACK_URL=https://auth.traino.cloud:7980
       - VITE_BACKEND_API_URL=https://api.traino.cloud
-    networks:
-      - app-network
     depends_on:
       - backend
+    networks:
+      - app-network
+
+  # Infra dependencies (stay as public images)
   mysql:
     image: mysql:8.0
     container_name: mysql_container
@@ -141,17 +137,19 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: root
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/
-      ME_CONFIG_BASICAUTH: false
+      ME_CONFIG_BASICAUTH: "false"
+    networks:
+      - app-network
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
     restart: always
     ports:
-      - "5672:5672"    # AMQP protocol port
-      - "15672:15672"  # Management UI port
+      - "5672:5672"
+      - "15672:15672"
     networks:
-    - app-network
+      - app-network
 
   keycloak:
     container_name: keycloak.openid-provider
@@ -160,29 +158,28 @@ services:
       - start
       - --import-realm
     ports:
-      - 7980:8080
+      - "7980:8080"
     volumes:
-      - keycloak-data:/opt/keycloak/data     # persist everything under /opt/keycloak/data
+      - keycloak-data:/opt/keycloak/data
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KEYCLOAK_LOGLEVEL: true
+      KEYCLOAK_LOGLEVEL: "true"
       KC_HTTP_PORT: 8080
       KC_HOSTNAME: auth.traino.cloud
-      KC_HOSTNAME_URL: https://auth.traino.cloud                # register 127.0.0.1 keycloak in /etc/hosts
+      KC_HOSTNAME_URL: https://auth.traino.cloud
       KC_HOSTNAME_ADMIN_URL: https://auth.traino.cloud
-      KC_HEALTH_ENABLED: true
-      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
       KEYCLOAK_PROXY: edge
-      # KC_PROXY_ADDRESS_FORWARDING: true
-      KC_HOSTNAME_STRICT: false
-      KC_HTTP_ENABLED: true
-      KC_HOSTNAME_DEBUG: true
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_DEBUG: "true"
       KC_PROXY_HEADERS: "xforwarded"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: [ 'CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:8080/auth/health/live' ]
+      test: [ "CMD-SHELL", "[ -f /tmp/HealthCheck.java ] || echo \"public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }\" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:8080/auth/health/live" ]
       interval: 5s
       timeout: 5s
       retries: 20
