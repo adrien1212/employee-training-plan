@@ -25,6 +25,10 @@ jobs:
     #needs: publish
  
     steps:
+    - name: Fix permissions
+      run: |
+        sudo chown -R $USER:$USER /opt/employee-training-plan-app
+
     - uses: actions/checkout@v4
     - name: Copy files via SSH
       uses: appleboy/scp-action@v1
