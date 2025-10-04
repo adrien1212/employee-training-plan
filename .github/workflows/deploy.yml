@@ -27,24 +27,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - name: frontend
-          #   context: frontend
-          #   image: frontend
-          # - name: employee-training-plan
-          #   context: backend/employee-training-plan
-          #   image: employee-training-plan
-          # - name: discovery
-          #   context: backend/discovery
-          #   image: discovery
-          # - name: email-service
-          #   context: backend/email-service
-          #   image: email-service
+          - name: frontend
+            context: frontend
+            image: frontend
+          - name: employee-training-plan
+            context: backend/employee-training-plan
+            image: employee-training-plan
+          - name: discovery
+            context: backend/discovery
+            image: discovery
+          - name: email-service
+            context: backend/email-service
+            image: email-service
           - name: gateway
             context: backend/gateway
             image: gateway
-          # - name: ms-notification
-          #   context: backend/ms-notification
-          #   image: ms-notification
+          - name: ms-notification
+            context: backend/ms-notification
+            image: ms-notification
 
     steps:
       - name: Checkout
