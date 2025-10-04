@@ -87,6 +87,7 @@ jobs:
   deploy:
     name: Deploy to VPS (compose up -d, no .env changes)
     runs-on: ubuntu-latest
+    depends: publish
 
     env:
       VPS_HOST: 57.128.201.144         
@@ -96,6 +97,7 @@ jobs:
 
 
     steps:
+    - uses: actions/checkout@v4
     - name: Copy files via SSH
       uses: appleboy/scp-action@v1
       with:
