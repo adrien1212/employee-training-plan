@@ -106,7 +106,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY_VPS }}
         port: 22
         source: "docker-compose.yml"
-        target: ${APP_DIR}
+        target: "docker-compose.yml"
 
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
