@@ -33,9 +33,9 @@ jobs:
           #- name: email-service
           #  context: backend/email-service
           #  image: email-service
-          #- name: gateway
-          #  context: backend/gateway
-          #  image: gateway
+          - name: gateway
+            context: backend/gateway
+            image: gateway
           #- name: ms-notification
           #  context: backend/ms-notification
           #  image: ms-notification
