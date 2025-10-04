@@ -34,7 +34,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY_VPS }}
         port: 22
         source: "docker-compose.yml"
-        target: "docker-compose.yml"
+        target: "/opt/employee-training-plan-app"
 
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
@@ -44,7 +44,7 @@ jobs:
         key: ${{ secrets.DEPLOY_KEY_VPS }}
         port: 22
         script: |
-          cd ${APP_DIR}
+          cd /opt/employee-training-plan-app
 
           # Login to GHCR if pulling private images
           printf "%s" "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
